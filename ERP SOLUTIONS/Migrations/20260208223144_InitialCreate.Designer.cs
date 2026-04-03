@@ -32,7 +32,7 @@ namespace ERP_SOLUTIONS.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("IsActive")
+                    b.Property<bool>("Status")
                         .HasColumnType("bit");
 
                     b.Property<string>("PasswordHash")
@@ -43,7 +43,7 @@ namespace ERP_SOLUTIONS.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Username")
+                    b.Property<string>("UserName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

@@ -1,4 +1,6 @@
 ﻿
+using ERP_SOLUTIONS.Models.DTOS;
+using ERP_SOLUTIONS.Models.ViewModels;
 using ERP_SOLUTIONS.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -13,6 +15,7 @@ namespace ERP_SOLUTIONS.Controllers
     {
         private readonly IHttpClientFactory _clientFactory;
         private readonly IAccountService _accountService;
+
         public AccountController(IHttpClientFactory clientFactory, IAccountService accountService)
         {
             _clientFactory = clientFactory;
@@ -22,47 +25,117 @@ namespace ERP_SOLUTIONS.Controllers
         [HttpGet]
         public IActionResult Login()
         {
-            return View();
+            var roles = _accountService.GetRolesDropdown();
+
+            var model = new LoginViewModel
+            {
+                Roles = roles,
+                SelectedRoleID = roles.Count == 1 ? int.Parse(roles.First().Value) : 0
+            };
+
+            return View(model);
         }
-        
+
         // POST: Login
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> Login(string Username, string Password, string Role)
+        public async Task<IActionResult> Login(LoginViewModel login)
         {
-            if (string.IsNullOrEmpty(Username) || string.IsNullOrEmpty(Password))
+            try
             {
-                ViewBag.Error = "Username and Password are required";
-                return View();
-            }
-            
-            var result = await _accountService.LoginAsync(Username, Password, Role);
-
-            if (result.Success)
-            {
-                int userid = 1; // Replace with actual user ID
-                // Create claims
-                var claims = new List<Claim>
+                if (string.IsNullOrEmpty(login.Username) || string.IsNullOrEmpty(login.Password))
                 {
-                    new Claim(ClaimTypes.Name, Username),           // User.Identity.Name
-                    new Claim(ClaimTypes.Email, "rout.anil@gmail.com"),
-                    new Claim(ClaimTypes.Role, Role),
-                    new Claim(ClaimTypes.NameIdentifier, userid.ToString()) // store UserID
+                    TempData["ErrorMessage"] = "Username and Password are required";
+                    login.Roles = _accountService.GetRolesDropdown();
+                    return View();
+                }
+
+                var result = await _accountService.LoginAsync(login.Username, login.Password, login.SelectedRoleID);
+
+                if (result.Success)
+                {
+                    //Get the user detail
+                    UserInfoDTO userInfo = await _accountService.GetUserInfoAsync(login.Username);
+
+                    // Create claims
+                    var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.NameIdentifier, userInfo.UserID.ToString()),
+                    new Claim(ClaimTypes.Name, userInfo.UserName),
+                    new Claim("FullName", userInfo.FullName),
+                    new Claim(ClaimTypes.Email, userInfo.Email),
+                    new Claim(ClaimTypes.Role, userInfo.RoleName),
+                    new Claim("RoleID", userInfo.RoleID.ToString()),
+                    new Claim("MobileNumber", userInfo.MobileNumber),
+                    new Claim("CreatedOn", userInfo.CreatedDate),
+                    new Claim("LastLogin", userInfo.LastLogin)
                 };
 
-                // Create identity and principal
-                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                var principal = new ClaimsPrincipal(identity);
+                    // Create identity and principal
+                    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var principal = new ClaimsPrincipal(identity);
 
-                // Sign in user (await is important!)
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+                    // Sign in user (await is important!)
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-                // Redirect to Dashboard
-                return RedirectToAction("Index", "Dashboard");
+                    // Redirect to Dashboard
+                    return RedirectToAction("Index", "Dashboard");
+
+                    ////Access Claims Anywhere
+                    //var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                    //var userName = User.FindFirst(ClaimTypes.Name)?.Value;
+                    //var fullName = User.FindFirst("FullName")?.Value;
+                    //var email = User.FindFirst(ClaimTypes.Email)?.Value;
+                    //var role = User.FindFirst(ClaimTypes.Role)?.Value;
+                    //var mobile = User.FindFirst("MobileNumber")?.Value;
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = result.Message;
+                    login.Roles = _accountService.GetRolesDropdown();
+                    return View(login);
+                }
             }
+            catch (Exception)
+            {
+                TempData["ErrorMessage"] = "Something went wrong, try again!";
+                login.Roles = _accountService.GetRolesDropdown();
+                return View();
+            }
+        }
 
-            ViewBag.Error = result.Message;
-            return View();
+
+        public IActionResult MyProfile()
+        {
+            var roleName = User.FindFirst(ClaimTypes.Role)?.Value;
+
+            switch (roleName.ToLower())
+            {
+                case "admin":
+                    // logic for Admin
+                    return RedirectToAction("Profile", "Admin");
+
+                case "superadmin":
+                    // logic for SuperAdmin
+                    return RedirectToAction("Profile", "SuperAdmin");
+
+                case "teacher":
+                    // logic for Teacher
+                    return RedirectToAction("Profile", "Teacher");
+
+                case "student":
+                    // logic for Student
+                    return RedirectToAction("MyProfile", "Students");
+
+                case "accountant":
+                    // logic for Accountant
+                    return RedirectToAction("Profile", "Accountant");
+
+                default:
+                    // role not recognized
+                    return RedirectToAction("AccessDenied", "Account");
+
+            }
         }
 
         public IActionResult Error()

@@ -1,23 +1,99 @@
-﻿namespace ERP_SOLUTIONS.Models.Entities
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace ERP_SOLUTIONS.Models.Entities
 {
     public class Student
     {
+        [Key]
         public int StudentID { get; set; }
-        public string FullName { get; set; } = "";
-        public string Gender { get; set; }
-        public string BloodGroup { get; set; }
-        public string MobileNumber { get; set; }
-        public string Email { get; set; }
-        public string RollNo { get; set; }
-        public DateTime DateOfBirth { get; set; }
-        public DateTime DateOfJoin { get; set; }
+
+        [Required]
+        public int UserID { get; set; }
+
+        // ---------------- Student Information ----------------
+
+        [Required]
+        [MaxLength(100)]
+        public string StudentName { get; set; }
+
+        [Required]
+        public int GenderID { get; set; }
+
+        [MaxLength(250)]
         public string PermanentAddress { get; set; }
-        public string PresentAddress { get; set; }
-        public string ParentName { get; set; }
-        public string ParentContact { get; set; }
-        public bool IsActive { get; set; }
+
+        [Required]
+        [MaxLength(12)]
+        public string Aadhaar { get; set; }
+
+        [MaxLength(10)]
+        public string PhoneNo { get; set; }
+
+        [MaxLength(150)]
+        public string EmailID { get; set; }
+
+        public DateTime? DateOfBirth { get; set; }
+
+        [MaxLength(3)]
+        public string BloodGroup { get; set; }
+
+        [Required]
+        [MaxLength(150)]
+        public string FatherName { get; set; }
+                
+        [MaxLength(12)]
+        public string FatherAadhaar { get; set; }
+
+        [Required]
+        [MaxLength(150)]
+        public string MotherName { get; set; }
+
+        [MaxLength(12)]
+        public string MotherAadhaar { get; set; }
+
+        [Required]
+        [MaxLength(10)]
+        public string EmergencyContact { get; set; }
+
+        [MaxLength(12)]
+        public string? ApaarID { get; set; }
+
+        // ---------------- Academic Info ----------------
+
+        [Required]
+        [MaxLength(50)]
+        public string? RollNumber { get; set; }
+
+        public int? AdmissionYear { get; set; }
+
+        [Required]
+        [NotMapped]
+        public int ClassID { get; set; }
+
+        [Required]
+        [NotMapped]
+        public int SectionID { get; set; }
+        public int? ClassSectionId { get; set; }
+
+        public int? AcademicYearID { get; set; }
+
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+        public bool IsActive { get; set; } = true;
+        public bool IsLocked { get; set; } = false;
+
+        // ---------------- Navigation Properties ----------------
+
+        [ForeignKey("UserID")]
+        public virtual User User { get; set; }
+
+        [ForeignKey("AcademicYearID")]
+        public virtual AcademicYear AcademicYear { get; set; }
+        public ClassModel Classes { get; set; } = new();
+
+        
     }
-
-
 
 }

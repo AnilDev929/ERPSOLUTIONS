@@ -23,7 +23,7 @@ namespace ERP_SOLUTIONS.Services.Implementations
         public async Task AddAsync(Student student)
         {
             // Business Rule Example
-            if (string.IsNullOrEmpty(student.FullName))
+            if (string.IsNullOrEmpty(student.StudentName))
                 throw new Exception("Student name is required");
 
             _context.Students.Add(student);

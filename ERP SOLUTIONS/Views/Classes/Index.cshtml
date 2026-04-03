@@ -79,12 +79,21 @@
 @section Scripts {
     <script>
         // Auto-hide TempData messages
-        setTimeout(function () {
-            const success = document.getElementById('successMessage');
-            const error = document.getElementById('errorMessage');
-            if (success) { success.classList.remove('show'); success.classList.add('fade'); }
-            if (error) { error.classList.remove('show'); error.classList.add('fade'); }
-        }, 5000);
+         document.addEventListener("DOMContentLoaded", function () {
+             setTimeout(function () {
+                 const success = document.getElementById('successMessage');
+                 const error = document.getElementById('errorMessage');
+
+                 if (success) {
+                     success.classList.remove('show');
+                     success.classList.add('fade');
+                 }
+                 if (error) {
+                     error.classList.remove('show');
+                     error.classList.add('fade');
+                 }
+             }, 5000);
+         });
         
     </script>
 }

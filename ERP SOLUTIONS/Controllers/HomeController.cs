@@ -109,18 +109,18 @@ namespace ERP_SOLUTIONS.Controllers
 
             //    new DashboardSection
             //    {
-            //        Title = "Faculty Management",
+            //        Title = "Teacher Management",
             //        Icon = "bi-person-badge",
             //        Color = "teal",
-            //        Subtitle = "Manage faculty and reports",
+            //        Subtitle = "Manage Teacher and reports",
             //        Items = new List<DashboardItem>
             //        {
-            //            new DashboardItem { Title = "Faculty Profile", Description = "Maintain faculty personal and professional profiles.", Icon="bi-person-workspace", Url="/Faculty/Index" },
-            //            new DashboardItem { Title = "Attendance Report", Description = "Monitor teacher attendance", Icon="bi-graph-up", Url="/Faculty/Report" },
-            //            new DashboardItem { Title = "Performane Review", Description = "Conduct performance evaluations of faculty.", Icon="bi-award", Url="/Faculty/Index" },
-            //            new DashboardItem { Title = "Leave Management", Description = "Track faculty leave requests and approvals.", Icon="bi-calendar-minus", Url="/Faculty/Report" },
-            //            new DashboardItem { Title = "PayRoll", Description = "Manage salary and compensation records.", Icon="bi-cash-stack", Url="/Faculty/Index" },
-            //            new DashboardItem { Title = "Assignment", Description = "Assign responsibilities to faculty", Icon="bi-journal-check", Url="/Faculty/Report" }
+            //            new DashboardItem { Title = "Teacher Profile", Description = "Maintain Teacher personal and professional profiles.", Icon="bi-person-workspace", Url="/Teacher/Index" },
+            //            new DashboardItem { Title = "Attendance Report", Description = "Monitor teacher attendance", Icon="bi-graph-up", Url="/Teacher/Report" },
+            //            new DashboardItem { Title = "Performane Review", Description = "Conduct performance evaluations of Teacher.", Icon="bi-award", Url="/Teacher/Index" },
+            //            new DashboardItem { Title = "Leave Management", Description = "Track Teacher leave requests and approvals.", Icon="bi-calendar-minus", Url="/Teacher/Report" },
+            //            new DashboardItem { Title = "PayRoll", Description = "Manage salary and compensation records.", Icon="bi-cash-stack", Url="/Teacher/Index" },
+            //            new DashboardItem { Title = "Assignment", Description = "Assign responsibilities to Teacher", Icon="bi-journal-check", Url="/Teacher/Report" }
             //        }
             //    },
 

@@ -51,6 +51,21 @@
         </div>
     </div>
 
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert" id="successMessage">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert" id="errorMessage">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     <!-- 🔽 ROLE SELECT -->
     <div class="card shadow-sm mb-4">
         <div class="card-body d-flex align-items-center justify-content-between">
@@ -83,7 +98,7 @@
 
     @if (Model.RoleId != 0)
     {
-        <form method="post" asp-action="Save">
+        <form method="post" asp-action="SavePermissions">
             <input type="hidden" asp-for="RoleId" />
 
             <!-- 🔢 SUMMARY BAR -->
@@ -106,6 +121,7 @@
 
             </div>
 
+
             <!-- 📂 ACCORDION -->
             <div class="accordion" id="permissionAccordion">
 
@@ -117,25 +133,22 @@
                     <div class="accordion-item mb-2 shadow-sm">
 
                         <!-- SECTION HEADER -->
-                        <h2 class="accordion-header" id="heading_@s">
-                            <button class="accordion-button collapsed d-flex justify-content-between align-items-center"
-                                    type="button"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target="#@collapseId"
-                                    aria-expanded="false"
-                                    aria-controls="@collapseId">
+                        <div class="d-flex justify-content-between align-items-center px-3">
 
-                                <span>
-                                    <i class="bi bi-folder-fill text-primary"></i>
+                            <h2 class="accordion-header flex-grow-1" id="heading_@s">
+                                <button class="accordion-button collapsed"
+                                        type="button"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#@collapseId">
+                                    <i class="bi bi-folder-fill text-primary me-2"></i>
                                     <strong>@_section.SectionTitle</strong>
-                                </span>
+                                </button>
+                            </h2>
 
-                                <!-- Select All -->
-                                <input type="checkbox"
-                                       class="form-check-input ms-3 select-all"
-                                       onclick="event.stopPropagation(); onchange="event.stopPropagation();"" />
-                            </button>
-                        </h2>
+                            <!-- ✅ Select All OUTSIDE button -->
+                            <input type="checkbox"
+                                   class="form-check-input ms-2 select-all" />
+                        </div>
 
                         <!-- SECTION BODY -->
                         <div id="@collapseId"
@@ -197,11 +210,10 @@
                 }
 
             </div>
-
             <!-- SAVE -->
             <div class="text-end mt-3">
                 <button class="btn btn-success px-4">
-                    <i class="bi bi-save"></i> Save Changes
+                    <i class="bi bi-save"></i> Save Permissions
                 </button>
             </div>
 
@@ -210,8 +222,89 @@
     
 </div>
 
+@section Scripts {
+
 <script>
 
+    document.addEventListener("DOMContentLoaded", function () {
+
+        function updateCounts() {
+            let all = document.querySelectorAll('.page-checkbox');
+            let checked = document.querySelectorAll('.page-checkbox:checked');
+
+            let total = all.length;
+            let assigned = checked.length;
+            let unassigned = total - assigned;
+
+            document.getElementById('assignedCount').innerText = assigned;
+            document.getElementById('unassignedCount').innerText = unassigned;
+        }
+
+        // Update parent checkbox state
+        function updateParentState(section) {
+            let all = section.querySelectorAll('.page-checkbox');
+            let checked = section.querySelectorAll('.page-checkbox:checked');
+            let parent = section.querySelector('.select-all');
+
+            if (!parent) return;
+
+            if (checked.length === 0) {
+                parent.checked = false;
+                parent.indeterminate = false;
+            }
+            else if (checked.length === all.length) {
+                parent.checked = true;
+                parent.indeterminate = false;
+            }
+            else {
+                parent.checked = false;
+                parent.indeterminate = true;
+            }
+        }
+
+        // Child checkbox change
+        document.querySelectorAll('.page-checkbox').forEach(cb => {
+            cb.addEventListener('change', function () {
+                let section = this.closest('.accordion-item');
+                updateParentState(section);
+                updateCounts();
+            });
+        });
+
+        // Select All per section
+        document.querySelectorAll('.select-all').forEach(selectAll => {
+
+            // prevent accordion toggle
+            selectAll.addEventListener('click', function (e) {
+                e.stopPropagation();
+            });
+
+            selectAll.addEventListener('change', function () {
+                let section = this.closest('.accordion-item');
+                let checkboxes = section.querySelectorAll('.page-checkbox');
+
+                checkboxes.forEach(cb => cb.checked = this.checked);
+
+                this.indeterminate = false;
+                updateCounts();
+            });
+        });
+
+        // Initial load
+        document.querySelectorAll('.accordion-item').forEach(section => {
+            updateParentState(section);
+        });
+
+        updateCounts();
+    });
+
+</script>
+}
+
+
+<script>
+
+@* 
     function updateCounts() {
         let all = document.querySelectorAll('.page-checkbox');
         let checked = document.querySelectorAll('.page-checkbox:checked');
@@ -222,18 +315,18 @@
 
         document.getElementById('assignedCount').innerText = assigned;
         document.getElementById('unassignedCount').innerText = unassigned;
-    }
+    } *@
 
     @* Initial load *@
-    updateCounts();
+   @*  updateCounts(); *@
 
     @* On change *@
-    document.querySelectorAll('.page-checkbox').forEach(cb => {
+   @*  document.querySelectorAll('.page-checkbox').forEach(cb => {
         cb.addEventListener('change', updateCounts);
-    });
+    }); *@
 
     @* Select All per section *@
-    document.querySelectorAll('.select-all').forEach(selectAll => {
+    @* document.querySelectorAll('.select-all').forEach(selectAll => {
         selectAll.addEventListener('change', function () {
             let body = this.closest('.accordion-item');
             let checkboxes = body.querySelectorAll('.page-checkbox');
@@ -241,7 +334,7 @@
             checkboxes.forEach(cb => cb.checked = this.checked);
             updateCounts();
         });
-    });
+    }); *@
 
 
    @*  🔁 Sync Select-All based on children *@

@@ -11,9 +11,8 @@ namespace ERP_SOLUTIONS.Models.Entities
 
         [Required]
         public string UserName { get; set; }
-
-        [NotMapped]
-        public string Role { get; set; } = "Admin";
+        public string? FullName { get; set; }
+        public string? MobileNo { get; set; }
 
         public bool IsActive { get; set; } = true;
 
@@ -28,11 +27,8 @@ namespace ERP_SOLUTIONS.Models.Entities
 
         public DateTime? LockoutUntil { get; set; } = null;
 
-        [NotMapped]
-        public Role role { get; set; } = new();
-
         // Navigation property
-        public ICollection<UserRole> UserRoles { get; set; }
+        public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 
         public User() { }
     }

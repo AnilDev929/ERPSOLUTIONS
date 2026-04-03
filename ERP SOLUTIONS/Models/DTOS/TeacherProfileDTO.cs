@@ -1,15 +1,19 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using ERP_SOLUTIONS.Enum;
+using System.ComponentModel.DataAnnotations;
 
 namespace ERP_SOLUTIONS.Models.DTOS
 {
     public class TeacherProfileDTO
     {
         // 🧾 Personal Info
+        public string EncryptedId { get; set; }
         public int TeacherID { get; set; }
 
         [Display(Name = "Full Name")]
         [Required(ErrorMessage = "Full Name is required")]
         public string FullName { get; set; }
+
+        public string Designation { get; set; }
 
         [Display(Name = "Gender")]
         public string GenderName { get; set; } // Read-only for teacher
@@ -64,7 +68,11 @@ namespace ERP_SOLUTIONS.Models.DTOS
 
         [Display(Name = "Experience (years)")]
         public decimal? Experience { get; set; }
+
+        public string? StatusRemark { get; set; }
+        public string? StatusUpdatedOn { get; set; }
+        public string? JoiningDate { get; set; }
+        public string Aadhaar { get; set; } = string.Empty;
+        public TeacherStatus Status { get; set; } = TeacherStatus.Active;
     }
-
-
 }

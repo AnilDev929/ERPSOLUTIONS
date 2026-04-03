@@ -1,4 +1,5 @@
-﻿using ERP_SOLUTIONS.Models.Entities;
+﻿using ERP_SOLUTIONS.Models.DTOS;
+using ERP_SOLUTIONS.Models.Entities;
 using ERP_SOLUTIONS.Models.ViewModels;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,6 +17,9 @@ namespace ERP_SOLUTIONS.Data
         public DbSet<Role> Roles { get; set; }
         public DbSet<Subject> Subjects { get; set; }
         public DbSet<ClassModel> Classes { get; set; }
+        public DbSet<Section> Sections { get; set; }
+        public DbSet<ClassSection> ClassSections { get; set; }
+        public DbSet<CourseFee> CourseFees { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<AcademicYear> AcademicYears { get; set; }
@@ -29,23 +33,21 @@ namespace ERP_SOLUTIONS.Data
         public DbSet<RoleMenuAccess> RoleMenuAccess { get; set; }
 
 
+        public DbSet<LeaveType> LeaveTypes { get; set; }
+        public DbSet<LeaveRequest> LeaveRequests { get; set; }
+        public DbSet<LeaveBalance> LeaveBalances { get; set; }
 
+
+
+
+        public DbSet<CreateStudentResultDto> CreateStudentResults { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            //modelBuilder.Entity<MenuSection>()
-            //    .HasMany(s => s.Items)
-            //    .WithOne(i => i.MenuSections)
-            //    .HasForeignKey(i => i.SectionId);
+            modelBuilder.Entity<CreateStudentResultDto>().HasNoKey();
 
-            modelBuilder.Entity<UserRole>()
-       .HasKey(ur => ur.UserRoleID);
-
-            modelBuilder.Entity<UserRole>()
-                .HasIndex(ur => new { ur.UserID, ur.RoleID })
-                .IsUnique();
 
             modelBuilder.Entity<UserRole>()
                 .HasOne(ur => ur.User)

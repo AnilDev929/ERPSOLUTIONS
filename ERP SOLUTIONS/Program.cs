@@ -51,12 +51,13 @@ builder.Services.AddScoped<IAcademicYearService, AcademicYearService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IStudentProfileService, StudentProfileService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
+builder.Services.AddScoped<IAttendanceService, AttendanceService>();
 builder.Services.AddScoped<ISubjectService, SubjectService>();
 builder.Services.AddScoped<IClassService, ClassService>();
 builder.Services.AddScoped<ITeacherService, TeacherService>();
 builder.Services.AddScoped<IHostelService, HostelService>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
-
+builder.Services.AddScoped<ILeaveService, LeaveService>();
 
 
 builder.Services.AddScoped<MenuService>(); //One instance per HTTP request

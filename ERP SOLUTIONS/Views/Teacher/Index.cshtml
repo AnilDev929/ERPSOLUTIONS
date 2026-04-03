@@ -178,7 +178,8 @@
                             <td>@teacher.Designation</td>
                             <td>@teacher.Specialization</td>
                             <td>
-                                <a class="btn btn-sm btn-info me-1" href="@Url.Action("Edit", new { id = teacher.TeacherID })">
+                                <a href="@Url.Action("Edit", new { teacherID = teacher.TeacherID })"
+                                    class="btn btn-sm btn-info me-1">
                                     <i class="bi bi-pencil"></i></a>
                                 <a class="btn btn-sm btn-danger" href="@Url.Action("Delete", new { id = teacher.TeacherID })">
                                     <i class="bi bi-trash"></i></a>

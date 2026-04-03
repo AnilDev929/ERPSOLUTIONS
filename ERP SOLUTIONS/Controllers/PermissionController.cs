@@ -26,10 +26,18 @@ namespace ERP_SOLUTIONS.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Save(RolePermissionViewModel model)
+        public async Task<IActionResult> SavePermissions(RolePermissionViewModel model)
         {
-            await _service.SaveRolePermissionsAsync(model);
-            TempData["Success"] = "Permissions updated successfully!";
+            try
+            {
+                await _service.SaveRolePermissionsAsync(model);
+                TempData["SuccessMessage"] = "Selected Permissions assigned successfully!";
+            }
+            catch (Exception)
+            {
+                TempData["ErrorMessage"] = "Selected Permissions unable to assign.";
+            }
+
             return RedirectToAction("Index", new { roleId = model.RoleId });
         }
 

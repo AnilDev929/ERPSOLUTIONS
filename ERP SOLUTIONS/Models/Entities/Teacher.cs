@@ -108,6 +108,8 @@ namespace ERP_SOLUTIONS.Models.Entities
         public TeacherStatus Status { get; set; } = TeacherStatus.Active;
         public string? StatusRemark { get; set; }
         public DateTime? StatusUpdatedOn { get; set; }
+
+        //public ICollection<LeaveRequest> LeaveRequests { get; set; }
     }
 
 

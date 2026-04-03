@@ -1,4 +1,5 @@
-﻿@{
+﻿@using System.Security.Claims
+@{
     // Get current controller and action to highlight active menu
     string currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     string currentAction = ViewContext.RouteData.Values["action"]?.ToString();
@@ -124,7 +125,7 @@
         }
 
         .custom-navbar {
-            padding: 12px 20px; /* increase height */
+            padding: 7px 20px; /* increase height */
             background: linear-gradient(to right, #ffffff, #f8f9fc);
             border-bottom: 2px solid #4e73df;
         }
@@ -218,8 +219,10 @@
                         <i class="fas fa-tachometer-alt"></i> Dashboard
                     </a>
                 </li>
+
                 <li class="nav-item">
-                    <a class="nav-link collapsed" data-bs-toggle="collapse" href="#adminMasterData" role="button" aria-expanded="false" aria-controls="adminMasterData">
+                    <a class="nav-link collapsed" data-bs-toggle="collapse" href="#adminMasterData" role="button" 
+                    aria-expanded="false" aria-controls="adminMasterData">
                         <i class="fas fa-cogs me-2"></i> Master Data
                         <i class="fas fa-chevron-down ms-auto"></i>
                     </a>
@@ -265,21 +268,59 @@
                                     <i class="fas fa-wallet"></i> Hostel Management
                                 </a>
                             </li>
+
                         </ul>
                     </div>
                 </li>
 
-                <li class="nav-item dropdown">
-                    <a class="nav-link" href="@Url.Action("Index", "Teachers")" id="teacherssDropdown" 
-                    role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-chalkboard-teacher"></i> Teachers
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center justify-content-between collapsed"
+                       data-bs-toggle="collapse"
+                       href="#teachersDropdown"
+                       role="button"
+                       aria-controls="teachersDropdown"
+                       aria-expanded="false">
+                        <span>
+                            <i class="fas fa-chalkboard-teacher me-2"></i>
+                            Teacher
+                        </span>
+                        <i class="fas fa-chevron-down"></i>
                     </a>
-                    <ul class="dropdown-menu bg-dark border-0" aria-labelledby="teacherssDropdown">
-                        <li><a class="dropdown-item text-white @(currentAction == "Entry" ? "active" : "")" href="@Url.Action("Index", "Teacher")">All Techer</a></li>
-                        <li><a class="dropdown-item text-white @(currentAction == "Entry" ? "active" : "")" href="@Url.Action("Entry", "Teachers")">New Techer</a></li>
-                        <li><a class="dropdown-item text-white @(currentAction == "Entry" ? "active" : "")" href="@Url.Action("Salary", "Teachers")">Techer Salary</a></li>
-                        <li><a class="dropdown-item text-white @(currentAction == "Entry" ? "active" : "")" href="@Url.Action("Attandance", "Teachers")">Attandance</a></li>
-                    </ul>
+
+                    <div class="collapse" id="teachersDropdown">
+                        <ul class="nav flex-column ms-3">
+                            <li class="nav-item">
+                                <a class="nav-link text-white @(currentAction == "Index" ? "active" : "")"
+                                   href="@Url.Action("Index", "Teacher")">
+                                    <i class="fas fa-users me-2"></i> All Teachers
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white @(currentAction == "Entry" ? "active" : "")"
+                                   href="@Url.Action("Entry", "Teachers")">
+                                    <i class="fas fa-user-plus me-2"></i> New Teacher
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white @(currentAction == "Salary" ? "active" : "")"
+                                   href="@Url.Action("Salary", "Teachers")">
+                                    <i class="fas fa-money-bill-wave me-2"></i> Teacher Salary
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white @(currentAction == "TeacherAttendance" ? "active" : "")"
+                                   href="@Url.Action("TeacherAttendance", "Attendance")">
+                                    <i class="fas fa-calendar-check me-2"></i> Teacher Attendance
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white @(currentAction == "StudentAttendance" ? "active" : "")"
+                                   href="@Url.Action("Student", "Attendance")">
+                                    <i class="fas fa-user-check me-2"></i> Student Attendance
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </li>
 
                 <!-- Students dropdown example -->
@@ -307,7 +348,7 @@
 
                             <!-- Student Entry -->
                             <li>
-                                <a href="@Url.Action("Entry", "Students")"
+                                <a href="@Url.Action("NewStudent", "Students")"
                                    class="nav-link text-white @(currentAction == "Entry" ? "active" : "")">
                                     <i class="fas fa-user-graduate me-2"></i> Student Entry
                                 </a>
@@ -344,10 +385,49 @@
                                     <i class="fas fa-chart-line me-2"></i> Marks
                                 </a>
                             </li>
-
+                            <li>
+                                <a href="@Url.Action("StudentLock", "Admin")"
+                                   class="nav-link text-white @(currentAction == "Marks" ? "active" : "")">
+                                    <i class="fas fa-chart-line me-2"></i> Unlock Student
+                                </a>
+                            </li>
                         </ul>
                     </div>
                 </li>
+
+
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center justify-content-between collapsed"
+                       data-bs-toggle="collapse"
+                       href="#leaveDropdown"
+                       role="button"
+                       aria-controls="leaveDropdown"
+                       aria-expanded="false">
+                        <span>
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            Leave Management
+                        </span>
+                        <i class="fas fa-chevron-down"></i>
+                    </a>
+
+                    <div class="collapse" id="leaveDropdown">
+                        <ul class="nav flex-column ms-3">
+                            <li class="nav-item">
+                                <a class="nav-link text-white @(currentAction == "ApplyLeave" ? "active" : "")"
+                                   href="@Url.Action("Apply", "Leave")">
+                                    <i class="fas fa-pencil-alt me-2"></i> Apply Leave
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white @(currentAction == "ApproveLeave" ? "active" : "")"
+                                   href="@Url.Action("ApprovalList", "Leave")">
+                                    <i class="fas fa-check-circle me-2"></i> Approve Leave
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
 
                 <li class="nav-item mt-auto">
                     <a class="nav-link" href="@Url.Action("Logout", "Account")">
@@ -404,7 +484,7 @@
                                     <i class="fas fa-user"></i>
                                 </div>
                                 <div class="profile-text">
-                                    <span class="profile-name">@User.Identity.Name</span>
+                                    <span class="profile-name">@User.FindFirst(ClaimTypes.Role)?.Value</span>
                                 </div>
                             </button>
 
@@ -414,23 +494,23 @@
                                 <li class="px-3 py-2 border-bottom d-flex align-items-center">
                                     <div>
                                         <div class="fw-semibold">@User.Identity.Name
-                                        <small class="text-muted">(@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value)</small>
+                                            <small class="text-muted">(@User.FindFirst("FullName")?.Value)</small>
                                         </div>
                                     </div>
                                 </li>
 
                                 <!-- Menu Items -->
                                 <li>
-                                    <a class="dropdown-item d-flex align-items-center" href="@Url.Action("MyProfile", "Students")">
+                                    <a class="dropdown-item d-flex align-items-center" href="@Url.Action("MyProfile", "Account")">
                                         <i class="fas fa-user me-2 text-secondary"></i> My Profile
                                     </a>
                                 </li>
 
-                                <li>
+                                @* <li>
                                     <a class="dropdown-item d-flex align-items-center" href="#">
                                         <i class="fas fa-cog me-2 text-secondary"></i> Settings
                                     </a>
-                                </li>
+                                </li> *@
 
                                 <li><hr class="dropdown-divider"></li>
 
@@ -490,6 +570,13 @@
             document.body.classList.add("dark-mode");
             toggle.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
         }
+
+            // Prevent dropdown parent link from jumping
+        document.querySelectorAll('.dropdown-toggle').forEach(el => {
+            el.addEventListener('click', function (e) {
+                e.preventDefault();
+            });
+        });
     </script>
 
     @RenderSection("Scripts", required: false)

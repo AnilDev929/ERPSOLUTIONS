@@ -11,7 +11,7 @@ namespace ERP_SOLUTIONS.Services.Interfaces
         Task<Teacher> GetByIdAsync(int teacherId);
 
         Task<(string username, string password)> CreateTeacherWithUserAsync(Teacher teacher);
-        Task<(bool Status, string message)> UpdateAsync(Teacher teacher);
+        Task<(bool Status, string message)> UpdateAsync(Teacher teacher, string Role);
 
         Task DeactivateAsync(int teacherId);
 

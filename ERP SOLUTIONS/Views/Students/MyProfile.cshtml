@@ -63,14 +63,20 @@
         .btn-primary:hover {
             background: linear-gradient(45deg, #3b5bcc, #5a78e0);
         }
+
+    .bi-person-circle {
+        background: #e7f1ff;
+        border-radius: 50%;
+        padding: 15px;
+    }
 </style>
 
-<div class="container-fluid mt-4">
+<div class="container mt-4">
 
     <!-- Header -->
-    <div class="mb-4">
-        <h3 class="fw-bold mb-1 text-dark">
-            <i class="fas fa-user-circle text-primary me-2"></i>
+    <div class="mb-4 p-3 border-start border-4 border-primary bg-light rounded">
+        <h3 class="fw-bold mb-1 text-primary">
+            <i class="bi bi-person-circle me-2"></i>
             My Profile
         </h3>
         <small class="text-muted">View and manage your profile information</small>
@@ -79,122 +85,59 @@
     <div class="row justify-content-center">
         <div class="col-lg-8 col-md-10">
 
-            <div class="card shadow-sm border-0 rounded-3 form-card">
-
-                <!-- Card Header -->
-                <div class="card-header bg-light py-3">
-                    <h5 class="mb-0 text-primary">
-                        <i class="fas fa-id-badge me-2"></i>Profile Details
-                    </h5>
+            <div class="card shadow-lg text-center p-4">
+                <!-- Status -->
+                
+                <span class="position-absolute top-0 end-0 m-3 badge rounded-pill px-4 py-3 fs-6"
+                      style="background-color:#e6f4ea; color:#198754;">
+                    <i class="bi bi-check-circle-fill me-1"></i> Active
+                </span>
+                <!-- Profile Icon -->
+                <div class="mb-3">
+                    <i class="bi bi-person-circle text-primary" style="font-size: 80px;"></i>
                 </div>
 
-                <!-- Card Body -->
-                <div class="card-body">
+                <h3>Anil Rout</h3>
+                <p class="text-muted">
+                    <i class="bi bi-envelope"></i> rout.anil@gmail.com
+                </p>
+            </div>
 
-                    <!-- Row 1 -->
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="fw-semibold text-secondary">Full Name</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                <input asp-for="FullName" class="form-control" placeholder="Enter your name..." />
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="fw-semibold text-secondary">Gender</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-venus-mars"></i></span>
-                                <input asp-for="Gender" class="form-control bg-light" />
-                            </div>
-                        </div>
+            <div class="row mt-4">
+                <!-- Personal Info -->
+                <div class="col-md-6">
+                    <div class="card p-3 shadow-sm">
+                        <h5><i class="bi bi-person"></i> Personal Info</h5>
+                        <p><i class="bi bi-telephone"></i> 2225255</p>
+                        <p><i class="bi bi-geo-alt"></i> skljklgjkljfgkldf</p>
                     </div>
-
-                    <!-- Row 2 -->
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="fw-semibold text-secondary">Mobile Number</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-phone"></i></span>
-                                <input asp-for="MobileNumber" class="form-control bg-light" />
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="fw-semibold text-secondary">Email</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                                <input asp-for="Email" class="form-control bg-light" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Row 3 -->
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="fw-semibold text-secondary">Roll No</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-id-card"></i></span>
-                                <input asp-for="RollNo" class="form-control bg-light" />
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="fw-semibold text-secondary">Date of Birth</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
-                                <input asp-for="DateOfBirth" type="date" class="form-control bg-light" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Row 4 -->
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="fw-semibold text-secondary">Date of Join</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-calendar-check"></i></span>
-                                <input asp-for="DateOfJoin" type="date" class="form-control bg-light" />
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="fw-semibold text-secondary">Address</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
-                                <input asp-for="PermanentAddress" class="form-control bg-light" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Row 5 -->
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="fw-semibold text-secondary">Parent Name</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-user-friends"></i></span>
-                                <input asp-for="ParentName" class="form-control bg-light" />
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="fw-semibold text-secondary">Parent Contact</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-phone-alt"></i></span>
-                                <input asp-for="ParentContact" class="form-control bg-light" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Button -->
-                    <div class="text-end mt-4">
-                        <a href="@Url.Action("EditProfile", "Account")"
-                           class="btn btn-primary rounded-pill px-4 shadow-sm">
-                            <i class="fas fa-edit me-2"></i> Edit Profile
-                        </a>
-                    </div>
-
                 </div>
+
+                <!-- Academic Info -->
+                <div class="col-md-6">
+                    <div class="card p-3 shadow-sm">
+                        <h5><i class="bi bi-mortarboard"></i> Academic Info</h5>
+                        <p><i class="bi bi-book"></i> 10th</p>
+                        <p><i class="bi bi-calendar"></i> 2026</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="text-center mt-4">
+
+                <!-- Change Password -->
+                <a asp-controller="Account" asp-action="ChangePassword"
+                   class="btn btn-warning me-2">
+                    <i class="bi bi-key"></i> Change Password
+                </a>
+
+                <!-- Edit Profile -->
+                <a asp-controller="Student" asp-action="Edit"
+                   class="btn btn-primary">
+                    <i class="bi bi-pencil-square"></i> Edit Profile
+                </a>
+
             </div>
         </div>
     </div>

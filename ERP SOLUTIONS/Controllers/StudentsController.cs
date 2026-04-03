@@ -1,7 +1,11 @@
-﻿using ERP_SOLUTIONS.Models.Entities;
+﻿using ERP_SOLUTIONS.Data;
+using ERP_SOLUTIONS.Models.DTOS;
+using ERP_SOLUTIONS.Models.Entities;
+using ERP_SOLUTIONS.Models.ViewModels;
 using ERP_SOLUTIONS.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Security.Claims;
 
 namespace ERP_SOLUTIONS.Controllers
@@ -10,10 +14,12 @@ namespace ERP_SOLUTIONS.Controllers
     public class StudentsController : Controller
     {
         private readonly IStudentProfileService _service;
+        private readonly AppDbContext _context;
 
-        public StudentsController(IStudentProfileService service)
+        public StudentsController(IStudentProfileService service, AppDbContext context)
         {
             _service = service;
+            _context = context;
         }
 
 
@@ -34,12 +40,14 @@ namespace ERP_SOLUTIONS.Controllers
                 
                 // convert to int if needed
                 int userId = int.Parse(userIdClaim);
-                var userProfile = await _service.GetStudentProfileAsync(userId);
+                //var userProfile = await _service.GetStudentProfileAsync(userId);
 
-                if (userProfile == null)
-                    return View("Error"); // or NotFound page
+                //if (userProfile == null)
+                //    return View("Error"); // or NotFound page
 
-                return View(userProfile); // pass model to view
+                //return View(userProfile); // pass model to view
+
+                return View();
             }
             catch (Exception)
             {
@@ -90,9 +98,137 @@ namespace ERP_SOLUTIONS.Controllers
             return View();
         }
 
+        private void LoadDropdowns(StudentFormViewModel vm)
+        {
+            var activeYearId = _context.AcademicYears
+            .Where(a => a.IsActive)
+            .Select(a => a.AcademicYearID)
+            .FirstOrDefault();
+
+            vm.AcademicYearID = activeYearId; // 👈 pre-select
+
+            vm.Genders = _context.Genders.Select(g => new SelectListItem
+            {
+                Value = g.GenderID.ToString(),
+                Text = g.GenderName
+            }).ToList();
+
+            vm.AcademicYears = _context.AcademicYears.Select(a => new SelectListItem
+            {
+                Value = a.AcademicYearID.ToString(),
+                Text = a.YearName,
+                Selected = a.IsActive // auto-select active
+            }).ToList();
+
+            vm.Classes = _context.Classes.Select(c => new SelectListItem
+            {
+                Value = c.ClassId.ToString(),
+                Text = c.ClassName
+            }).ToList();
+        }
+
+        [HttpGet]
+        public IActionResult NewStudent()
+        {
+            var vm = new StudentFormViewModel();
+            LoadDropdowns(vm); // 👈 reusable call
+            return View(vm);
+        }
+
+        //public IActionResult GetClassDetails(int classId, int academicYearId)
+        //{
+        //    var sections = _context.ClassSections
+        //        .Where(cs => cs.ClassId == classId)
+        //        .Select(cs => new { cs.SectionId, cs.Section.SectionName })
+        //        .ToList();
+
+        //    var fees = _context.CourseFees
+        //        .Where(cf => cf.ClassId == classId && cf.AcademicYearId == academicYearId)
+        //        .Select(cf => new { cf.TuitionFee, cf.LabFee, cf.LibraryFee, cf.OtherFee, cf.TotalFee })
+        //        .FirstOrDefault();
+
+        //    return Json(new { sections, fees });
+        //}
+        [HttpGet]
+        public IActionResult GetClassDetails(int classId, int academicYearId)
+        {
+            // Get all sections for this class
+            var sections = _context.ClassSections
+                .Where(cs => cs.ClassId == classId)
+                .Select(cs => new
+                {
+                    cs.Id,             // ClassSectionId
+                    SectionId = cs.SectionId,
+                    SectionName = cs.Section.SectionName
+                }).ToList();
+
+            // Get course fees for this class + academic year
+            var fees = _context.CourseFees
+                .Where(cf => cf.ClassId == classId && cf.AcademicYearId == academicYearId)
+                .Select(cf => new
+                {
+                    cf.TuitionFee,
+                    cf.LabFee,
+                    cf.LibraryFee,
+                    cf.OtherFee,
+                    cf.TotalFee
+                }).FirstOrDefault();
+
+            return Json(new { sections, fees });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> NewStudent(StudentFormViewModel vm)
+        {
+            if (!ModelState.IsValid)
+            {
+                // Loop through all ModelState entries
+                foreach (var entry in ModelState)
+                {
+                    var key = entry.Key; // The field name
+                    foreach (var error in entry.Value.Errors)
+                    {
+                        // This prints to console (for debugging)
+                        Console.WriteLine($"Field: {key}, Error: {error.ErrorMessage}");
+                    }
+                }
+            }
+
+            vm.Genders = _context.Genders.Select(g => new SelectListItem
+            {
+                Value = g.GenderID.ToString(),
+                Text = g.GenderName
+            }).ToList();
+
+            vm.AcademicYears = _context.AcademicYears.Select(a => new SelectListItem
+            {
+                Value = a.AcademicYearID.ToString(),
+                Text = a.YearName,
+                Selected = a.IsActive // auto-select active
+            }).ToList();
+
+            vm.Classes = _context.Classes.Select(c => new SelectListItem
+            {
+                Value = c.ClassId.ToString(),
+                Text = c.ClassName
+            }).ToList();
 
 
+            if (ModelState.IsValid)
+            {
+                CreateStudentResultDto resultDto  = await _service.SaveStudentDetail(vm);
 
+                vm.RollNumber = resultDto.RollNumber;
+
+
+                return RedirectToAction("Index");
+            }
+
+            // IMPORTANT: Reload dropdowns if validation fails
+            LoadDropdowns(vm); // 👈 reusable call
+
+            return View(vm);
+        }
 
     }
 }

@@ -1,9 +1,14 @@
 ﻿@using ERP_SOLUTIONS.Models.Entities
+@using System.Security.Claims
 @model Teacher
 @{
-    ViewData["Title"] = Model.TeacherID == 0 ? "Add Teacher" : "Edit Teacher";
+    ViewData["Title"] = Model.TeacherID == 0 ? "Add Teacher" : "Edit Detail";
     Layout = "~/Views/Shared/_Layout.cshtml";
-    bool isEdit = Model != null && Model.TeacherID > 0;
+
+    var isTeacher = User.IsInRole("Teacher");
+    bool isEditMode = Model != null && Model.TeacherID > 0;
+    var role = User.FindFirst(ClaimTypes.Role)?.Value;
+    
 }
 
 @* <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet"> *@
@@ -31,12 +36,29 @@
         </div>
 
         @* <form asp-action="Create" method="post"> *@
-        <form asp-action="@(isEdit ? "Edit" : "Create")" method="post">
+        <form asp-action="@(isEditMode ? "Edit" : "Create")" method="post">
             <div class="card-body">
-                @if (isEdit)
+                @if (isEditMode)
                 {
                     <input type="hidden" asp-for="TeacherID" />
+                    <input type="hidden" asp-for="UserID" />
                 }
+
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" id="successMessage" role="alert">
+                        <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" id="errorMessage" role="alert">
+                        <i class="fas fa-exclamation-triangle"></i> @TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
                 <!-- 🧾 Personal Info -->
                 <h5 class="mb-3 text-secondary"><i class="bi bi-person"></i> Personal Info</h5>
                 <div class="row mb-3">
@@ -145,12 +167,6 @@
                 <h5 class="mb-3 text-secondary"><i class="bi bi-mortarboard"></i> Professional Info</h5>
                 <div class="row mb-3">
                     <div class="col-md-3">
-                        <label asp-for="Designation" class="form-label"><i class="bi bi-person-badge"></i> Designation</label>
-                        <input asp-for="Designation" class="form-control" />
-                        <span asp-validation-for="Designation" class="text-danger"></span>
-                    </div>
-
-                    <div class="col-md-3">
                         <label asp-for="Qualification" class="form-label"><i class="bi bi-mortarboard"></i> Qualification</label>
                         <input asp-for="Qualification" class="form-control" />
                         <span asp-validation-for="Qualification" class="text-danger"></span>
@@ -167,28 +183,54 @@
                         <input asp-for="Experience" type="number" step="0.1" class="form-control" />
                         <span asp-validation-for="Experience" class="text-danger"></span>
                     </div>
-
+                    <div class="col-md-3">
+                        <label asp-for="Designation" class="form-label"><i class="bi bi-person-badge"></i> Designation</label>
+                        @if (isTeacher)
+                        {
+                            <input asp-for="Designation" class="form-control" disabled />
+                        }
+                        else
+                        {
+                            <input asp-for="Designation" class="form-control" />
+                        }
+                        <span asp-validation-for="Designation" class="text-danger"></span>
+                    </div>
                     <div class="col-md-3">
                         <label asp-for="JoiningDate" class="form-label"><i class="bi bi-calendar-check"></i> Joining Date</label>
-                        <input asp-for="JoiningDate" type="date" class="form-control" />
+                        @if (isTeacher)
+                        {
+                            <input asp-for="JoiningDate" class="form-control" disabled />
+                        }
+                        else
+                        {
+                            <input asp-for="JoiningDate" type="date" class="form-control" />
+                        }
+                       
                         <span asp-validation-for="JoiningDate" class="text-danger"></span>
                     </div>
-
                     <div class="col-md-3">
                         <label asp-for="LastWorkingDate" class="form-label"><i class="bi bi-calendar-x"></i> Last Working Date</label>
-                        <input asp-for="LastWorkingDate" type="date" class="form-control" />
+                        @if (isTeacher)
+                        {
+                            <input asp-for="LastWorkingDate" class="form-control" disabled/>
+                        }
+                        else
+                        {
+                            <input asp-for="LastWorkingDate" type="date" class="form-control" />
+                        }
                     </div>
-
                     
                 </div>
             </div>
 
             <!-- Footer Save/Update -->
             <div class="card-footer d-flex justify-content-end gap-2">
-                <a href="@Url.Action("Index")" class="btn btn-secondary px-4">
-                    <i class="fas fa-arrow-left me-1"></i> Back
-                </a>
-
+                @if (!isTeacher)
+                {
+                    <a href="@Url.Action("Index")" class="btn btn-secondary px-4">
+                        <i class="fas fa-arrow-left me-1"></i> Back
+                    </a>
+                }
                 <button type="submit" class="btn btn-success">
                     <i class="bi bi-save me-1"></i> Save
                 </button>
@@ -200,6 +242,15 @@
 <!-- ================= Script for Married Toggle ================= -->
 @section Scripts {
     <script>
+
+        // Auto-hide TempData messages
+        setTimeout(function () {
+            const success = document.getElementById('successMessage');
+            const error = document.getElementById('errorMessage');
+            if (success) { success.classList.remove('show'); success.classList.add('fade'); }
+            if (error) { error.classList.remove('show'); error.classList.add('fade'); }
+        }, 5000);
+
         $(document).ready(function () {
             function toggleSpouseFields() {
                 if ($('#IsMarried').is(':checked')) {
