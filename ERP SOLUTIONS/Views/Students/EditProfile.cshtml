@@ -1,13 +1,12 @@
-﻿@using ERP_SOLUTIONS.Models.Entities
-@model Student
+﻿@using ERP_SOLUTIONS.Models.DTOS
+@model EditStudentProfileDto
 
 @{
-    ViewData["Title"] = "EditProfile";
+    ViewData["Title"] = "Student Profile";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-
-<div class="container-fluid mt-4">
+<div class="container mt-4">
 
     <!-- Header -->
     <div class="mb-4">
@@ -17,23 +16,407 @@
         <small class="text-muted">Update your profile information</small>
     </div>
 
-    <!-- Card -->
-    <div class="row justify-content-center">
-        <div class="col-lg-8 col-md-10">
-            <div class="card shadow-sm border-0 rounded-3 form-card">
-
-                <!-- Card Header -->
-                <div class="card-header bg-light py-3">
-                    <h5 class="mb-0 text-primary"><i class="fas fa-id-badge me-2"></i> Profile Details</h5>
+    <!-- 🔷 Profile Header -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body d-flex align-items-center">
+            <img src="~/images/default-user.png" class="rounded-circle me-3" width="80" height="80" />
+            <div class="mt-2">
+                <div class="d-flex align-items-center mb-1">
+                    <i class="bi bi-mortarboard-fill text-primary me-2"></i>
+                    <span class="fw-semibold">@Model.Class - @Model.Section</span>
                 </div>
 
-                <!-- Card Body -->
-                <div class="card-body p-4">
-                    <form asp-action="EditProfile" method="post">
-                        <input type="hidden" asp-for="StudentID" />
-                    </form>
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-hash text-success me-2"></i>
+                    <span class="fw-semibold">Admission No: @Model.AdmissionNumber</span>
                 </div>
+
             </div>
         </div>
     </div>
+
+    <form asp-action="EditProfile" method="post">
+        <input type="hidden" asp-for="Id" />
+
+        <!-- PERSONAL INFO -->
+        <div class="card mb-3 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <i class="bi bi-person-fill"></i> Personal Information
+            </div>
+            <div class="card-body row g-3">
+
+                <div class="col-md-6">
+                    <label>Name</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                        <input type="text" asp-for="StudentName" required
+                               class="form-control" maxlength="100">
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <label>Gender</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-gender-ambiguous"></i></span>
+                        <select asp-for="GenderID" asp-items="ViewBag.Genders" class="form-control" required>
+                            <option value="">-- Select Gender --</option>
+                        </select>
+                    </div>
+                    <span asp-validation-for="GenderID" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-3">
+                    <label>Date of Birth</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-calendar-date"></i></span>
+                        <input type="date" asp-for="DateOfBirth" id="DateOfBirth"
+                               class="form-control" required
+                               max="@DateTime.Today.AddYears(-5).ToString("yyyy-MM-dd")"
+                               min="@DateTime.Today.AddYears(-100).ToString("yyyy-MM-dd")">
+                        <span id="dobError" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <label>Blood Group</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-droplet"></i></span>
+                        <select class="form-select" required asp-for="BloodGroup">
+                            <option value="">Select</option>
+                            <option>A+</option>
+                            <option>A-</option>
+                            <option>B+</option>
+                            <option>B-</option>
+                            <option>O+</option>
+                            <option>O-</option>
+                            <option>AB+</option>
+                            <option>AB-</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <label>Category</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-tags"></i></span>
+                        <select asp-for="Category" class="form-select" required>
+                            <option value="">Select</option>
+                            <option>General</option>
+                            <option>OBC</option>
+                            <option>SC</option>
+                            <option>ST</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <label>Religion</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                        <input asp-for="Religion" class="form-control" placeholder="Religion" required />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label>Admission Year</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+                        <input type="number" name="AdmissionYear" id="AdmissionYear" value="@Model.AdmissionYear" readonly
+                               class="form-control" placeholder="YYYY">
+                    </div>
+                </div>
+
+                <!-- Read-only -->
+                <div class="col-md-4">
+                    <label>Academic Year</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+                        <input asp-for="AcademicYear" class="form-control" readonly />
+                    </div>
+                </div>
+               
+                <div class="col-md-4">
+                    <label>Roll No</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-hash"></i></span>
+                        <input asp-for="RollNumber" class="form-control" readonly />
+                    </div>
+                    
+                </div>
+
+            </div>
+        </div>
+
+        <!-- CONTACT -->
+        <div class="card mb-3 shadow-sm">
+            <div class="card-header bg-success text-white">
+                <i class="bi bi-telephone-fill"></i> Contact Details
+            </div>
+            <div class="card-body row g-3">
+
+                <div class="col-md-4">
+                    <label>Phone Number</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                        <input type="text" asp-for="PhoneNo" id="PhoneNo"
+                               class="form-control"
+                               maxlength="10" required
+                               pattern="[6-9]{1}[0-9]{9}"
+                               oninput="allowOnlyNumbers(this)"
+                               placeholder="Mobile Number">
+                    </div>
+                    <span asp-validation-for="PhoneNo" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label>Email</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                        <input type="email" asp-for="EmailID"
+                               class="form-control"
+                               maxlength="100" required
+                               placeholder="Email Address">
+                    </div>
+                    <span asp-validation-for="EmailID" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label>Emergency Contact</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-telephone-forward"></i></span>
+                        <input type="text" asp-for="EmergencyContact" maxlength="10"
+                               pattern="[6-9]{1}[0-9]{9}" required
+                               class="form-control" placeholder="Emergency Contact"
+                               maxlength="10">
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <label>Address</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                        <textarea asp-for="PermanentAddress"
+                                  class="form-control" placeholder="Enter Address"
+                                  maxlength="250" required></textarea>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <label>City</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-building"></i></span>
+                        <input asp-for="City" class="form-control" placeholder="City" required />
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <label>State</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-map"></i></span>
+                        <input asp-for="State" class="form-control" placeholder="State" required />
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <label>Pincode</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-mailbox"></i></span>
+                        <input asp-for="Pincode" class="form-control"
+                               maxlength="6" required
+                               pattern="\d{6}"
+                               oninput="allowOnlyNumbers(this)"
+                               placeholder="Pincode" />
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- FAMILY -->
+        <div class="card mb-3 shadow-sm">
+            <div class="card-header bg-warning">
+                <i class="bi bi-people-fill"></i> Family Details
+            </div>
+            <div class="card-body row g-3">
+
+                <div class="col-md-6">
+                    <label>Father Name</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                        <input type="text" asp-for="FatherName" required
+                               class="form-control" placeholder="Father Name"
+                               maxlength="100">
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label>Mother Name</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person-heart"></i></span>
+                        <input type="text" asp-for="MotherName" required
+                               class="form-control" placeholder="Mother Name"
+                               maxlength="100">
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <label>Parent Occupation</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-briefcase"></i>
+                        </span>
+                        <input asp-for="ParentOccupation" class="form-control" placeholder="Occupation" required />
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <label>Parent Email</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-envelope-at"></i>
+                        </span>
+                        <input asp-for="ParentEmail" type="email"
+                               class="form-control" placeholder="Parent Email" />
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <label>Annual Income</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-currency-rupee"></i>
+                        </span>
+                        <input asp-for="AnnualIncome" type="number"
+                               class="form-control" placeholder="Annual Income" required />
+                    </div>
+                </div>
+
+                <!-- Sensitive -->
+                <div class="col-md-4">
+                    <label>Father Aadhaar No</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-credit-card"></i></span>
+                        <input type="text" asp-for="FatherAadhaar" readonly                              
+                               class="form-control" placeholder="Enter Aadhaar" maxlength="12">
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <label>Mother Aadhaar No</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-credit-card"></i></span>
+                        <input type="text" asp-for="MotherAadhaar" required maxlength="12"
+                               class="form-control" readonly placeholder="Enter Aadhaar">
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- IDENTITY -->
+        <div class="card mb-3 shadow-sm">
+            <div class="card-header bg-danger text-white">
+                <i class="bi bi-shield-lock-fill"></i> Identity Details
+            </div>
+            <div class="card-body row g-3">
+
+                <div class="col-md-4">
+                    <label>Aadhaar</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-credit-card"></i></span>
+                        <input value="@Model.AadhaarMasked" class="form-control" readonly />
+                    </div>
+                    
+                </div>
+
+                <div class="col-md-4">
+                    <label>Apaar ID</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-credit-card-2-front"></i></span>
+                        <input value="@Model.ApaarIDMasked" class="form-control" readonly />
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ACADEMIC -->
+        <div class="card mb-3 shadow-sm">
+            <div class="card-header bg-info text-white">
+                <i class="bi bi-mortarboard-fill"></i> Academic Info
+            </div>
+            <div class="card-body row g-3">
+                <div class="col-md-4">
+                    <label>Previous School</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-building"></i>
+                        </span>
+                        <input type="text" asp-for="PreviousSchoolName"
+                               class="form-control"
+                               placeholder="Enter previous school name"
+                               maxlength="150" readonly>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <label>Last Class Studied</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-journal-text"></i>
+                        </span>
+                        <input asp-for="LastClassStudied" class="form-control" readonly />
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <label>Result (%)</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-bar-chart"></i>
+                        </span>
+                        <input asp-for="LastClassResult" class="form-control" readonly />
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <label>Medium of Education</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-translate"></i>
+                        </span>
+                        <input asp-for="MediumOfEducation" class="form-control" readonly />
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 🔘 Buttons -->
+        <div class="text-end">
+
+            <button type="submit" class="btn btn-success" id="saveBtn">
+                <i class="bi bi-check-circle"></i> Save
+            </button>
+
+            <button type="button" class="btn btn-secondary" id="cancelBtn">
+                <i class="bi bi-x-circle"></i> Cancel
+            </button>
+        </div>
+    </form>
+
+
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+
+        function allowOnlyNumbers(input) {
+            input.value = input.value.replace(/\D/g, '');
+        }
+
+
+    </script>
+
+}

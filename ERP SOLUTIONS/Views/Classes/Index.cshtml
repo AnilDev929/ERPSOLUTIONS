@@ -22,20 +22,20 @@
         </a>
     </div>
 
-    @if (TempData["SuccessMessage"] != null)
+    @* @if (TempData["Success"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show" id="successMessage" role="alert">
-            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
-    @if (TempData["ErrorMessage"] != null)
+    @if (TempData["Error"] != null)
     {
         <div class="alert alert-danger alert-dismissible fade show" id="errorMessage" role="alert">
-            <i class="fas fa-exclamation-triangle"></i> @TempData["ErrorMessage"]
+            <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-    }
+    } *@
 
     <div class="row">
 

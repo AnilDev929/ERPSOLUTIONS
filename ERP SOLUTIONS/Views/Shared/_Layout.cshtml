@@ -124,11 +124,34 @@
             background: #343a40;
         }
 
+        
         .custom-navbar {
-            padding: 7px 20px; /* increase height */
-            background: linear-gradient(to right, #ffffff, #f8f9fc);
-            border-bottom: 2px solid #4e73df;
+            background: linear-gradient(to right, #232526, #414345) !important;
+            color: #ffffff !important;
+            padding: 0 20px; /* remove vertical padding */
+            height: 60px; /* fixed professional height */
+            border-bottom: 2px solid #00c6ff;
+            display: flex;
+            align-items: center; /* vertical centering */
         }
+
+        .custom-navbar .btn {
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 12px;
+            border-radius: 6px;
+        }
+
+                .custom-navbar .btn i {
+                    font-size: 16px;
+                }
+
+            .custom-navbar .badge {
+                font-size: 10px;
+                padding: 3px 6px;
+            }
 
         .custom-navbar .navbar-brand {
             font-size: 22px;
@@ -139,7 +162,35 @@
             min-width: 220px;
             max-height: 300px;
             overflow-y: auto;
+            border-radius: 8px;
+            border: none;
         }
+
+        .custom-navbar .btn,
+        .profile-btn {
+            background: transparent !important;
+            color: #ffffff !important;
+            border: none !important;
+            transition: all 0.2s ease;
+        }
+
+            /* 🔥 Fix hover issue */
+            .custom-navbar .btn:hover,
+            .profile-btn:hover {
+                background: rgba(255, 255, 255, 0.12) !important;
+                color: #ffffff !important;
+            }
+
+            /* Remove Bootstrap default focus/active white flash */
+.custom-navbar .btn:focus,
+.custom-navbar .btn:active,
+.profile-btn:focus,
+.profile-btn:active {
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+    box-shadow: none;
+}
+
         .user-info span {
             font-size: 16px;
         }
@@ -156,23 +207,36 @@
         }
 
         .profile-dropdown .dropdown-item:hover {
-            background-color: #f1f5ff;
+            background-color: #2c2f33;
+            color: #fff;
         }
 
         .profile-btn {
+            background: transparent !important;
+            border: none;
+            color: #fff;
             display: flex;
             align-items: center;
-            gap: 10px;
-            background: #f8f9fc;
-            border: none;
-            border-radius: 30px;
-            padding: 6px 14px;
-            transition: all 0.2s ease;
+            height: 38px;
+            padding: 0 10px;
+            gap: 8px;
         }
 
-        .profile-btn:hover {
-            background: #e9f0ff;
+        .profile-avatar {
+            width: 32px;
+            height: 32px;
+            background: #00c6ff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+
+        .profile-text {
+            margin-left: 8px;
+            font-size: 14px;
+        }
+
 
         .profile-avatar {
             width: 36px;
@@ -201,7 +265,15 @@
             font-size: 12px;
             color: #6c757d;
         }
+
+        #darkModeToggle {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.3);
+            color: #fff;
+            font-size: 14px;
+        }
     </style>
+
 </head>
 
 <body>
@@ -337,15 +409,22 @@
                 </li> *@
 
                 <li class="nav-item">
-                    <a class="nav-link collapsed @(currentController == "Students" ? "active" : "")" 
-                    data-bs-toggle="collapse" href="#studentsDropdown" role="button" 
+                    <a class="nav-link d-flex align-items-center justify-content-between
+                        collapsed"
+                       data-bs-toggle="collapse" href="#studentsDropdown" role="button" 
                     aria-expanded="false" aria-controls="studentsDropdown">
-                        <i class="fas fa-user-graduate me-2"></i> <span>Students</span>
+                        <i class="fas fa-user-graduate me-2"></i> <span>Student</span>
                         <i class="fas fa-chevron-down ms-auto"></i>
                     </a>
                     <div class="collapse" id="studentsDropdown">
                         <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
 
+                            <li>
+                                <a href="@Url.Action("Entry", "Students")"
+                                   class="nav-link text-white @(currentAction == "Entry" ? "active" : "")">
+                                    <i class="fas fa-user-graduate me-2"></i> Students
+                                </a>
+                            </li>
                             <!-- Student Entry -->
                             <li>
                                 <a href="@Url.Action("NewStudent", "Students")"
@@ -450,17 +529,17 @@
                     </button>
 
                     <!-- Right side -->
-                    <div class="ms-auto d-flex align-items-center">
+                    <div class="ms-auto d-flex align-items-center gap-3">
 
                         <!-- 🌙 Dark Mode Toggle -->
-                        <button id="darkModeToggle" class="btn btn-light btn-sm shadow-sm"
+                        <button id="darkModeToggle" class="btn"
                                 title="Toggle Dark Mode">
-                            <i class="fas fa-moon"></i> Dark Mode
+                            <i class="fas fa-moon me-2"></i> Dark Mode
                         </button>
 
                         <!-- 🔔 Notifications -->
                         <div class="dropdown me-3">
-                            <button class="btn btn-light position-relative" data-bs-toggle="dropdown">
+                            <button class="btn position-relative" data-bs-toggle="dropdown">
                                 <i class="fas fa-bell fa-lg"></i>
                                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                                     3
@@ -493,8 +572,8 @@
                                 <!-- User Info Header -->
                                 <li class="px-3 py-2 border-bottom d-flex align-items-center">
                                     <div>
-                                        <div class="fw-semibold">@User.Identity.Name
-                                            <small class="text-muted">(@User.FindFirst("FullName")?.Value)</small>
+                                        <div class="fw-semibold">
+                                            <small class="text-muted">@User.FindFirst("FullName")?.Value</small>
                                         </div>
                                     </div>
                                 </li>
@@ -506,11 +585,6 @@
                                     </a>
                                 </li>
 
-                                @* <li>
-                                    <a class="dropdown-item d-flex align-items-center" href="#">
-                                        <i class="fas fa-cog me-2 text-secondary"></i> Settings
-                                    </a>
-                                </li> *@
 
                                 <li><hr class="dropdown-divider"></li>
 
@@ -532,6 +606,61 @@
 
             <!-- Page Content -->
             @RenderBody()
+
+            @if (TempData["Success"] != null)
+            {
+                <script>
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Success',
+                        text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["Success"])),
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                </script>
+            }
+
+            @if (TempData["Error"] != null)
+            {
+                <script>
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'error',
+                        title: 'Error',
+                        text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["Error"]))
+                    });
+                </script>
+            }
+
+            @if (TempData["Warning"] != null)
+            {
+                <script>
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'warning',
+                        title: 'Warning',
+                        text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["Warning"]))
+                    });
+                </script>
+            }
+
+            @if (TempData["Info"] != null)
+            {
+                <script>
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'info',
+                        title: 'Info',
+                        text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["Info"]))
+                    });
+                </script>
+            }
+
         </div>
     </div>
 
@@ -542,6 +671,9 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
 
     <script>
         // Toggle sidebar on mobile
@@ -558,17 +690,17 @@
             // Save preference
             if (document.body.classList.contains("dark-mode")) {
                 localStorage.setItem("theme", "dark");
-                toggle.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
+                toggle.innerHTML = '<i class="fas fa-sun me-2"></i> Light Mode';
             } else {
                 localStorage.setItem("theme", "light");
-                toggle.innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
+                toggle.innerHTML = '<i class="fas fa-moon me-2"></i> Dark Mode';
             }
         });
 
         // Apply saved preference on page load
         if (localStorage.getItem("theme") === "dark") {
             document.body.classList.add("dark-mode");
-            toggle.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
+            toggle.innerHTML = '<i class="fas fa-sun me-2"></i> Light Mode';
         }
 
             // Prevent dropdown parent link from jumping

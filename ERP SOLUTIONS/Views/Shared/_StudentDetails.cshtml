@@ -1,0 +1,154 @@
+﻿@using ERP_SOLUTIONS.Models.ViewModels
+@model StudentFormViewModel
+
+<div class="container-fluid">
+
+    <!-- PERSONAL INFO -->
+    <h6 class="text-primary mb-3"><i class="bi bi-person-circle me-1"></i> Personal Info</h6>
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-6">
+            <div class="d-flex align-items-center p-2 border rounded bg-light">
+                <i class="bi bi-person-fill fs-4 text-primary me-3"></i>
+                <div>
+                    <small class="text-muted">Name</small>
+                    <div class="fw-semibold">@Model.StudentName</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="d-flex align-items-center p-2 border rounded bg-light">
+                <i class="bi bi-gender-ambiguous fs-4 text-danger me-3"></i>
+                <div>
+                    <small class="text-muted">Gender</small>
+                    <div class="fw-semibold">
+                        @(Model.GenderID == 1 ? "Male" : Model.GenderID == 2 ? "Female" : "Other")
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="d-flex align-items-center p-2 border rounded bg-light">
+                <i class="bi bi-calendar-event fs-4 text-success me-3"></i>
+                <div>
+                    <small class="text-muted">Date of Birth</small>
+                    <div class="fw-semibold">
+                        @(Model.DateOfBirth.HasValue? Model.DateOfBirth.Value.ToString("dd MMM yyyy") : DateTime.Now.ToString("dd MMM yyyy"))
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="d-flex align-items-center p-2 border rounded bg-light">
+                <i class="bi bi-droplet fs-4 text-danger me-3"></i>
+                <div>
+                    <small class="text-muted">Blood Group</small>
+                    <div class="fw-semibold">@Model.BloodGroup</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- CONTACT INFO -->
+    <h6 class="text-primary mb-3"><i class="bi bi-telephone-fill me-1"></i> Contact Info</h6>
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-6">
+            <div class="d-flex align-items-center p-2 border rounded bg-light">
+                <i class="bi bi-telephone-fill fs-4 text-success me-3"></i>
+                <div>
+                    <small class="text-muted">Phone</small>
+                    <div class="fw-semibold">@Model.PhoneNo</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="d-flex align-items-center p-2 border rounded bg-light">
+                <i class="bi bi-envelope-fill fs-4 text-danger me-3"></i>
+                <div>
+                    <small class="text-muted">Email</small>
+                    <div class="fw-semibold">@Model.EmailID</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="d-flex align-items-center p-2 border rounded bg-light">
+                <i class="bi bi-house-fill fs-4 text-primary me-3"></i>
+                <div>
+                    <small class="text-muted">Permanent Address</small>
+                    <div class="fw-semibold">@Model.PermanentAddress</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- PARENTS INFO -->
+    <h6 class="text-primary mb-3"><i class="bi bi-people-fill me-1"></i> Parents Info</h6>
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-6">
+            <div class="d-flex align-items-center p-2 border rounded bg-light">
+                <i class="bi bi-person-fill fs-4 text-success me-3"></i>
+                <div>
+                    <small class="text-muted">Father Name</small>
+                    <div class="fw-semibold">@Model.FatherName</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="d-flex align-items-center p-2 border rounded bg-light">
+                <i class="bi bi-person-fill fs-4 text-danger me-3"></i>
+                <div>
+                    <small class="text-muted">Mother Name</small>
+                    <div class="fw-semibold">@Model.MotherName</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ACADEMIC INFO -->
+    <h6 class="text-primary mb-3"><i class="bi bi-mortarboard-fill me-1"></i> Academic Info</h6>
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-6">
+            <div class="d-flex align-items-center p-2 border rounded bg-light">
+                <i class="bi bi-journal-bookmark-fill fs-4 text-primary me-3"></i>
+                <div>
+                    <small class="text-muted">Class</small>
+                    <div class="fw-semibold">@Model.ClassName</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="d-flex align-items-center p-2 border rounded bg-light">
+                <i class="bi bi-layout-text-sidebar-reverse fs-4 text-success me-3"></i>
+                <div>
+                    <small class="text-muted">Section</small>
+                    <div class="fw-semibold">@Model.SectionName</div>
+                </div>
+            </div>
+        </div>
+
+       @*  <div class="col-md-4">
+            <div class="d-flex align-items-center p-2 border rounded bg-light">
+                <i class="bi bi-calendar-fill fs-4 text-danger me-3"></i>
+                <div>
+                    <small class="text-muted">Academic Year</small>
+                    <div class="fw-semibold">@Model.AcademicYearID</div>
+                </div>
+            </div>
+        </div> *@
+
+    </div>
+
+</div>

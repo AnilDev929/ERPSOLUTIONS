@@ -74,10 +74,10 @@ namespace ERP_SOLUTIONS.Services.Implementations
                     return("", "Teacher already exists.");
                 }
 
-                // 1️⃣ Generate unique username based on count
+                // 1️ Generate unique username based on count
                 var username = await GenerateUniqueUsernameAsync("FAC");
 
-                // 2️⃣ Create User
+                // 2️ Create User
                 var user = new User
                 {
                     FullName = teacher.FullName,
@@ -86,8 +86,6 @@ namespace ERP_SOLUTIONS.Services.Implementations
                     Email = teacher.EmailID,
                     PasswordHash = HashPassword("Password@123"), // default password
                     CreatedAt = DateTime.Now,
-                    LastLogin = null,      // if optional
-                    LockoutUntil = null,    // if optional
                     IsActive = true
                 };
 

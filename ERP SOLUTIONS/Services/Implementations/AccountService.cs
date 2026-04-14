@@ -10,16 +10,16 @@ namespace ERP_SOLUTIONS.Services.Implementations
 {
     public class AccountService : IAccountService
     {
-
         private readonly AppDbContext _context;
         private readonly ILogger<SubjectService> _logger;
         private readonly PasswordHasher<User> _passwordHasher;
 
-        public AccountService(AppDbContext context, ILogger<SubjectService> logger)
+        public AccountService(AppDbContext context, 
+            ILogger<SubjectService> logger
+            )
         {
             _context = context;
             _logger = logger;
-
             _passwordHasher = new PasswordHasher<User>();
         }
 
@@ -81,7 +81,13 @@ namespace ERP_SOLUTIONS.Services.Implementations
 
                 // 5️⃣ Reset failed login count & update last login
                 user.FailedLoginCount = 0;
-                user.LastLogin = DateTime.Now;
+
+                // Shift current login to previous
+                user.PreviousLoginAt = user.LastLoginAt;
+
+                // Set new login time
+                user.LastLoginAt = DateTime.UtcNow;
+
                 await _context.SaveChangesAsync();
 
                 return (true, "Login successful");
@@ -110,7 +116,7 @@ namespace ERP_SOLUTIONS.Services.Implementations
                          RoleName = string.Join(", ", u.UserRoles.Select(ur => ur.Role.RoleName)),
                          MobileNumber = u.MobileNo ?? "N/A",
                          CreatedDate = u.CreatedAt.ToString("dd MMM yyyy"),
-                         LastLogin = u.LastLogin.HasValue ? u.LastLogin.Value.ToString("dd MMM yyyy hh mm t") : ""
+                         LastLogin = u.LastLoginAt.HasValue ? u.LastLoginAt.Value.ToString("dd MMM yyyy hh mm t") : ""
                      })
                     .FirstOrDefaultAsync(u => u.UserName.ToLower() == username.ToLower());
 
@@ -163,6 +169,44 @@ namespace ERP_SOLUTIONS.Services.Implementations
 
         //    return (true, "Login successful");
         //}
+
+        public async Task<ChangePasswordResult> ChangePasswordAsync(int userId, string currentPassword, string newPassword)
+        {
+            // Get user
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+            {
+                return new ChangePasswordResult
+                {
+                    Succeeded = false,
+                    Errors = new[] { "User not found" }
+                };
+            }
+
+            // Change password
+            // Verify current password
+            var verifyResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, currentPassword);
+            if (verifyResult == PasswordVerificationResult.Failed)
+            {
+                return new ChangePasswordResult
+                {
+                    Succeeded = false,
+                    Errors = new[] { "Current password is incorrect" }
+                };
+            }
+
+            // Hash new password
+            user.PasswordHash = _passwordHasher.HashPassword(user, newPassword);
+
+            await _context.SaveChangesAsync();
+
+            return new ChangePasswordResult
+            {
+                Succeeded = true,
+                Errors = new string[0]
+            };
+
+        }
 
 
 

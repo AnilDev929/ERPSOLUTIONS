@@ -31,11 +31,11 @@ namespace ERP_SOLUTIONS.Controllers
             try
             {
                 await _service.SaveRolePermissionsAsync(model);
-                TempData["SuccessMessage"] = "Selected Permissions assigned successfully!";
+                TempData["Success"] = "Selected Permissions assigned successfully!";
             }
             catch (Exception)
             {
-                TempData["ErrorMessage"] = "Selected Permissions unable to assign.";
+                TempData["Error"] = "Selected Permissions unable to assign.";
             }
 
             return RedirectToAction("Index", new { roleId = model.RoleId });

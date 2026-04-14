@@ -1,6 +1,9 @@
-﻿@{
+﻿@using ERP_SOLUTIONS.Models.ViewModels
+@model StudentListViewModel
+
+@{
     ViewBag.Title = "Student Management";
-    Layout = "_Layout"; // your main layout
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <style>
@@ -41,10 +44,10 @@
         transition: all 0.2s ease;
     }
 
-        .form-control:focus, .form-select:focus {
-            border-color: #4e73df;
-            box-shadow: 0 0 0 0.15rem rgba(78,115,223,0.2);
-        }
+    .form-control:focus, .form-select:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.15rem rgba(78,115,223,0.2);
+    }
 
     /* Labels */
     .form-label {
@@ -65,186 +68,173 @@
 
 <div class="container-fluid">
 
-    <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0"><i class="fas fa-user-graduate me-2"></i> Student Management</h2>
-        <button class="btn btn-success" data-bs-toggle="collapse" data-bs-target="#studentFormCard">
-            <i class="fas fa-plus me-1"></i> Add New Student
-        </button>
-    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="studentModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content shadow-lg border-0 rounded-3">
 
-    <!-- Student Entry Form (Collapsible) -->
-    <div class="collapse" id="studentFormCard">
-        <div class="card shadow-sm mb-4">
-            <div class="card-body">
-                <form asp-action="Create" method="post">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Full Name</label>
-                            <input type="text" class="form-control" name="FullName" placeholder="Enter full name" required />
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Date of Birth</label>
-                            <input type="date" class="form-control" name="DOB" required />
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Gender</label>
-                            <select class="form-select" name="Gender" required>
-                                <option selected disabled>Select Gender</option>
-                                <option>Male</option>
-                                <option>Female</option>
-                                <option>Other</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Class</label>
-                            <select class="form-select" name="ClassId" required>
-                                <option selected disabled>Select Class</option>
-                                <!-- Populate from DB -->
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Admission No.</label>
-                            <input type="text" class="form-control" name="AdmissionNo" placeholder="Admission Number" required />
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Contact</label>
-                            <input type="tel" class="form-control" name="Contact" placeholder="Phone number" required />
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Address</label>
-                            <textarea class="form-control" name="Address" rows="2" placeholder="Enter address"></textarea>
-                        </div>
-                    </div>
-                    <div class="mt-3 d-grid">
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-save me-1"></i> Save Student
-                        </button>
-                    </div>
-                </form>
+                <!-- Header -->
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title d-flex align-items-center">
+                        <i class="bi bi-person-circle me-2"></i>
+                        Student Details
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- Body -->
+                <div class="modal-body p-4" id="studentModalBody">
+                    Loading...
+                </div>
+
             </div>
         </div>
     </div>
 
-    <!-- Student List Table -->
-    <div class="card shadow-sm">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-4 text-center text-primary">
+            <i class="bi bi-people-fill me-2"></i>Student List
+        </h2>
+
+        <a href="@Url.Action("NewStudent")" class="btn  btn-success">
+            <i class="fas fa-plus me-1"></i> Add New Student
+        </a>
+    </div>
+
+    <!-- 🔍 Search Card -->
+    <div class="card shadow-sm mb-4">
         <div class="card-body">
-            <h5 class="card-title mb-3"><i class="fas fa-list me-2"></i> Students List</h5>
+            <form method="get" class="row g-3 align-items-end">
+
+                <div class="col-md-3">
+                    <label class="form-label"><i class="bi bi-building me-1"></i>Class</label>
+                    <select asp-for="ClassID" asp-items="Model.Classes" class="form-select">
+                        <option value="">All Classes</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label"><i class="bi bi-diagram-3 me-1"></i>Section</label>
+                    <select asp-for="SectionID" asp-items="Model.Sections" class="form-select">
+                        <option value="">All Sections</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label"><i class="bi bi-hash me-1"></i>Roll Number</label>
+                    <input type="text" asp-for="RollNumber" class="form-control" placeholder="Enter Roll No">
+                </div>
+
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search me-1"></i>Search
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- 📋 Student Table -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-table me-2"></i>Students</span>
+            <span class="badge bg-light text-primary fs-6">@Model.Students.Count() Students</span>
+        </div>
+        <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle">
+                <table class="table table-hover table-bordered mb-0 align-middle">
                     <thead class="table-light">
                         <tr>
-                            <th>#</th>
-                            <th>Full Name</th>
-                            <th>Class</th>
-                            <th>Admission No.</th>
-                            <th>Contact</th>
-                            <th>Gender</th>
-                            <th>Actions</th>
+                            <th><i class="bi bi-hash me-1"></i>Roll No</th>
+                            <th><i class="bi bi-person-fill me-1"></i>Name</th>
+                            <th><i class="bi bi-gender-ambiguous me-1"></i>SGender</th>
+                            <th><i class="bi bi-building me-1"></i>Class</th>
+                            <th><i class="bi bi-diagram-3 me-1"></i>Section</th>
+                            <th><i class="bi bi-telephone me-1"></i>Mobile No</th>
+                            <th class="text-center"><i class="bi bi-gear-fill"></i>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @* Example row *@
-                        <tr>
-                            <td>1</td>
-                            <td>Arun Test</td>
-                            <td>Class 10</td>
-                            <td>ADM001</td>
-                            <td>+91 9876543210</td>
-                            <td>Male</td>
-                            <td>
-                                @* <a href="@Url.Action("Edit", "Students", new { id = 1 })" class="btn btn-sm btn-warning me-1">
-                                    <i class="fas fa-edit"></i>
-                                </a> *@
-                                <button class="btn btn-sm btn-warning me-1" data-bs-toggle="modal" data-bs-target="#studentModal" data-id="1">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <a href="@Url.Action("Delete", "Students", new { id = 1 })" class="btn btn-sm btn-danger">
-                                    <i class="fas fa-trash"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        @* Repeat rows dynamically from database *@
+                        @if (Model.Students.Any())
+                        {
+                            foreach (var s in Model.Students)
+                            {
+                                <tr>
+                                    <td>@s.RollNumber</td>
+                                    <td>@s.StudentName</td>
+                                    <td>
+                                        @{
+                                            var genderText = (s.Gender == 1) ? "Male" :
+                                            (s.Gender == 2) ? "Female" :
+                                            "Other";
+                                        }
+                                        @genderText
+                                    </td>
+                                    <td>@s.ClassName</td>
+                                    <td>@s.SectionName</td>
+                                    <td>@s.PhoneNumber</td>
+                                    <td class="text-center">
+                                        <a href="javascript:void(0);"
+                                           class="btn btn-sm btn-info me-1 view-student"
+                                           data-id="@s.StudentID">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="@Url.Action("Edit", "Students", new { id = s.RollNumber })" class="btn btn-sm btn-warning me-1">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                        <a href="@Url.Action("Delete", "Students", new { id = s.RollNumber })" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-3">
+                                    <i class="bi bi-info-circle me-1"></i>No students found.
+                                </td>
+                            </tr>
+                        }
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    
-    <!-- Student Modal -->
-    <div class="modal fade" id="studentModal" tabindex="-1" aria-labelledby="studentModalLabel" aria-hidden="true"
-         data-bs-backdrop="static" data-bs-keyboard="false">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <form asp-action="CreateOrUpdate" method="post" id="studentForm">
-                    <!-- Modal Header -->
-                    @* <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title" id="studentModalLabel"><i class="fas fa-user-graduate me-2"></i> Student Entry</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div> *@
-                    <div class="modal-header custom-header">
-                        <h5 class="modal-title" id="studentModalLabel">
-                            <i class="fas fa-user-graduate me-2"></i> Student Entry
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-
-                    <!-- Modal Body -->
-                    <div class="modal-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Full Name</label>
-                                <input type="text" class="form-control" name="FullName" placeholder="Enter full name" required />
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Date of Birth</label>
-                                <input type="date" class="form-control" name="DOB" required />
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Gender</label>
-                                <select class="form-select" name="Gender" required>
-                                    <option selected disabled>Select Gender</option>
-                                    <option>Male</option>
-                                    <option>Female</option>
-                                    <option>Other</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Class</label>
-                                <select class="form-select" name="ClassId" required>
-                                    <option selected disabled>Select Class</option>
-                                    @* Populate dynamically *@
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Admission No.</label>
-                                <input type="text" class="form-control" name="AdmissionNo" placeholder="Admission Number" required />
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Contact</label>
-                                <input type="tel" class="form-control" name="Contact" placeholder="Phone number" required />
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Address</label>
-                                <textarea class="form-control" name="Address" rows="2" placeholder="Enter address"></textarea>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Modal Footer -->
-                    <div class="modal-footer custom-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                            Cancel
-                        </button>
-                        <button type="submit" class="btn btn-success px-4">
-                            <i class="fas fa-save me-1"></i> Save
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+
+        // Initialize Bootstrap 5 modal
+        var studentModalEl = document.getElementById('studentModal');
+        var studentModal = new bootstrap.Modal(studentModalEl, {
+            backdrop: 'static', // prevents outside click closing
+            keyboard: false      // disables ESC key closing
+        });
+
+        $(".view-student").click(function () {
+            var studentId = $(this).data("id");
+
+            $("#studentModalBody").html("Loading...");
+
+            $.get('/Students/Details', { id: studentId }, function (data) {
+                $("#studentModalBody").html(data);
+
+                // Show modal safely using JS API
+                studentModal.show();
+            });
+        });
+
+        // Optional: focus close button after modal is fully shown
+        studentModalEl.addEventListener('shown.bs.modal', function () {
+            $(studentModalEl).find('.btn-close').focus();
+        });
+
+    });
+</script>

@@ -83,20 +83,20 @@
 
         <!-- LEFT COLUMN: Apply Leave Form -->
         <div class="col-lg-6">
-            @if (TempData["SuccessMessage"] != null)
+           @*  @if (TempData["Success"] != null)
             {
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+                    <i class="fas fa-check-circle me-2"></i> @TempData["Success"]
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             }
-            else if (TempData["ErrorMessage"] != null)
+            else if (TempData["Error"] != null)
             {
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-triangle me-2"></i> @TempData["ErrorMessage"]
+                    <i class="fas fa-exclamation-triangle me-2"></i> @TempData["ErrorM"]
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
-            }
+            } *@
 
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">

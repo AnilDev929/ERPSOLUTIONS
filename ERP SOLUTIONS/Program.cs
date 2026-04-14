@@ -1,10 +1,10 @@
 ﻿
 using ERP_SOLUTIONS.Data;
 using ERP_SOLUTIONS.Helpers;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using ERP_SOLUTIONS.Services.Interfaces;
 using ERP_SOLUTIONS.Services.Implementations;
+using ERP_SOLUTIONS.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -58,7 +58,6 @@ builder.Services.AddScoped<ITeacherService, TeacherService>();
 builder.Services.AddScoped<IHostelService, HostelService>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<ILeaveService, LeaveService>();
-
 
 builder.Services.AddScoped<MenuService>(); //One instance per HTTP request
 // Helpers

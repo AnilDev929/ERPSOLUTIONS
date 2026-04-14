@@ -5,6 +5,7 @@ using ERP_SOLUTIONS.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -45,7 +46,7 @@ namespace ERP_SOLUTIONS.Controllers
             {
                 if (string.IsNullOrEmpty(login.Username) || string.IsNullOrEmpty(login.Password))
                 {
-                    TempData["ErrorMessage"] = "Username and Password are required";
+                    TempData["Error"] = "Username and Password are required";
                     login.Roles = _accountService.GetRolesDropdown();
                     return View();
                 }
@@ -91,14 +92,14 @@ namespace ERP_SOLUTIONS.Controllers
                 }
                 else
                 {
-                    TempData["ErrorMessage"] = result.Message;
+                    TempData["Error"] = result.Message;
                     login.Roles = _accountService.GetRolesDropdown();
                     return View(login);
                 }
             }
             catch (Exception)
             {
-                TempData["ErrorMessage"] = "Something went wrong, try again!";
+                TempData["Error"] = "Something went wrong, try again!";
                 login.Roles = _accountService.GetRolesDropdown();
                 return View();
             }
@@ -136,6 +137,33 @@ namespace ERP_SOLUTIONS.Controllers
                     return RedirectToAction("AccessDenied", "Account");
 
             }
+        }
+
+        [HttpGet]
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid) return View(model);
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            var result = await _accountService.ChangePasswordAsync(Convert.ToInt32(userId), model.CurrentPassword, model.NewPassword);
+
+            if (result.Succeeded)
+            {
+                TempData["Success"] = "Your password has been changed successfully.";
+                return RedirectToAction("ChangePassword");
+            }
+
+            foreach (var error in result.Errors)
+                ModelState.AddModelError(string.Empty, error);
+
+            return View(model);
         }
 
         public IActionResult Error()

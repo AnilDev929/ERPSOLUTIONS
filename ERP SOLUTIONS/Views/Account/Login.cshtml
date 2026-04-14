@@ -115,7 +115,7 @@
             <div class="login-left">
                 <div class="login-card">
                     <h3 class="text-center mb-4"><i class="fas fa-school me-2"></i>School ERP Login</h3>
-                    @if (TempData["ErrorMessage"] != null)
+                    @if (TempData["Error"] != null)
                     {
                         <div class="alert alert-danger alert-dismissible fade show" role="alert" id="errorMessage">
                             <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]

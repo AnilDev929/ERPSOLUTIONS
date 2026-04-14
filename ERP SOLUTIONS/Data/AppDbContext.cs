@@ -28,8 +28,8 @@ namespace ERP_SOLUTIONS.Data
         public DbSet<Room> Rooms { get; set; }
         public DbSet<StudentHostelAllocation> StudentHostelAllocations { get; set; }
         public DbSet<Student> Students { get; set; }
+        public DbSet<StudentFee> StudentFees { get; set; }
         public DbSet<Teacher> Teachers { get; set; }
-         
         public DbSet<RoleMenuAccess> RoleMenuAccess { get; set; }
 
 
@@ -58,6 +58,19 @@ namespace ERP_SOLUTIONS.Data
                 .HasOne(ur => ur.Role)
                 .WithMany(r => r.UserRoles)
                 .HasForeignKey(ur => ur.RoleID);
+
+
+            modelBuilder.Entity<ClassModel>()
+            .ToTable("Classes")
+            .HasKey(c => c.ClassId);
+
+            modelBuilder.Entity<ClassModel>()
+                .Property(c => c.ClassId)
+                .HasColumnName("ClassId");
+
+            modelBuilder.Entity<ClassSection>()
+                .Property(cs => cs.ClassId)
+                .HasColumnName("ClassId");
 
         }
     }

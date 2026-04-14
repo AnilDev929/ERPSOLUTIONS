@@ -41,7 +41,7 @@ namespace ERP_SOLUTIONS.Controllers
 
             if (success)
             {
-                TempData["SuccessMessage"] = $"Subject '{subject.SubjectName}' added successfully!";
+                TempData["Success"] = $"Subject '{subject.SubjectName}' added successfully!";
                 return RedirectToAction(nameof(Index));
             }
             else
@@ -79,7 +79,7 @@ namespace ERP_SOLUTIONS.Controllers
 
             if (success)
             {
-                TempData["SuccessMessage"] = $"Subject '{subject.SubjectName}' updated successfully!";
+                TempData["Success"] = $"Subject '{subject.SubjectName}' updated successfully!";
                 return RedirectToAction(nameof(Index));
             }
             else
@@ -106,11 +106,11 @@ namespace ERP_SOLUTIONS.Controllers
             var success = await _subjectService.DeleteSubjectAsync(id);
             if (success)
             {
-                TempData["SuccessMessage"] = "Subject deleted successfully!";
+                TempData["Success"] = "Subject deleted successfully!";
             }
             else
             {
-                TempData["ErrorMessage"] = "Failed to delete subject.";
+                TempData["Error"] = "Failed to delete subject.";
             }
             return RedirectToAction(nameof(Index));
         }

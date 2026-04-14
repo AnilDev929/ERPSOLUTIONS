@@ -90,15 +90,15 @@ namespace ERP_SOLUTIONS.Controllers
 
                     if(data.username == "")
                     {
-                        TempData["ErrorMessage"] = "Teacher already exists.";
+                        TempData["Error"] = "Teacher already exists.";
                         return View(model);
                     }
-                    TempData["SuccessMessage"] = $"Teacher {model.FullName} added successfully! Username: {data.username}, and Password: {data.password}";
+                    TempData["Success"] = $"Teacher {model.FullName} added successfully! Username: {data.username}, and Password: {data.password}";
                     return RedirectToAction("Index");
                 }
                 catch ( Exception ex)
                 {
-                    TempData["ErrorMessage"] = ex.Message;
+                    TempData["Error"] = ex.Message;
                     return RedirectToAction("Index");
                 }
             }

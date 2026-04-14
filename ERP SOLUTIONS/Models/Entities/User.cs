@@ -21,8 +21,8 @@ namespace ERP_SOLUTIONS.Models.Entities
         public string PasswordHash { get; set; }
 
         public DateTime CreatedAt { get; set; }
-        public DateTime? LastLogin { get; set; } = null;
-
+        public DateTime? LastLoginAt { get; set; } = null;
+        public DateTime? PreviousLoginAt { get; set; } = null;
         public int FailedLoginCount { set; get; } = 0;
 
         public DateTime? LockoutUntil { get; set; } = null;

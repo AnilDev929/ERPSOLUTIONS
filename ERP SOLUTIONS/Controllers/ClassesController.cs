@@ -36,7 +36,7 @@ namespace ERP_SOLUTIONS.Controllers
             bool success = await _classService.AddClassAsync(model);
             if (success)
             {
-                TempData["SuccessMessage"] = $"Class '{model.ClassName}' added successfully!";
+                TempData["Success"] = $"Class '{model.ClassName}' added successfully!";
                 return RedirectToAction(nameof(Index));
             }
             ModelState.AddModelError(string.Empty, "Duplicate class name found.");
@@ -65,7 +65,7 @@ namespace ERP_SOLUTIONS.Controllers
             bool success = await _classService.UpdateClassAsync(model);
             if (success)
             {
-                TempData["SuccessMessage"] = $"Class '{model.ClassName}' updated successfully!";
+                TempData["Success"] = $"Class '{model.ClassName}' updated successfully!";
                 return RedirectToAction(nameof(Index));
             }
             ModelState.AddModelError(string.Empty, "Duplicate class name found.");
@@ -89,10 +89,10 @@ namespace ERP_SOLUTIONS.Controllers
             bool success = await _classService.DeleteClassAsync(id);
             if (success)
             {
-                TempData["SuccessMessage"] = "Class deleted successfully!";
+                TempData["Success"] = "Class deleted successfully!";
                 return RedirectToAction(nameof(Index));
             }
-            TempData["ErrorMessage"] = "Error deleting class!";
+            TempData["Error"] = "Error deleting class!";
             return RedirectToAction(nameof(Index));
         }
 

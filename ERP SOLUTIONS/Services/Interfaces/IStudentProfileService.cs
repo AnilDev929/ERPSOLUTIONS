@@ -6,8 +6,9 @@ namespace ERP_SOLUTIONS.Services.Interfaces
 {
     public interface IStudentProfileService
     {
+        Task<EditStudentProfileDto> GetStudentProfileData(int id);
         Task<CreateStudentResultDto> SaveStudentDetail(StudentFormViewModel student);
-        Task<Student> GetStudentProfileAsync(int StudentID);
-        Task UpdateStudentProfileAsync(Student model);
+        Task<StudentProfileDto> GetStudentProfileAsync(int StudentID);
+        Task UpdateStudentProfileAsync(EditStudentProfileDto model);
     }
 }

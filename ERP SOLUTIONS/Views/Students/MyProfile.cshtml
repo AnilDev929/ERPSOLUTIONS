@@ -1,5 +1,5 @@
-﻿@using ERP_SOLUTIONS.Models.Entities
-@model Student
+﻿@using ERP_SOLUTIONS.Models.DTOS
+@model StudentProfileDto
 
 @{
     ViewData["Title"] = "My Profile";
@@ -71,74 +71,154 @@
     }
 </style>
 
+
 <div class="container mt-4">
 
     <!-- Header -->
     <div class="mb-4 p-3 border-start border-4 border-primary bg-light rounded">
         <h3 class="fw-bold mb-1 text-primary">
-            <i class="bi bi-person-circle me-2"></i>
-            My Profile
+            <i class="bi bi-person-circle me-2"></i> My Profile
         </h3>
         <small class="text-muted">View and manage your profile information</small>
     </div>
 
     <div class="row justify-content-center">
-        <div class="col-lg-8 col-md-10">
+        <div class="col-lg-9">
 
-            <div class="card shadow-lg text-center p-4">
+            <!-- PROFILE HEADER -->
+            <div class="card shadow-lg p-4 position-relative">
+
                 <!-- Status -->
-                
-                <span class="position-absolute top-0 end-0 m-3 badge rounded-pill px-4 py-3 fs-6"
-                      style="background-color:#e6f4ea; color:#198754;">
-                    <i class="bi bi-check-circle-fill me-1"></i> Active
+                <span class="position-absolute top-0 end-0 m-3 badge rounded-pill px-3 py-2"
+                      style="background-color:#e6f4ea; color:#198754; font-size: medium;">
+                    <i class="bi bi-check-circle-fill me-1"></i> 
+                    @{
+                        var active = (Model.IsActive) ? "Active" : "In-Active";
+                    }
+                    @active
                 </span>
-                <!-- Profile Icon -->
-                <div class="mb-3">
-                    <i class="bi bi-person-circle text-primary" style="font-size: 80px;"></i>
-                </div>
 
-                <h3>Anil Rout</h3>
-                <p class="text-muted">
-                    <i class="bi bi-envelope"></i> rout.anil@gmail.com
-                </p>
+                <div class="d-flex align-items-center">
+
+                    <!-- Avatar -->
+                    <div class="me-4">
+                        <i class="bi bi-person-circle text-primary" style="font-size: 80px;"></i>
+                    </div>
+
+                    <!-- Info -->
+                    <div>
+                        <h4 class="mb-1">@User.FindFirst("FullName")?.Value</h4>
+                        <p class="text-muted mb-2">
+                            <i class="bi bi-envelope me-1"></i> @Model.Email
+                        </p>
+
+                        <!-- Quick Info -->
+                        <div class="d-flex gap-2 flex-wrap">
+                            <span class="badge bg-primary">Roll No: @Model.RollNumber</span>
+                            <span class="badge bg-secondary">@Model.Class</span>
+                            <span class="badge bg-info text-dark">@Model.Year</span>
+                        </div>
+                    </div>
+
+                </div>
             </div>
 
+            <!-- DETAILS -->
             <div class="row mt-4">
+
                 <!-- Personal Info -->
                 <div class="col-md-6">
-                    <div class="card p-3 shadow-sm">
-                        <h5><i class="bi bi-person"></i> Personal Info</h5>
-                        <p><i class="bi bi-telephone"></i> 2225255</p>
-                        <p><i class="bi bi-geo-alt"></i> skljklgjkljfgkldf</p>
+                    <div class="card shadow-sm p-3 h-100">
+                        <h5 class="fw-bold mb-3 text-primary">
+                            <i class="bi bi-person me-2"></i> Personal Info
+                        </h5>
+
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Phone</span>
+                            <strong>@Model.Phone</strong>
+                        </div>
+
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Address</span>
+                            <strong>@Model.Address</strong>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Gender</span>
+                            <strong>
+                                @{
+                                    var genderText = (Model.Gender == 1) ? "Male" :
+                                    (Model.Gender == 2) ? "Female" :
+                                    "Other";
+                                }
+                                @genderText
+                            </strong>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Academic Info -->
                 <div class="col-md-6">
-                    <div class="card p-3 shadow-sm">
-                        <h5><i class="bi bi-mortarboard"></i> Academic Info</h5>
-                        <p><i class="bi bi-book"></i> 10th</p>
-                        <p><i class="bi bi-calendar"></i> 2026</p>
+                    <div class="card shadow-sm p-3 h-100">
+                        <h5 class="fw-bold mb-3 text-success">
+                            <i class="bi bi-mortarboard me-2"></i> Academic Info
+                        </h5>
+
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Class</span>
+                            <strong>@Model.Class</strong>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Section</span>
+                            <strong>@Model.Section</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Year</span>
+                            <strong>@Model.Year</strong>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Action Buttons -->
-            <div class="text-center mt-4">
+            <!-- ✅ ADD HERE -->
+            <div class="row">
+                <div class="col-12">
 
-                <!-- Change Password -->
+                    <div class="card shadow-sm p-3 mt-4">
+                        <h5 class="fw-bold text-warning mb-3">
+                            <i class="bi bi-clock-history me-2"></i> Recent Activity
+                        </h5>
+
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Last Login</span>
+                            <strong>
+                                @(Model.LastLoginAt?.ToString("dd MMM yyyy, hh:mm tt") ?? "First Login")
+                            </strong>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Previous Login</span>
+                            <strong>
+                                @(Model.PreviousLoginAt?.ToString("dd MMM yyyy, hh:mm tt") ?? "-")
+                            </strong>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <!-- ACTIONS -->
+            <div class="text-center mt-4">
                 <a asp-controller="Account" asp-action="ChangePassword"
-                   class="btn btn-warning me-2">
+                   class="btn btn-outline-warning me-2 px-4">
                     <i class="bi bi-key"></i> Change Password
                 </a>
 
-                <!-- Edit Profile -->
-                <a asp-controller="Student" asp-action="Edit"
-                   class="btn btn-primary">
+                <a asp-controller="Students" asp-action="EditProfile"
+                   class="btn btn-primary px-4">
                     <i class="bi bi-pencil-square"></i> Edit Profile
                 </a>
-
             </div>
+
         </div>
     </div>
 </div>

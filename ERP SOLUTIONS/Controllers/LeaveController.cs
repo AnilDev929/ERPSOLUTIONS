@@ -122,7 +122,7 @@ namespace ERP_SOLUTIONS.Controllers
 
                 if (!canApply)
                 {
-                    TempData["ErrorMessage"] = "You already have a leave (Pending or Approved) in the selected date range.";
+                    TempData["Error"] = "You already have a leave (Pending or Approved) in the selected date range.";
                     var leaveTypes = await _leaveService.GetActiveLeaveTypesAsync();
                     ViewBag.LeaveTypes = new SelectList(leaveTypes, "Id", "Name");
                     model.LeaveHistory = await _leaveService.GetUserLeavesAsync(Convert.ToInt32(userId));
@@ -133,14 +133,12 @@ namespace ERP_SOLUTIONS.Controllers
                     return View(model);
                 }
 
-                
-
                 if (ModelState.IsValid)
                 {
                     //Half - Day Validation(Backend)
                     if (model.IsHalfDay && model.FromDate != model.ToDate)
                     {
-                        TempData["ErrorMessage"] = "Half-day must be a single date.";
+                        TempData["Error"] = "Half-day must be a single date.";
                         var leaveTypes = await _leaveService.GetActiveLeaveTypesAsync();
                         ViewBag.LeaveTypes = new SelectList(leaveTypes, "Id", "Name");
                         return View(model);
@@ -163,10 +161,10 @@ namespace ERP_SOLUTIONS.Controllers
                     bool flag = await _leaveService.ApplyLeaveAsync(leaveRequest);
                     if (!flag)
                     {
-                        TempData["ErrorMessage"] = "Failed to apply leave.";
+                        TempData["Error"] = "Failed to apply leave.";
                         return View(model);
                     }
-                    TempData["SuccessMessage"] = "Leave applied successfully!";
+                    TempData["Success"] = "Leave applied successfully!";
                     return RedirectToAction("Apply");
                 }
 
@@ -174,7 +172,7 @@ namespace ERP_SOLUTIONS.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = ex.InnerException?.Message ?? ex.Message;
+                TempData["Error"] = ex.InnerException?.Message ?? ex.Message;
                 return View(model);
             }
         }
@@ -213,7 +211,7 @@ namespace ERP_SOLUTIONS.Controllers
             //// Prevent cancelling approved leave
             //if (leave.Status == "Approved")
             //{
-            //    TempData["ErrorMessage"] = "Approved leave cannot be cancelled.";
+            //    TempData["Error"] = "Approved leave cannot be cancelled.";
             //    return RedirectToAction("Apply");
             //}
 
@@ -225,7 +223,7 @@ namespace ERP_SOLUTIONS.Controllers
 
             //_context.SaveChanges();
 
-            TempData["SuccessMessage"] = "Leave cancelled successfully.";
+            TempData["Success"] = "Leave cancelled successfully.";
             return RedirectToAction("Apply");
         }
 
@@ -242,7 +240,7 @@ namespace ERP_SOLUTIONS.Controllers
             }
             catch(Exception ex)
             {
-                TempData["ErrorMessage"] = ex.Message;
+                TempData["Error"] = ex.Message;
                 return View(new List<LeaveApprovalDto>());
             }
            
@@ -268,7 +266,7 @@ namespace ERP_SOLUTIONS.Controllers
             else if (status == LeaveStatus.Cancelled)
             {
                 flag = await _leaveService.CancelLeaveAsync(leaveId, userId);
-                TempData["SuccessMessage"] = "Leave cancelled successfully.";
+                TempData["Success"] = "Leave cancelled successfully.";
                 return RedirectToAction("Apply");
             }
 

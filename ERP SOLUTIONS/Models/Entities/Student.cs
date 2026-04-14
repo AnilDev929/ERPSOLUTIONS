@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Security.Claims;
 
 namespace ERP_SOLUTIONS.Models.Entities
 {
@@ -36,6 +37,9 @@ namespace ERP_SOLUTIONS.Models.Entities
 
         public DateTime? DateOfBirth { get; set; }
 
+        [NotMapped]
+        public int Age => DateTime.Now.Year - DateOfBirth.Value.Year;
+
         [MaxLength(3)]
         public string BloodGroup { get; set; }
 
@@ -65,16 +69,18 @@ namespace ERP_SOLUTIONS.Models.Entities
         [Required]
         [MaxLength(50)]
         public string? RollNumber { get; set; }
-
+        
+        public string? AdmissionNumber { get; set; }
         public int? AdmissionYear { get; set; }
 
         [Required]
         [NotMapped]
-        public int ClassID { get; set; }
+        public int ClassId { get; set; }
 
         [Required]
         [NotMapped]
         public int SectionID { get; set; }
+
         public int? ClassSectionId { get; set; }
 
         public int? AcademicYearID { get; set; }
@@ -91,9 +97,23 @@ namespace ERP_SOLUTIONS.Models.Entities
 
         [ForeignKey("AcademicYearID")]
         public virtual AcademicYear AcademicYear { get; set; }
-        public ClassModel Classes { get; set; } = new();
 
-        
+        //public ClassModel Classes { get; set; } = new();
+
+        public string Category { get; set; }
+        public string Religion { get; set; }
+        public string MedicalCondition { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        public string Pincode { get; set; }
+        public string ParentOccupation { get; set; }
+        public string ParentEmail { get; set; }
+        public decimal? AnnualIncome { get; set; }
+
+        public string? PreviousSchoolName { get; set; }
+        public string? LastClassStudied { get; set; }
+        public decimal? LastClassResult { get; set; }
+        public string? MediumOfEducation { get; set; }
     }
 
 }

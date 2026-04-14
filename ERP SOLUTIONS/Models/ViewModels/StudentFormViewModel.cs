@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -14,7 +15,7 @@ namespace ERP_SOLUTIONS.Models.ViewModels
         [Range(1, int.MaxValue, ErrorMessage = "Select Gender")]
         public int GenderID { get; set; }
 
-        [Required(ErrorMessage = "Date of Birth")]
+        [Required(ErrorMessage = "Date of Birth is required.")]
         [DataType(DataType.Date)]
         public DateTime? DateOfBirth { get; set; }
 
@@ -60,8 +61,44 @@ namespace ERP_SOLUTIONS.Models.ViewModels
         [RegularExpression(@"^[0-9]{12}$")]
         public string MotherAadhaar { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Select Academic Year")]
         public int? AcademicYearID { get; set; }
+
+
+        public string Category { get; set; }
+        public string Religion { get; set; }
+        public string MedicalCondition { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        public string Pincode { get; set; }
+        public string ParentOccupation { get; set; }
+        public string ParentEmail { get; set; }
+        public decimal? AnnualIncome { get; set; }
+
+
+        public string? PreviousSchoolName { get; set; }
+        public string? LastClassStudied { get; set; }
+        public decimal? LastClassResult { get; set; }
+        public string? MediumOfEducation { get; set; }
+
+        [NotMapped]
+        public int CourseFeeId { get; set; }
+        [NotMapped]
+        public string PaymentOption { get; set; }  // Full / Monthly
+        [NotMapped]
+        public decimal Discount { get; set; }
+        public decimal FinalAmount { get; set; }
+        [NotMapped]
+        public int? Months { get; set; }
+        [NotMapped]
+        public int? PaidMonths { get; set; }
+        [NotMapped]
+        public decimal? MonthlyAmount { get; set; }
+        [NotMapped]
+        public decimal? RemainingAmount { get; set; }
+        public bool IncludeTransport { get; set; }
+
+
 
         [NotMapped]
         [Required(ErrorMessage = "Select Class")]
@@ -72,7 +109,6 @@ namespace ERP_SOLUTIONS.Models.ViewModels
         public int? SectionID { get; set; }
 
         [NotMapped]
-        [Range(1, int.MaxValue, ErrorMessage = "Select Class Section")]
         public int ClassSectionID { get; set; }
 
         public int? AdmissionYear { get; set; } = DateTime.Now.Year;
@@ -80,11 +116,36 @@ namespace ERP_SOLUTIONS.Models.ViewModels
         [NotMapped]
         public string? RollNumber { get; set; }
 
-        // Fees
+        // Friendly names
+        [NotMapped]
+        [ValidateNever]
+        public string ClassName { get; set; }
+
+        [NotMapped]
+        [ValidateNever]
+        public string SectionName { get; set; }
+
+
+        // -------------------- Dropdown Lists --------------------
+        [NotMapped]
+        [ValidateNever]
+        public List<SelectListItem> Genders { get; set; }
+
+        [NotMapped]
+        [ValidateNever]
+        public List<SelectListItem> AcademicYears { get; set; }
+
+        [NotMapped]
+        [ValidateNever]
+        public List<SelectListItem> Classes { get; set; }
+
+        // -------------------- Fees --------------------
         [NotMapped]
         public decimal TuitionFee { get; set; }
         [NotMapped]
-        public decimal? LabFee { get; set; }
+        public decimal? AdmissionFee { get; set; }
+        [NotMapped]
+        public decimal? TransportFee { get; set; }
         [NotMapped]
         public decimal? LibraryFee { get; set; }
         [NotMapped]
@@ -92,16 +153,8 @@ namespace ERP_SOLUTIONS.Models.ViewModels
         [NotMapped]
         public decimal TotalFee { get; set; }
 
-        //[NotMapped]
-        public List<SelectListItem> Genders { get; set; }
 
-        //[NotMapped]
-        public List<SelectListItem> AcademicYears { get; set; }
-
-        //[NotMapped]
-        public List<SelectListItem> Classes { get; set; }
-
-
+        // -------------------- Custom Validation --------------------
         // ✅ Custom Validation
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
@@ -217,7 +270,7 @@ namespace ERP_SOLUTIONS.Models.ViewModels
     //    [NotMapped]
     //    public decimal TuitionFee { get; set; }
     //    [NotMapped]
-    //    public decimal? LabFee { get; set; }
+    //    public decimal? AdmissionFee { get; set; }
     //    [NotMapped]
     //    public decimal? LibraryFee { get; set; }
     //    [NotMapped]

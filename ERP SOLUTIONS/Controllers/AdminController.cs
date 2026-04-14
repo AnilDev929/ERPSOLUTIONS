@@ -104,7 +104,7 @@ namespace ERP_SOLUTIONS.Controllers
                 {
                     StudentId = s.StudentID,
                     Name = s.StudentName,
-                    ClassName = s.Classes.ClassName,
+                    //ClassName = s.Classes.ClassName,
                     //SectionName = s.Section.SectionName,
                     IsLocked = s.IsLocked
                 })

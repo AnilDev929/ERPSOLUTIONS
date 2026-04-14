@@ -19,7 +19,10 @@ namespace ERP_SOLUTIONS.Models.Entities
         public decimal TuitionFee { get; set; }
 
         [Column(TypeName = "decimal(10,2)")]
-        public decimal? LabFee { get; set; }
+        public decimal? AdmissionFee { get; set; }
+
+        [Column(TypeName = "decimal(10,2)")]
+        public decimal? TransportFee { set; get; }
 
         [Column(TypeName = "decimal(10,2)")]
         public decimal? LibraryFee { get; set; }
@@ -29,7 +32,7 @@ namespace ERP_SOLUTIONS.Models.Entities
 
         // Computed property (not stored in DB by default)
         [NotMapped]
-        public decimal TotalFee => TuitionFee + (LabFee ?? 0) + (LibraryFee ?? 0) + (OtherFee ?? 0);
+        public decimal TotalFee => TuitionFee + (AdmissionFee ?? 0) + (TransportFee ?? 0) + (LibraryFee ?? 0) + (OtherFee ?? 0);
 
         // Navigation properties
         [ForeignKey("ClassId")]
