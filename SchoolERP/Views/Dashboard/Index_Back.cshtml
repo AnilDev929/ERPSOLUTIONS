@@ -1,0 +1,213 @@
+﻿@using SchoolERP.Models.ViewModels
+@using System.Security.Claims
+@model DashboardViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Dashboard";
+    var roleName = User.FindFirst(ClaimTypes.Role)?.Value;
+}
+
+<style>
+    .dashboard-kpi {
+        border: none;
+        border-radius: 14px;
+        overflow: hidden;
+        transition: all 0.25s ease;
+        cursor: pointer;
+        position: relative;
+        color: #fff;
+    }
+
+    .dashboard-kpi:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 25px rgba(0,0,0,0.2);
+    }
+
+    .dashboard-kpi .icon-bg {
+        position: absolute;
+        right: 15px;
+        top: 15px;
+        font-size: 60px;
+        opacity: 0.15;
+    }
+
+    .dashboard-kpi .value {
+        font-size: 34px;
+        font-weight: 700;
+    }
+
+    .dashboard-kpi .sub {
+        font-size: 13px;
+        opacity: 0.9;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row g-4">
+
+        @if (roleName.ToLower() == "admin" 
+                    || roleName.ToLower() == "superadmin"
+                                || roleName.ToLower() == "teacher")
+        {
+
+        <!-- Students -->
+        <div class="col-md-3">
+            <div class="card dashboard-kpi bg-primary"
+                 onclick="location.href='@Url.Action("Index", "Students")'">
+
+                <i class="fas fa-user-graduate icon-bg"></i>
+
+                <div class="card-body">
+                    <div class="value">@Model.StudentCount</div>
+                    <div class="fw-semibold">Students</div>
+                    <div class="sub">Active enrolled students</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Teachers -->
+        <div class="col-md-3">
+            <div class="card dashboard-kpi bg-success"
+                 onclick="location.href='@Url.Action("Index", "Teacher")'">
+
+                <i class="fas fa-chalkboard-teacher icon-bg"></i>
+
+                <div class="card-body">
+                    <div class="value">@Model.TeacherCount</div>
+                    <div class="fw-semibold">Teachers</div>
+                    <div class="sub">Faculty members</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Classes -->
+        <div class="col-md-3">
+            <div class="card dashboard-kpi bg-warning text-dark"
+                 onclick="location.href='@Url.Action("Index", "Classes")'">
+
+                <i class="fas fa-school icon-bg"></i>
+
+                <div class="card-body">
+                    <div class="value">@Model.ClassCount</div>
+                    <div class="fw-semibold">Classes</div>
+                    <div class="sub">Active divisions</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subjects (NEW) -->
+        <div class="col-md-3">
+            <div class="card dashboard-kpi bg-info"
+                 onclick="location.href='@Url.Action("Index", "Subjects")'">
+
+                <i class="fas fa-book icon-bg"></i>
+
+                <div class="card-body">
+                    <div class="value">@Model.SubjectCount</div>
+                    <div class="fw-semibold">Subjects</div>
+                    <div class="sub">Total subjects available</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today Attendance (NEW) -->
+        <div class="col-md-3">
+            <div class="card dashboard-kpi bg-dark"
+                     onclick="location.href='@Url.Action("Attendance", "Index")'">
+
+                <i class="fas fa-clipboard-check icon-bg"></i>
+
+                <div class="card-body">
+                    <div class="value">@Model.TodayAttendance%</div>
+                    <div class="fw-semibold">Attendance Today</div>
+                    <div class="sub">Present ratio today</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- New Admissions (NEW) -->
+        <div class="col-md-3">
+            <div class="card dashboard-kpi bg-primary"
+                     onclick="location.href='@Url.Action("RecentlyJoined", "Students")'">
+
+                <i class="fas fa-user-plus icon-bg"></i>
+
+                <div class="card-body">
+                    <div class="value">@Model.NewStudentCount</div>
+                    <div class="fw-semibold">New Admissions</div>
+                    <div class="sub">This Year</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exams -->
+        <div class="col-md-3">
+            <div class="card dashboard-kpi bg-danger"
+                     onclick="location.href='@Url.Action("Index", "ExamSchedule")'">
+
+                <i class="fas fa-file-alt icon-bg"></i>
+
+                <div class="card-body">
+                    <div class="value">@Model.ExamCount</div>
+                    <div class="fw-semibold">Exams</div>
+                    <div class="sub">Scheduled exams</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fees -->
+        <div class="col-md-3">
+            <div class="card dashboard-kpi bg-info"
+                 onclick="location.href='@Url.Action("Index", "Fees")'">
+
+                <i class="fas fa-wallet icon-bg"></i>
+
+                <div class="card-body">
+                    <div class="value">@Model.PendingFees</div>
+                    <div class="fw-semibold">Fees Pending</div>
+                    <div class="sub">Outstanding payments</div>
+                </div>
+            </div>
+        </div>
+
+            <div class="col-md-3">
+                <div class="card dashboard-kpi bg-success"
+                     onclick="location.href='@Url.Action("Index", "Holiday")'">
+
+                    <i class="fas fa-calendar-alt icon-bg"></i>
+
+                    <div class="card-body">
+                        <div class="value">@Model.TotalHolidays</div>
+                        <div class="fw-semibold">Holiday Details</div>
+                        <div class="sub">View holiday list</div>
+                    </div>
+                </div>
+            </div>
+        }
+        else if (roleName.ToLower() == "student")
+        {
+            <div class="col-md-3">
+                <div class="card dashboard-kpi bg-success"
+                     onclick="location.href='@Url.Action("Index", "Holiday")'">
+
+                    <i class="fas fa-calendar-alt icon-bg"></i>
+
+                    <div class="card-body">
+                        <div class="value">@Model.TotalHolidays</div>
+                        <div class="fw-semibold">Holiday Details</div>
+                        <div class="sub">View holiday list</div>
+                    </div>
+                </div>
+            </div>
+        }
+        
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+
+
+    </script>            
+}

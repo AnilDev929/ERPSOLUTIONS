@@ -1,0 +1,551 @@
+﻿@{
+    ViewData["Title"] = "Section Subject Mapping";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="container mt-4">
+
+    <!-- Header -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h4>
+                <i class="bi bi-diagram-3-fill text-primary"></i>
+                Class Section & Subject Mapping
+            </h4>
+            <p class="text-muted">
+                Assign subjects and teachers to each class section.
+            </p>
+        </div>
+    </div>
+
+    <div class="modal fade" id="classModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>Add Class</h5>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input id="newClassName" class="form-control" placeholder="Class name">
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="saveClass()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="sectionModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>Add Section</h5>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input id="newSectionName" class="form-control" placeholder="Section name A, B, C etc.">
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="saveSection()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Class + Section -->
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+
+            <div class="row g-3">
+
+                <!-- Class -->
+                <div class="col-md-5">
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="fw-semibold mb-0 flex-shrink-0"> Select Class</label>
+                        <select id="classId" class="form-select">
+                            <option value="">Select</option>
+                        </select>
+                        <a href="javascript:void(0)" onclick="openAddClassModal()"
+                           class="text-primary small flex-shrink-0">
+                            <i class="bi bi-plus-circle fs-5" data-bs-toggle="tooltip"
+                               data-bs-placement="top"
+                               title="Add Class"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <!-- Section -->
+                <div class="col-md-5">
+                    <div class="d-flex align-items-center gap-2">
+
+                        <label class="fw-semibold mb-0 flex-shrink-0"> Select Section </label>
+                        <select id="sectionId" class="form-select">
+                            <option value="">Select</option>
+                        </select>
+
+                        <a href="javascript:void(0)" onclick="openAddSectionModal()"
+                           class="text-primary small flex-shrink-0">
+                            <i class="bi bi-plus-circle fs-5" data-bs-toggle="tooltip"
+                               data-bs-placement="top"
+                               title="Add Section"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <!-- Button -->
+                <div class="col-md-2 d-flex align-items-center">
+
+                    <button class="btn btn-primary w-100" onclick="loadMappings()">
+                        <i class="bi bi-search me-1"></i> Load
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+    </div>
+
+    <!-- Mapping -->
+    <div class="card shadow-sm">
+
+        <div class="card-header bg-primary text-white d-flex justify-content-between">
+            <span><i class="bi bi-book"></i> Assign Subjects</span>
+            <button class="btn btn-light btn-sm" id="btnSave" onclick="saveMapping()">
+                <i class="bi bi-save"></i> Save
+            </button>
+        </div>
+
+        <div class="card-body">
+
+            <!-- Add -->
+            <div class="row g-2 mb-3">
+
+                <div class="col-md-5 d-flex align-items-center gap-2">
+                    <label for="subjectId" class="fw-semibold mb-0 flex-shrink-0">
+                        <i class="bi bi-journal-bookmark-fill text-primary me-1"></i>Select Subject
+                    </label>
+
+                    <select id="subjectId" class="form-select">
+                        <option value="">-- Choose Subject --</option>
+                    </select>
+                </div>
+
+                <div class="col-md-5 d-flex align-items-center gap-2">
+                    <label for="teacherId" class="fw-semibold mb-0 flex-shrink-0">
+                        <i class="bi bi-person-workspace text-primary me-1"></i>Select Teacher
+                    </label>
+                    <select id="teacherId" class="form-select">
+                        <option value="">-- Choose Teacher --</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <button class="btn btn-success w-100" onclick="addRow()">
+                        <i class="bi bi-plus-circle"></i>
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Table -->
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Subject</th>
+                        <th>Teacher</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="mappingTable"></tbody>
+            </table>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+
+        let rowCount = 0;
+
+        $(document).ready(function () {
+            loadDropdowns();
+             checkTableEmpty(); // ✅ CALL HERE
+        });
+
+        function openAddClassModal() {
+            const modal = new bootstrap.Modal(document.getElementById('classModal'));
+            modal.show();
+        }
+
+        function openAddSectionModal() {
+            const modal = new bootstrap.Modal(document.getElementById('sectionModal'));
+            modal.show();
+        }
+        
+
+        function loadDropdowns() {
+            $.get('/Mapping/GetDropdowns', function (res) {
+
+                bindDropdown("#classId", res.classes);
+                bindDropdown("#sectionId", res.sections);
+                bindDropdown("#subjectId", res.subjects);
+                bindDropdown("#teacherId", res.teachers);
+            });
+        }
+
+        function bindDropdown(id, data) {
+            let ddl = $(id);
+            ddl.empty().append(`<option value="">Select</option>`);
+            $.each(data, function (_, item) {
+                ddl.append(`<option value="${item.id}">${item.name}</option>`);
+            });
+        }
+
+        function addRow() {
+
+            let subjectId = $("#subjectId").val();
+            let subjectText = $("#subjectId option:selected").text();
+
+            let teacherId = $("#teacherId").val();
+            let teacherText = $("#teacherId option:selected").text();
+
+            if (!subjectId || !teacherId) return alert("Select subject & teacher");
+
+            rowCount++;
+
+            $("#mappingTable").append(`
+                <tr>
+                    <td>${rowCount}</td>
+                    <td data-id="${subjectId}">${subjectText}</td>
+                    <td data-id="${teacherId}">${teacherText}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" onclick="removeRow(this)">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `);
+
+            renumberRows(); // IMPORTANT
+            checkTableEmpty(); // ✅ CALL HERE
+        }
+
+        function removeRow(btn) {
+            $(btn).closest("tr").remove();
+            renumberRows();
+            checkTableEmpty(); // ✅ CALL HERE
+        }
+
+        function renumberRows() {
+            let rows = document.querySelectorAll("#mappingTable tr");
+
+            rows.forEach((row, index) => {
+                row.querySelector(".row-index").innerText = index + 1;
+            });
+        }
+
+        function saveMapping() {
+
+            let classId = $("#classId").val();
+            let sectionId = $("#sectionId").val();
+            let data = [];
+
+            // 🔍 Validation: dropdowns
+            if (!classId || !sectionId) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Missing Selection',
+                    text: 'Please select both class and section.'
+                });
+                return;
+            }
+
+            // 🔍 Collect table data
+            $("#mappingTable tr").each(function () {
+
+                let subjectId = $(this).find("td:eq(1)").data("id");
+                let teacherId = $(this).find("td:eq(2)").data("id");
+
+                // Skip invalid rows
+                if (subjectId && teacherId) {
+                    data.push({
+                        subjectId: subjectId,
+                        teacherId: teacherId
+                    });
+                }
+            });
+
+            // 🔍 Validation: no mappings
+            if (data.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'No Data',
+                    text: 'Please add at least one subject-class mapping.'
+                });
+                return;
+            }
+
+            // 🔒 Disable button to prevent double click
+            $("#btnSave").prop("disabled", true);
+
+            $.ajax({
+                url: '/Mapping/Save',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    classId: classId,
+                    sectionId: sectionId,
+                    mappings: data
+                }),
+
+                success: function (res) {
+
+                    if (res.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Subject Assigned',
+                            text: 'The subject has been successfully mapped to the selected class.'
+                        });
+
+                        // Reset form
+                        $("#subjectId").val('');
+                        $("#classId").val('');
+
+                        // Optional: reset table or form
+                        // $("#mappingTable").empty();
+
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Failed',
+                            text: 'Unable to assign the subject. Please try again'
+                        });
+                    }
+                },
+
+                error: function () {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Something went wrong while saving.'
+                    });
+                },
+
+                complete: function () {
+                    // 🔓 Enable button again
+                    $("#btnSave").prop("disabled", false);
+                }
+            });
+        }
+
+        function loadMappings() {
+            $.get('/Mapping/GetMappings', {
+                classId: $("#classId").val(),
+                sectionId: $("#sectionId").val()
+            }, function (data) {
+
+                $("#mappingTable").empty();
+                rowCount = 0;
+
+                $.each(data, function (_, item) {
+                    rowCount++;
+
+                    $("#mappingTable").append(`
+                        <tr>
+                            <td>${rowCount}</td>
+                            <td data-id="${item.subjectId}">${item.subjectName}</td>
+                            <td data-id="${item.teacherId}">${item.teacherName}</td>
+                            <td>
+                                <button class="btn btn-danger btn-sm" onclick="removeRow(this)">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `);
+                });
+            });
+        }
+
+
+        function loadClasses() {
+            $.ajax({
+                url: '/Class/GetClasses',
+                type: 'GET',
+                success: function (data) {
+                    let ddl = $('#classId');
+                    ddl.empty();
+
+                    ddl.append('<option value="">-- Select Class --</option>');
+
+                    $.each(data, function (i, item) {
+                        ddl.append(
+                            $('<option>', {
+                                value: item.id,
+                                text: item.name
+                            })
+                        );
+                    });
+                },
+                error: function () {
+                    alert('Failed to load classes');
+                }
+            });
+        }
+
+        function loadSections() {
+            $.ajax({
+                url: '/Section/GetSections',
+                type: 'GET',
+                success: function (data) {
+                    let ddl = $('#sectionId');
+                    ddl.empty();
+                    ddl.append('<option value="">-- Select Section --</option>');
+
+                    $.each(data, function (i, item) {
+                        ddl.append(
+                            $('<option>', {
+                                value: item.id,
+                                text: item.name
+                            })
+                        );
+                    });
+                },
+                error: function () {
+                    alert('Failed to load sections');
+                }
+            });
+        }
+
+        // Save Class + Subject Functions
+
+        function saveClass() {
+
+            const name = document.getElementById("newClassName").value;
+
+            if (!name || name.trim() === "") {
+                alert("Class name is required");
+                return;
+            }
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            fetch("/Mapping/AddClass", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "RequestVerificationToken": token
+                },
+                body: new URLSearchParams({
+                    name: name.trim()
+                })
+            })
+            .then(r => r.json())
+            .then(res => {
+
+                if (res.success) {
+
+                    bootstrap.Modal.getInstance(
+                        document.getElementById("classModal")
+                    ).hide();
+
+                    document.getElementById("newClassName").value = "";
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'New Class',
+                        text: res.message
+                    });
+
+                    loadClasses();
+                }
+                else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'New Class',
+                        text: res.message
+                    });
+                }
+            })
+            .catch(err => {
+                
+                Swal.fire({
+                        icon: 'error',
+                        title: 'New Class',
+                        text: 'Error while saving class.'
+                    });
+            });
+        }
+
+
+        function saveSection() {
+
+            const name = document.getElementById("newSectionName").value;
+
+            if (!name || name.trim() === "") {
+                alert("Section name is required");
+                return;
+            }
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            fetch("/Mapping/AddSection", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "RequestVerificationToken": token
+                },
+                body: new URLSearchParams({
+                    name: name.trim()
+                })
+            })
+            .then(r => r.json())
+            .then(res => {
+
+                if (res.success) {
+
+                    bootstrap.Modal.getInstance(
+                        document.getElementById("sectionModal")
+                    ).hide();
+
+                    document.getElementById("newSectionName").value = "";
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'New Section',
+                        text: res.message
+                    });
+
+                    loadSections(); // refresh dropdown/list
+                }
+                else {
+                     Swal.fire({
+                        icon: 'warning',
+                        title: 'New Section',
+                        text: res.message
+                    });
+                }
+            })
+            .catch(err => {
+                
+                Swal.fire({
+                        icon: 'error',
+                        title: 'New Subject',
+                        text: 'Unable to create subject. Please try again'
+                    });
+            });
+        }
+
+    </script>
+}

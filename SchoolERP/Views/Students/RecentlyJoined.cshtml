@@ -1,0 +1,170 @@
+﻿@using SchoolERP.Models.DTOS
+@model IEnumerable<NewStudentDto>
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Recently Joined Students";
+    var totalStudents = Model.Count();
+}
+
+<style>
+    .student-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .table thead {
+        background-color: #0d6efd;
+        color: white;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f5f9ff;
+        transition: 0.2s ease-in-out;
+    }
+
+    .student-avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: #0d6efd;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 16px;
+    }
+
+    .join-badge {
+        font-size: 12px;
+        padding: 6px 10px;
+        border-radius: 20px;
+    }
+
+    .search-box {
+        border-radius: 12px;
+        padding: 10px 15px;
+    }
+</style>
+
+<div class="container mt-4">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">
+                Recently Joined Students
+            </h2>
+
+            <p class="text-muted mb-0">
+                Students admitted in @DateTime.Now.Year
+            </p>
+        </div>
+
+        <div class="text-end">
+            <h3 class="fw-bold text-primary mb-0">
+                @totalStudents
+            </h3>
+            <small class="text-muted">
+                Total Students
+            </small>
+        </div>
+    </div>
+
+    <!-- Search -->
+    <div class="mb-3">
+        <input type="text"
+               id="studentSearch"
+               class="form-control search-box"
+               placeholder="Search student by name or admission no..." />
+    </div>
+
+    <!-- Card -->
+    <div class="card student-card">
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+                <table class="table align-middle mb-0" id="studentTable">
+
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Student</th>
+                            <th>Gender</th>
+                            <th>Admission No</th>
+                            <th>Class</th>
+                            <th>Join Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var item in Model)
+                        {
+                            var initials = item.StudentName.Substring(0, 1).ToUpper();
+
+                            bool isNew = item.JoinDate >= DateTime.Now.AddDays(-30);
+
+                            <tr>
+                                <!-- Student -->
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="student-avatar">@initials</div>
+                                        <div>
+                                            <div class="fw-semibold"> @item.StudentName </div>
+                                            <small class="text-muted"> Student</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>@item.Gender</td>
+                                <!-- Admission -->
+                                <td> <span class="fw-medium"> @item.AdmissionNumber </span></td>
+                                <td>@item.ClassName</td>
+                                <!-- Join Date -->
+                                <td> @item.JoinDate.ToString("dd MMM yyyy") </td>
+
+                                <!-- Status -->
+                                <td>
+                                    @if (isNew)
+                                    {
+                                        <span class="badge bg-success join-badge">  New Admission</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary join-badge"> Active</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+@section Scripts
+{
+    <script>
+        // Simple Search Filter
+        document.getElementById("studentSearch")
+            .addEventListener("keyup", function () {
+
+            let value = this.value.toLowerCase();
+
+            let rows = document.querySelectorAll("#studentTable tbody tr");
+
+            rows.forEach(row => {
+                row.style.display =
+                    row.innerText.toLowerCase().includes(value)
+                    ? ""
+                    : "none";
+            });
+        });
+    </script>
+}

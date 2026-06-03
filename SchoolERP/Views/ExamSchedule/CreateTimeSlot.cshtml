@@ -1,0 +1,316 @@
+﻿@using SchoolERP.Models.ViewModels
+@model ExamTimeSlotVM
+@{
+    ViewBag.Title = "Time Slots";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid px-2 px-md-4">
+
+    <div class="card border-0 shadow-lg rounded-4">
+
+        <!-- Header -->
+        <div class="card-header bg-primary text-white py-3 rounded-top-4">
+            <div class="d-flex align-items-center">
+                <div class="me-3"><i class="bi bi-clock-history fs-3"></i></div>
+                <div>
+                    <h4 class="mb-0">Create Exam Time Slot</h4>
+                    <small class="opacity-75">
+                        Configure exam slot timing and room allocation
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Body -->
+        <div class="card-body p-4">
+
+            <form asp-action="CreateTimeSlot">
+
+                <!-- Validation -->
+                <div asp-validation-summary="ModelOnly"
+                     class="alert alert-danger mb-4">
+                </div>
+
+                <!-- Basic Information -->
+                <div class="mb-4">
+
+                    <h5 class="border-bottom pb-2 text-secondary">
+                        <i class="bi bi-info-circle"></i> Basic Information
+                    </h5>
+
+                    <div class="row g-4 mt-1">
+
+                        <div class="col-md-4">
+                            <label asp-for="ExamId" class="form-label fw-semibold"> Exam Type </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"> <i class="bi bi-tag"></i> </span>
+                                <select asp-for="ExamId" class="form-select w-auto">
+                                    <option value="">Exam Types</option>
+                                    @foreach (var type in ViewBag.ExamTypes)
+                                    {
+                                        <option value="@type.ExamId">@type.ExamName</option>
+                                    }
+                                </select>
+                            </div>
+                            <span asp-validation-for="ExamId" class="text-danger small"></span>
+                        </div>
+
+                       @*  <!-- Slot Name -->
+                        <div class="col-md-4">
+                            <label asp-for="SlotName" class="form-label fw-semibold"> Slot Name </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"> <i class="bi bi-tag"></i> </span>
+                                <input asp-for="SlotName" readonly class="form-control" placeholder="Morning Shift / 9AM-10AM etc" />
+                            </div>
+                            <span asp-validation-for="SlotName" class="text-danger small"></span>
+                        </div> *@
+
+                        <!-- Status -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold"> Status </label>
+                            <select asp-for="IsActive" class="form-select">
+                                <option value="true"> Active </option>
+                                <option value="false">Inactive </option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- Timing Information -->
+                <div class="mb-4">
+                    <h5 class="border-bottom pb-2 text-secondary">
+                        <i class="bi bi-alarm"></i> Timing Information
+                    </h5>
+
+                    <div id="timeConflictAlert" class="alert alert-danger mt-3 d-none">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        Time slot conflicts with an existing schedule.
+                    </div>
+
+                    <div class="row g-4 mt-1">
+
+                        <div class="col-md-3">
+                            <label asp-for="ExamDate" class="form-label fw-semibold"> Exam Date</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="bi bi-calendar-check"></i>
+                                </span>
+                                <input asp-for="ExamDate"
+                                       type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")"
+                                       class="form-control " />
+                            </div>
+                        </div>
+
+                        <!-- Start Time -->
+                        <div class="col-md-3">
+                            <label asp-for="StartTime" class="form-label fw-semibold"> Start Time</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="bi bi-play-circle"></i>
+                                </span>
+                                <input asp-for="StartTime" type="time" class="form-control" id="startTime" />
+                            </div>
+                        </div>
+
+                        <!-- End Time -->
+                        <div class="col-md-3">
+                            <label asp-for="EndTime" class="form-label fw-semibold"> End Time </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="bi bi-stop-circle"></i>
+                                </span>
+                                <input asp-for="EndTime" type="time" class="form-control" id="endTime" />
+                            </div>
+                        </div>
+
+                        <!-- Duration -->
+                        <div class="col-md-3">
+                            <span class="form-label fw-semibold"> Duration </span>
+                            <div class="border rounded-3 bg-light">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-hourglass-split text-primary fs-4 me-2"></i>
+                                    <span id="durationText" class="fw-bold">
+                                        -- Hr -- Min
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location Information -->
+                <div class="mb-4">
+
+                    <h5 class="border-bottom pb-2 text-secondary">
+                        <i class="bi bi-geo-alt"></i> Location Information
+                    </h5>
+
+                    <div class="row g-4 mt-1">
+
+                        <!-- Floor Number -->
+                        <div class="col-md-6">
+                            <label asp-for="FloorNumber" class="form-label fw-semibold"> Floor Number </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="bi bi-building"></i>
+                                </span>
+                                <input asp-for="FloorNumber" id="floorNo" class="form-control" placeholder="Enter Floor Number" />
+                            </div>
+                            <span asp-validation-for="FloorNumber" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Room Number -->
+                        <div class="col-md-6">
+                            <label asp-for="RoomNumber" class="form-label fw-semibold"> Room Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="bi bi-door-open"></i>
+                                </span>
+                                <input asp-for="RoomNumber" id="roomNo" class="form-control" placeholder="Enter Room No" />
+                            </div>
+                            <span asp-validation-for="RoomNumber" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Footer -->
+                <div class="d-flex justify-content-between align-items-center mt-5 pt-3 border-top">
+                    <a asp-action="TimeSlots" class="btn btn-light border px-4">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </a>
+                    <button type="submit" id="saveBtn" class="btn btn-success px-4">
+                        <i class="bi bi-check-circle"></i> Save Time Slot
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    window.onload = function () {
+        calculateDuration();
+    };
+
+    const startTimeInput = document.getElementById("startTime");
+    const endTimeInput = document.getElementById("endTime");
+    const floorNoInput = document.getElementById("floorNo");
+    const roomNoInput = document.getElementById("roomNo");
+
+    const durationText =
+        document.getElementById("durationText");
+
+    const alertBox =
+        document.getElementById("timeConflictAlert");
+
+    const saveBtn =
+        document.getElementById("saveBtn");
+
+    // =========================
+    // Duration Calculation
+    // =========================
+    function calculateDuration() {
+
+        let start = startTimeInput.value;
+        let end = endTimeInput.value;
+
+        if (!start || !end)
+        {
+            durationText.innerText = "-- Hr -- Min";
+            return;
+        }
+
+        let startTime = new Date("2000-01-01T" + start);
+        let endTime = new Date("2000-01-01T" + end);
+
+        let diff = endTime - startTime;
+
+        if (diff > 0) {
+
+            let hrs = Math.floor(diff / 1000 / 60 / 60);
+            let mins = Math.floor((diff / 1000 / 60) % 60);
+
+            durationText.innerText = `${hrs} Hr ${mins} Min`;
+        }
+        else {
+            durationText.innerText = "Invalid Time";
+        }
+    }
+
+    // =========================
+    // Time Conflict Validation
+    // =========================
+    async function checkConflict() {
+
+        let startTime = startTimeInput.value;
+        let endTime = endTimeInput.value;
+        let floorNo = floorNoInput.value;
+        let roomNo = roomNoInput.value;
+
+        // Reset if fields empty
+        if (!startTime || !endTime || !floorNo || !roomNo) {
+            alertBox.classList.add("d-none");
+            saveBtn.disabled = false;
+            return;
+        }
+
+        try {
+
+            let url =
+                `/ExamSchedule/CheckTimeConflict` +
+                `?startTime=${encodeURIComponent(startTime)}` +
+                `&endTime=${encodeURIComponent(endTime)}` +
+                `&floorNo=${encodeURIComponent(floorNo)}` +
+                `&roomNo=${encodeURIComponent(roomNo)}`;
+
+            let response = await fetch(url);
+
+            if (!response.ok) {
+                throw new Error("Server Error");
+            }
+
+            let exists = await response.json();
+
+            if (exists) {
+                alertBox.classList.remove("d-none");
+                alertBox.className = "alert alert-danger mt-3";
+                alertBox.innerHTML =`<i class="bi bi-exclamation-triangle-fill"></i> Room already booked for this time slot.`;
+                saveBtn.disabled = true;
+            }
+            else {
+                alertBox.classList.add("d-none");
+                alertBox.className = "alert alert-success mt-3";
+                alertBox.innerHTML =`<i class="bi bi-check-circle-fill"></i>Time slot available.`;
+                saveBtn.disabled = false;
+            }
+        }
+        catch (error) {
+            console.error("Conflict Check Failed:", error);
+            saveBtn.disabled = false;
+        }
+    }
+
+    // =========================
+    // Event Listeners
+    // =========================
+    startTimeInput.addEventListener("input", () => {
+        calculateDuration();
+        checkConflict();
+    });
+
+    endTimeInput.addEventListener("input", () => {
+        calculateDuration();
+        checkConflict();
+    });
+
+    floorNoInput.addEventListener("input", checkConflict);
+
+    roomNoInput.addEventListener("input", checkConflict);
+
+</script>

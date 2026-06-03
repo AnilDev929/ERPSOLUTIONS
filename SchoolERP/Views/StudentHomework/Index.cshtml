@@ -1,0 +1,244 @@
+﻿@using SchoolERP.Models.ViewModels
+@model List<StudentHomeworkVM>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Homework Detail";
+}
+
+<style>
+    .hw-card {
+        background: linear-gradient(135deg, #4f8cff, #6ee7b7);
+        border-radius: 18px;
+        padding: 18px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        border: 1px solid #f1f3f5;
+    }
+
+    .hw-card .subject {
+        font-size: 16px;
+        color: white;
+        font-weight: 500;
+    }
+
+    .filter-btn.active {
+        background: #4f46e5;
+        color: white !important;
+    }
+
+    .hw-title {
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    .bg-warning {
+        font-size: medium;
+    }
+
+</style>
+
+<div class="container-fluid py-4">
+
+    <!-- Header -->
+    <div class="mb-4">
+        <h3 class="fw-bold">📘 My Homework</h3>
+        <p class="text-muted">View and submit your assigned homework</p>
+    </div>
+
+    <!-- Filters -->
+    <div class="d-flex gap-2 mb-4">
+
+        <button class="btn btn-outline-primary btn-sm filter-btn active" onclick="filterHomework('All', this)">All</button>
+        <button class="btn btn-outline-warning btn-sm filter-btn" onclick="filterHomework('Pending', this)">Pending</button>
+        <button class="btn btn-outline-success btn-sm filter-btn" onclick="filterHomework('Submitted', this)">Submitted</button>
+        <button class="btn btn-outline-danger btn-sm filter-btn" onclick="filterHomework('Overdue', this)">Overdue</button>
+
+        <input type="text"
+               id="searchBox" class="form-control ms-auto"
+               style="max-width:250px" onkeyup="searchHomework()"
+               placeholder="Search homework..." />
+
+    </div>
+
+    <!-- Homework List -->
+    <div class="row g-3" id="homeworkContainer">
+
+        @foreach (var item in Model)
+        {
+            var statusClass = "bg-warning";
+            var daysClass = "bg-warning";
+
+            if (item.Status == "Submitted")
+                statusClass = "bg-success";
+
+            if (item.Status == "Overdue")
+                statusClass = "bg-danger";
+
+            if (item.Status == "Submitted")
+                daysClass = "bg-success";
+
+            if (item.Status == "Overdue")
+                daysClass = "bg-danger";
+
+            <div class="col-md-6 col-lg-4 homework-item" 
+                data-status="@item.Status" data-title="@item.Title.ToLower()"
+                 data-subject="@item.SubjectName.ToLower()">
+
+                <div class="hw-card">
+
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between">
+
+                        <span class="subject">
+                            @item.SubjectName
+                        </span>
+
+                        <span class="badge @statusClass">
+                            @item.Status
+                        </span>
+
+                    </div>
+
+                    <!-- Title -->
+                    <h5 class="mt-3 fw-bold">
+                        @item.Title
+                    </h5>
+
+                    <p class="text-muted small">
+                        @item.Description
+                    </p>
+
+                    <!-- Due Info -->
+                    <div class="d-flex justify-content-between mt-3">
+
+                        <div>
+                            <small class="text-muted fw-bold">Due Date</small><br />
+                            <span class="due-date">
+                                📅 @item.DueDate.ToString("dd MMM yyyy")
+                            </span>
+                        </div>
+
+                        <div class="text-end">
+                            <small class="fw-bold">Days Left</small><br />
+                            <span class="badge days-left @daysClass">
+
+                                @if (item.Status == "Submitted")
+                                {
+                                    <span>Completed</span>
+                                }
+                                else if (item.DaysLeft < 0)
+                                {
+                                    <span>Overdue</span>
+                                }
+                                else
+                                {
+                                    <span>@item.DaysLeft Days</span>
+                                }
+
+                            </span>
+                        </div>
+                        @* <span class="text-danger small fw-semibold">
+                            @item.DaysLeft days left
+                        </span> *@
+
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="mt-3 d-flex gap-2">
+
+                        <a href="/StudentHomework/Details/@item.HomeworkId"
+                           class="btn btn-light btn-sm w-50">
+                            View
+                        </a>
+
+                        @if (@item.DaysLeft <= 0)
+                        {
+                            <button class="btn btn-success btn-sm w-50">
+                                Expired
+                            </button>
+                        }
+                        else if (item.Status != "Submitted")
+                        {
+                            <a href="/StudentHomework/Submit/@item.HomeworkId"
+                               class="btn btn-primary btn-sm w-50">
+                                Submit
+                            </a>
+                        }
+                        else
+                        {
+                            <button class="btn btn-success btn-sm w-50">
+                                Submitted
+                            </button>
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+
+</div>
+
+@section Scripts
+{
+
+    <script>
+
+        function searchHomework() {
+
+            let input = document.getElementById("searchBox").value.toLowerCase();
+
+            let items = document.querySelectorAll(".homework-item");
+
+            items.forEach(item => {
+
+                let title = item.getAttribute("data-title");
+                let subject = item.getAttribute("data-subject");
+
+                if (title.includes(input) || subject.includes(input)) {
+                    item.style.display = "block";
+                }
+                else {
+                    item.style.display = "none";
+                }
+            });
+
+        }
+
+        function filterHomework(status, button) {
+
+            let items = document.querySelectorAll(".homework-item");
+
+            items.forEach(item => {
+
+                if (status === "All") {
+                    item.style.display = "block";
+                }
+                else {
+
+                    if (item.getAttribute("data-status") === status) {
+                        item.style.display = "block";
+                    }
+                    else {
+                        item.style.display = "none";
+                    }
+
+                }
+
+            });
+
+            document.querySelectorAll(".filter-btn").forEach(btn => {
+                btn.classList.remove("active");
+            });
+
+            button.classList.add("active");
+
+        }
+
+    </script>
+
+
+}

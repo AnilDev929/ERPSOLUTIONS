@@ -1,0 +1,941 @@
+﻿@using System.Security.Claims
+@using SchoolERP.Data;
+@inject AppDbContext _context
+@{
+    var msg = TempData["Success"] as string
+           ?? TempData["Error"] as string
+           ?? TempData["Warning"] as string
+           ?? TempData["Info"] as string;
+
+    var type =
+        TempData["Success"] != null ? "success" :
+        TempData["Error"] != null ? "error" :
+        TempData["Warning"] != null ? "warning" :
+        TempData["Info"] != null ? "info" : null;
+
+    var roleName = User.FindFirst(ClaimTypes.Role)?.Value;
+
+    var examMenu = _context.MenuSettings
+        .FirstOrDefault(x => x.MenuKey == "ExamTimeTable");
+
+    // var promotionMenu = _context.MenuSettings
+    //     .FirstOrDefault(x => x.MenuKey == "StudentPromotion");
+
+    bool showExamMenu = false;
+    // bool showPromotionMenu = false;
+
+    if (examMenu != null)
+    {
+        showExamMenu = 
+            examMenu.IsActive && (!examMenu.StartDate.HasValue || examMenu.StartDate <= DateTime.Now) 
+            && ( !examMenu.EndDate.HasValue || examMenu.EndDate >= DateTime.Now);
+    }
+
+    // if (promotionMenu != null)
+    // {
+    //     showPromotionMenu =
+    //         promotionMenu.IsActive;
+    // }
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewBag.Title - School ERP</title>
+
+    <link href="~/css/site.css" rel="stylesheet" />
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.3/themes/base/jquery-ui.css">
+    <!-- Bootstrap Icon -->
+    @* <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" /> *@
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="~/css/_layoutpage.css" rel="stylesheet" />
+
+</head>
+
+<body>
+
+    <div class="main-wrapper">
+
+        <!-- LEFT SIDEBAR -->
+        <div id="sidebar" class="d-flex flex-column p-3">
+
+            <a href="@Url.Action("Dashboard", "Home")" class="navbar-brand mb-4 text-white fs-4">
+                <i class="bi bi-building me-2"></i> School ERP
+            </a>
+
+            <ul class="nav nav-pills flex-column">
+
+                <!-- DASHBOARD -->
+                @if (roleName.ToLower() == "parent")
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Parents", "Dashboard")"><i class="bi bi-parent-heart fs-4"></i> Profile</a>
+                    </li>
+                }
+                else
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Index", "Dashboard")"><i class="bi bi-speedometer2 fs-4"></i> Dashboard</a>
+                    </li>
+                }
+
+                @if (roleName.ToLower() == "admin" || roleName.ToLower() =="superadmin")
+                {
+                    <!-- ADMIN SETTINGS -->
+                    <li class="nav-item">
+
+                        <a class="nav-link collapsed d-flex align-items-center justify-content-between"
+                           data-bs-toggle="collapse"
+                           href="#adminMenu">
+                            <span> <i class="bi bi-shield-lock me-1"></i> Administration
+                            </span>
+                            <i class="bi bi-chevron-down toggleicon"></i>
+                        </a>
+
+                        <div class="collapse" id="adminMenu">
+                            <ul class="nav flex-column ms-3">
+
+                                <li>
+                                    <a class="nav-link d-flex align-items-center" href="@Url.Action("Index", "Roles")">
+                                        <i class="bi bi-person-badge me-2 "></i>Role Management
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-link d-flex align-items-center"
+                                       href="@Url.Action("CreateMenu", "Menu")">
+                                        <i class="bi bi-list-ul me-2"></i> Menu Management
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-link d-flex align-items-center"
+                                       href="@Url.Action("ManageMenu", "Menu")">
+                                        <i class="bi bi-list-nested me-2"></i>
+                                        Manage Menu
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="@Url.Action("Index", "Settings")">
+                                        <i class="bi bi-gear me-2"></i> Menu Settings
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-link d-flex align-items-center"
+                                       href="@Url.Action("Index", "Permission")">
+                                        <i class="bi bi-key me-2 "></i> Permission Management
+                                    </a>
+                                </li>
+                                @* <li>
+                                    <a class="nav-link d-flex align-items-center" href="@Url.Action("CreateMenu", "Menu")">
+                                        <i class="bi bi-house-door me-2 "></i> Hostel Allocation
+                                    </a>
+                                </li> *@
+                                
+                                <li>
+                                    <a class="nav-link d-flex align-items-center" href="/PromotionControl/Index">
+                                        <i class="bi bi-gear-fill me-2 text-warning"></i>
+                                        Promotion Control
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+
+                    <!-- MASTER DATA -->
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center justify-content-between collapsed" data-bs-toggle="collapse" href="#masterData">
+                            <span>
+                                <i class="bi bi-gear me-1"></i> Master Data
+                            </span>
+                            <i class="bi bi-chevron-down toggleicon"></i>
+                        </a>
+
+                        <div class="collapse" id="masterData">
+                            <ul class="nav flex-column ms-3">
+                                <li>
+                                    <a class="nav-link d-flex align-items-center" href="@Url.Action("Index", "Holiday")">
+                                        <i class="bi bi-sun me-2 "></i> Holidays
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-link d-flex align-items-center" href="@Url.Action("Index", "AcademicYears")">
+                                        <i class="bi bi-calendar-range me-2 "></i> Academic Year
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a class="nav-link d-flex align-items-center" href="@Url.Action("Index", "Classes")">
+                                        <i class="bi bi-building me-2 "></i> Classes
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a class="nav-link d-flex align-items-center" href="@Url.Action("Index", "Subjects")">
+                                        <i class="bi bi-journal-text me-2 "></i> Subjects
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-link d-flex align-items-center" href="@Url.Action("Index", "ClassTeacher")">
+                                        <i class="bi bi-journal-text me-2 "></i> Teacher Assignment
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-link d-flex align-items-center" href="@Url.Action("Index", "Mapping")">
+                                        <i class="bi bi-diagram-3 me-2 "></i> Mapping
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-link d-flex align-items-center" href="@Url.Action("Index", "Hostel")">
+                                        <i class="bi bi-house-door me-2 "></i> Hostel Management
+                                    </a>
+                                </li>
+                               
+                            </ul>
+                        </div>
+                    </li>
+
+                }
+
+                @if (roleName.ToLower() == "admin" || roleName.ToLower() == "superadmin" || roleName.ToLower() == "teacher")
+                {
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center justify-content-between collapsed" data-bs-toggle="collapse" href="#accounlocktMenu">
+                            <span>
+                                <i class="bi bi-shield-lock me-1"></i> Manage Account
+                            </span>
+                            <i class="bi bi-chevron-down toggleicon"></i>
+                        </a>
+
+                        <div class="collapse" id="accounlocktMenu">
+                            <ul class="nav flex-column ms-3">
+
+                                @if (roleName.ToLower() == "admin" || roleName.ToLower() == "superadmin" || roleName.ToLower() == "teacher")
+                                {
+                                    <li>
+                                        <a class="nav-link d-flex align-items-center" href="@Url.Action("ParentLock", "Admin")">
+                                            <i class="bi bi-people-fill me-2"></i>Parent Account
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="nav-link d-flex align-items-center"
+                                           href="@Url.Action("StudentLock", "Admin")">
+                                            <i class="bi bi-mortarboard-fill me-2"></i>
+                                            Student Account
+                                        </a>
+                                    </li>
+                                }
+                                @if (roleName.ToLower() == "admin" || roleName.ToLower() == "superadmin")
+                                {
+                                    <li>
+                                        <a class="nav-link d-flex align-items-center" href="@Url.Action("TeacherLock", "Admin")">
+                                            <i class="bi bi-person-workspace me-2"></i> Teacher Account
+                                        </a>
+                                    </li>
+                                }
+                               
+                            </ul>
+                        </div>
+                    </li>
+                }
+
+                <!-- STUDENTS -->
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center justify-content-between collapsed" data-bs-toggle="collapse" href="#studentsMenu">
+                        <span>
+                            <i class="bi bi-people mse-1"></i> Students
+                        </span>
+                        <i class="bi bi-chevron-down toggleicon"></i>
+                    </a>
+
+                    <div class="collapse" id="studentsMenu">
+                        <ul class="nav flex-column ms-3">
+
+                            @if (roleName.ToLower() == "admin" || roleName.ToLower() == "superadmin")
+                            {
+                                <li>
+                                    <a class="nav-link d-flex align-items-center" href="@Url.Action("Index", "Students")">
+                                        <i class="bi bi-people-fill me-2 "></i> Students
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-link d-flex align-items-center" href="@Url.Action("NewStudent", "Students")">
+                                        <i class="bi bi-person-plus me-2 "></i> New Student
+                                    </a>
+                                </li>
+                            }
+
+
+                            @if (roleName.ToLower() == "teacher")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center" href="@Url.Action("Student", "Attendance")">
+                                        <i class="bi bi-calendar-check me-2"></i>
+                                        Attendance Entry
+                                    </a>
+                                </li>
+                            }
+
+                            @if (roleName.ToLower() == "student" || roleName.ToLower() == "parent")
+                            {
+                                <li>
+                                    <a class="nav-link d-flex align-items-center" href="@Url.Action("MyAttendance", "Attendance")">
+                                        <i class="bi bi-calendar-check me-2 "></i> Attendance
+                                    </a>
+                                </li>
+
+                                @* <li>
+                                    <a class="nav-link d-flex align-items-center" href="@Url.Action("Marks", "Students")">
+                                        <i class="bi bi-graph-up me-2 "></i> Marks
+                                    </a>
+                                </li> *@
+                            }
+                        </ul>
+                    </div>
+                </li>
+
+                @if (roleName.ToLower() == "admin" 
+                    || roleName.ToLower() == "superadmin"
+                                || roleName.ToLower() == "teacher")
+                {
+                    <!-- TEACHERS -->
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center justify-content-between collapsed" data-bs-toggle="collapse" href="#teacherMenu">
+                            <span>
+                                <i class="bi bi-easel me-1"></i> Teachers
+                            </span>
+                            <i class="bi bi-chevron-down toggleicon"></i>
+                        </a>
+
+                        <div class="collapse" id="teacherMenu">
+                            <ul class="nav flex-column ms-3">
+
+                                @if (roleName.ToLower() == "admin" || roleName.ToLower() == "superadmin")
+                                {
+                                    <li>
+                                        <a class="nav-link d-flex align-items-center" href="@Url.Action("Index", "Teacher")">
+                                            <i class="bi bi-easel2 me-2 "></i> All Teachers
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="nav-link d-flex align-items-center" href="@Url.Action("Create", "Teacher")">
+                                            <i class="bi bi-person-plus me-2 "></i> Add Teacher
+                                        </a>
+                                    </li>
+                                }
+                                else if (roleName.ToLower() == "teacher")
+                                {
+                                    @* <li>
+                                        <a class="nav-link d-flex align-items-center" href="@Url.Action("Salary", "Teacher")">
+                                            <i class="bi bi-cash-stack me-2 "></i> Salary
+                                        </a>
+                                    </li> 
+                                    
+                                    <li>
+                                        <a class="nav-link d-flex align-items-center" href="@Url.Action("TeacherAttendance", "Attendance")">
+                                            <i class="bi bi-calendar-check me-2 "></i> Teacher Attendance
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active">
+                                        <a class="nav-link d-flex align-items-center" href="@Url.Action("TeacherAttendance", "Attendance")">
+                                            <i class="bi bi-arrow-up-circle me-2 "></i> Attendance
+                                        </a>
+                                    </li> *@
+                                    @await Component.InvokeAsync("PromotionMenu")
+                                }
+                                
+                            </ul>
+                        </div>
+                    </li>
+                }
+
+                <!-- Homework -->
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center justify-content-between collapsed" data-bs-toggle="collapse" href="#homeworkMenu">
+                        <span>
+                            <i class="bi bi-book"></i> Home Work
+                        </span>
+                        <i class="bi bi-chevron-down toggleicon"></i>
+                    </a>
+                    <div class="collapse" id="homeworkMenu">
+                        <ul class="nav flex-column ms-3">
+                            @if (roleName.ToLower() == "teacher" || roleName.ToLower() == "admin" || roleName.ToLower() == "superadmin")
+                            {
+                                <li class="nav-item">
+                                    <a asp-controller="Homework"
+                                       asp-action="Index" class="nav-link d-flex align-items-center">
+                                        <i class="bi bi-journal-bookmark-fill me-2"></i>
+                                        <span>Assignment</span>
+                                    </a>
+                                </li>
+                            }
+                            @if (roleName.ToLower() == "student" || roleName.ToLower() == "parent")
+                            {
+                                <li class="nav-item">
+                                    <a asp-controller="StudentHomework"
+                                       asp-action="Index" class="nav-link d-flex align-items-center">
+                                        <i class="bi bi-book-half me-2"></i>
+                                        <span>My Homework</span>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </li>
+
+
+                <!-- Fees -->
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center justify-content-between collapsed" data-bs-toggle="collapse" href="#feesMenu">
+                        <span>
+                            <i class="bi  bi-cash-coin"></i> Fees Section
+                        </span>
+                        <i class="bi bi-chevron-down toggleicon"></i>
+                    </a>
+                    <div class="collapse" id="feesMenu">
+                        <ul class="nav flex-column ms-3">
+
+                            @if (roleName.ToLower() == "admin" || roleName.ToLower() == "superadmin")
+                            {
+                                <!-- FEES -->
+                                <li class="nav-item">
+                                    <a class="nav-link" href="@Url.Action("Index", "CourseFee")">
+                                        <i class="bi bi-wallet2 me-2"></i> Fees
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a class="nav-link d-flex align-items-center" href="@Url.Action("Index", "AcademicCalendarExceptions")">
+                                        <i class="bi bi-calendar-check me-2 "></i> Fees Exempt
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-link d-flex align-items-center" href="@Url.Action("Index", "FeeConfiguration")">
+                                        <i class="bi bi-cash-stack me-2 "></i> Fee Settings
+                                    </a>
+                                </li>
+                            }
+
+                            @if (roleName.ToLower() == "teacher")
+                            {
+                                <li>
+                                    <a class="nav-link d-flex align-items-center" href="@Url.Action("Fees", "Students")">
+                                        <i class="bi bi-cash-coin me-2 "></i> Fees Payments
+                                    </a>
+                                </li>
+                            }
+                            @if (roleName.ToLower() == "student" || roleName.ToLower() == "parent")
+                            {
+                                <li>
+                                    <a class="nav-link d-flex align-items-center" href="@Url.Action("Installments", "Fees")">
+                                        <i class="bi bi-cash-stack me-2 "></i> My Fee
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- EXAMS -->
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center justify-content-between collapsed" data-bs-toggle="collapse" href="#examMenu">
+                        <span>
+                            <i class="bi bi-mortarboard"></i> Exams
+                        </span> 
+                        <i class="bi bi-chevron-down toggleicon"></i>
+                    </a>
+
+                    <div class="collapse" id="examMenu">
+                        <ul class="nav flex-column ms-3">
+                            @if (roleName.ToLower() == "admin" || roleName.ToLower() == "superadmin")
+                            {
+                                <li>
+                                    <a class="nav-link d-flex align-items-center" href="@Url.Action("Index", "GradeRule")">
+                                        <i class="bi bi-star me-2 "></i> Grade Rules
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-link d-flex align-items-center" href="@Url.Action("Index", "Exam")">
+                                        <i class="bi bi-journal-text me-2 "></i> Exams
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-link d-flex align-items-center"
+                                       href="@Url.Action("TimeSlots", "ExamSchedule")">
+                                        <i class="bi bi-clock-history me-2"></i> Exam Time Slots
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-link d-flex align-items-center" href="@Url.Action("Index", "ExamSchedule")">
+                                        <i class="bi bi-calendar-week me-2 "></i> Exam Schedule
+                                    </a>
+                                </li>
+                            }
+                            else if (roleName.ToLower() == "teacher")
+                            {
+                                @if (showExamMenu)
+                                {
+                                    <li>
+                                        <a class="nav-link d-flex align-items-center" asp-controller="ExamSchedule" asp-action="StudentExamSchedule">
+                                            <i class="bi bi-calendar-event me-2"></i>
+                                            Exam Schedule
+                                        </a>
+                                    </li>
+                                }
+                                <li>
+                                    <a class="nav-link d-flex align-items-center" href="@Url.Action("MarksEntry", "Marks")">
+                                        <i class="bi bi-pencil-square me-2 "></i> Marks Entry
+                                    </a>
+                                </li>
+                            }
+                            else if (roleName.ToLower() == "student" || roleName.ToLower() == "parent")
+                            {
+                                @if (showExamMenu)
+                                {
+                                    <li>
+                                        <a class="nav-link d-flex align-items-center" asp-controller="ExamSchedule" asp-action="StudentExamSchedule">
+                                            <i class="bi bi-calendar-event me-2"></i>
+                                            Exam Schedule
+                                        </a>
+                                    </li>
+                                }
+                                
+                                <li>
+                                    <a class="nav-link d-flex align-items-center" href="@Url.Action("Result", "StudentResult")">
+                                        <i class="bi bi-bar-chart me-2 "></i> Results
+                                    </a>
+                                </li>
+                            }
+
+                        </ul>
+                    </div>
+                </li>
+                
+                <!-- LEAVE -->
+                <li class="nav-item">
+
+                    <a class="nav-link collapsed d-flex align-items-center justify-content-between"
+                        data-bs-toggle="collapse"
+                        href="#leaveMenu">
+                        <span><i class="bi bi-calendar2-minus me-2"></i> Leave</span>
+                        <i class="bi bi-chevron-down toggleicon"></i>
+                    </a>
+
+                    <div class="collapse" id="leaveMenu">
+                        <ul class="nav flex-column ms-3">
+                            @if (roleName.ToLower() == "teacher" || roleName.ToLower() == "student" || roleName.ToLower() == "parent")
+                            {
+                                <li>
+                                    <a class="nav-link d-flex align-items-center"
+                                    href="@Url.Action("Apply", "Leave")">
+                                        <i class="bi bi-pen me-2 "></i>Apply Leave</a>
+                                </li>
+                            }
+                            else if (roleName.ToLower() == "admin" || roleName.ToLower() == "superadmin")
+                            {
+                                <li>
+                                    <a class="nav-link d-flex align-items-center"
+                                    href="@Url.Action("ApprovalList", "Leave")">
+                                        <i class="bi bi-check2-circle me-2 "></i>Approve Leave</a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- NOTIFICATIONS -->
+                <li class="nav-item">
+
+                    <a class="nav-link collapsed d-flex align-items-center justify-content-between"
+                       data-bs-toggle="collapse"
+                       href="#notificationMenu">
+                        <span>
+                            <i class="bi bi-bell me-2"></i>
+                            Notifications
+                        </span>
+                        <i class="bi bi-chevron-down toggleicon"></i>
+                    </a>
+
+                    <div class="collapse" id="notificationMenu">
+                        <ul class="nav flex-column ms-3">
+                            @if (roleName.ToLower() == "admin" || roleName.ToLower() == "superadmin")
+                            {
+                                <li>
+                                    <a class="nav-link d-flex align-items-center"
+                                       href="@Url.Action("Index", "Notification")">
+                                        <i class="bi bi-list me-2 "></i>
+                                        All
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-link d-flex align-items-center"
+                                       href="@Url.Action("Create", "Notification")">
+                                        <i class="bi bi-plus-circle me-2 "></i>
+                                        Create
+                                    </a>
+                                </li>
+                            }
+                            
+                            <li class="nav-item">
+                                <a class="nav-link d-flex align-items-center"
+                                   href="@Url.Action("Inbox", "UserNotification")">
+                                    <i class="bi bi-bell me-2"></i>
+                                    Notifications
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                </li>
+
+                @if (roleName.ToLower() == "superadmin")
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Audit" asp-action="Index">
+                            <i class="bi bi-clock-history"></i> System Logs
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Backup" asp-action="Logs">
+                            <i class="bi bi-hdd-stack"></i> Backup & Restore
+                        </a>
+                    </li>
+                }
+                
+                <!-- LOGOUT -->
+                <li class="nav-item mt-auto">
+                    <a class="nav-link" href="@Url.Action("Logout", "Account")">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </a>
+                </li>
+
+            </ul>
+        </div>
+
+        <div id="right-wrapper">
+
+            <!-- Top Navbar (Enhanced UX/UI Version) -->
+            <nav class="navbar navbar-expand-lg bg-white shadow-sm border-bottom sticky-top custom-navbar">
+                <div class="container-fluid">
+
+                    <!-- Sidebar toggle -->
+                    <button class="btn btn-light me-2 rounded-circle shadow-sm"
+                            id="toggleSidebar"
+                            aria-label="Toggle Sidebar">
+                        <i class="fas fa-bars"></i>
+                    </button>
+
+                    <!-- Left brand/space (optional future use) -->
+                    <div class="d-none d-lg-flex align-items-center">
+                        <span class="fw-semibold">Dashboard</span>
+                    </div>
+
+                    <!-- Right side -->
+                    <div class="ms-auto d-flex align-items-center gap-3">
+
+                        <!-- 🌙 Dark Mode Toggle -->
+                        <button id="darkModeToggle"
+                                class="btn btn-outline-dark btn-sm d-flex align-items-center gap-2 px-3 rounded-pill shadow-sm"
+                                title="Toggle Dark Mode">
+                            <i class="fas fa-moon"></i>
+                            <span class="d-none d-md-inline">Dark Mode</span>
+                        </button>
+
+                        <!-- 🔔 Notifications -->
+                        <div class="position-relative">
+                            @await Component.InvokeAsync("NotificationBell")
+                        </div>
+
+                        <!-- 👤 Profile Dropdown -->
+                        <div class="dropdown">
+
+                            <button class="btn btn-light dropdown-toggle d-flex align-items-center gap-2 px-3 py-2 rounded-pill shadow-sm profile-btn"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+
+                                <div class="profile-avatar rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
+                                     style="width:32px;height:32px;font-size:14px;">
+                                    <i class="fas fa-user"></i>
+                                </div>
+
+                                <div class="text-start d-none d-md-block">
+                                    <div class="small fw-semibold">
+                                        @User.FindFirst("FullName")?.Value
+                                    </div>
+                                    <div class="" style="font-size:11px;">
+                                        @User.FindFirst(ClaimTypes.Role)?.Value
+                                    </div>
+                                </div>
+
+                            </button>
+
+                            <!-- Dropdown Menu -->
+                            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 profile-dropdown p-2">
+
+                                <!-- User Info Header -->
+                                @* <li class="px-3 py-2 border-bottom mb-2">
+                                        <div class="fw-semibold text-dark">
+                                            @User.FindFirst("FullName")?.Value
+                                        </div>
+                                        <small class="text-muted">
+                                            @User.FindFirst(ClaimTypes.Role)?.Value
+                                        </small>
+                                    </li> *@
+
+                                <!-- Profile -->
+                                <li>
+                                    <a class="dropdown-item rounded-2 py-2 d-flex align-items-center gap-2"
+                                       href="@Url.Action("MyProfile", "Account")">
+                                        <i class="fas fa-user text-secondary"></i>
+                                        My Profile
+                                    </a>
+                                </li>
+
+                                <li><hr class="dropdown-divider"></li>
+
+                                <!-- Logout -->
+                                <li>
+                                    <form asp-controller="Account" asp-action="Logout" method="post">
+                                        @Html.AntiForgeryToken()
+
+                                        <button type="submit"
+                                                class="dropdown-item rounded-2 py-2 d-flex align-items-center gap-2">
+                                            <i class="fas fa-sign-out-alt"></i>
+                                            Logout
+                                        </button>
+                                    </form>
+                                </li>
+
+                            </ul>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <div id="content">
+                <!-- Page Content -->
+                @RenderBody()
+            </div>
+
+            <footer class="gradient-footer text-white py-2">
+                <div class="container text-center">
+                    @* <h5 class="fw-bold">Your Company Name</h5> *@
+                    <p class="small mb-2">
+                        Empowering Education with Smart ERP Solutions
+                    </p>
+                    <div class="small">
+                        © @DateTime.Now.Year All Rights Reserved
+                    </div>
+                </div>
+            </footer>
+
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.3/jquery-ui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="~/scripts/common.js"></script>
+    <script src="~/scripts/validation.js"></script>
+
+    @RenderSection("Scripts", required: false)
+
+    <script>
+
+        // $(".collapse").on("show.bs.collapse", function () {
+        //     $(this).prev().find(".toggleicon")
+        //         .removeClass("bi-chevron-down")
+        //         .addClass("bi-chevron-up");
+        // });
+
+        // $(".collapse").on("hide.bs.collapse", function () {
+        //     $(this).prev().find(".toggleicon")
+        //         .removeClass("bi-chevron-up")
+        //         .addClass("bi-chevron-down");
+        // });
+
+        // const toggleBtn = document.getElementById('toggleSidebar');
+        // if (toggleBtn) {
+        //     toggleBtn.addEventListener('click', () => {
+        //         document.getElementById('sidebar').classList.toggle('collapsed');
+        //     });
+        // }
+        // // restore state
+        // if (localStorage.getItem("sidebar") === "collapsed") {
+        //     sidebar.classList.add("collapsed");
+        // }
+
+
+        $(".collapse").on("show.bs.collapse", function () {
+            $(this).prev().find(".toggleicon")
+                .removeClass("bi-chevron-down")
+                .addClass("bi-chevron-up");
+        });
+
+        $(".collapse").on("hide.bs.collapse", function () {
+            $(this).prev().find(".toggleicon")
+                .removeClass("bi-chevron-up")
+                .addClass("bi-chevron-down");
+        });
+
+              
+
+       
+                /* Auto close on mobile menu click */
+        $("#sidebar .nav-link").on("click", function () {
+
+            if ($(window).width() <= 991) {
+                $("body").removeClass("sidebar-open");
+            }
+
+        });
+
+        /* Restore state */
+        $(document).ready(function () {
+
+            function adjustLayout() 
+            {
+                if ($(window).width() <= 991) {
+
+                    // entering mobile
+                    $("body")
+                        .removeClass("sidebar-collapsed");
+
+                } else {
+
+                    // entering desktop
+                    $("body")
+                        .removeClass("sidebar-open");
+
+                    if (localStorage.getItem("sidebar") === "collapsed") {
+                        $("body").addClass("sidebar-collapsed");
+                    }
+
+                }
+            }
+
+            adjustLayout();
+
+            $(window).on("resize", adjustLayout);
+
+            if (localStorage.getItem("sidebar") === "collapsed"
+                && $(window).width() > 991) 
+            {
+                $("body").addClass("sidebar-collapsed");
+            }
+
+
+            $("#toggleSidebar").on("click", function () {
+
+                if ($(window).width() <= 991) {
+                    $("body").toggleClass("sidebar-open");
+
+                } else {
+
+                    $("body").toggleClass("sidebar-collapsed");
+
+                    localStorage.setItem(
+                        "sidebar",
+                        $("body").hasClass("sidebar-collapsed")
+                            ? "collapsed"
+                            : "expanded"
+                    );
+                }
+
+            });
+        });
+
+
+        const toggle = document.getElementById("darkModeToggle");
+        if (toggle) {
+            toggle.addEventListener("click", () => {
+                document.body.classList.toggle("dark-mode");
+
+                if (document.body.classList.contains("dark-mode")) {
+                    localStorage.setItem("theme", "dark");
+                    toggle.innerHTML = '<i class="fas fa-sun me-2"></i> Light Mode';
+                } else {
+                    localStorage.setItem("theme", "light");
+                    toggle.innerHTML = '<i class="fas fa-moon me-2"></i> Dark Mode';
+                }
+            });
+        }
+
+        if (localStorage.getItem("theme") === "dark") {
+            document.body.classList.add("dark-mode");
+            if (toggle) {
+                toggle.innerHTML = '<i class="fas fa-sun me-2"></i> Light Mode';
+            }
+        }
+
+        document.querySelectorAll('.dropdown-toggle').forEach(el => {
+            el.addEventListener('click', function (e) {
+                e.preventDefault();
+            });
+        });
+
+        window.addEventListener("resize", () => {
+            if (window.innerWidth > 992) {
+                sidebar.classList.remove("collapsed");
+                localStorage.setItem("sidebar", "expanded");
+            }
+        });
+    </script>
+
+    @if (!string.IsNullOrEmpty(msg))
+    {
+        <script>
+            try {
+
+                const swalMessage = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(msg));
+                const swalType = '@type';
+
+                console.log("DEBUG:", swalMessage, swalType);
+
+                if (typeof Swal !== "undefined") {
+
+                    Swal.fire({
+                        icon: swalType,
+                        title: swalType.toUpperCase(),
+                        text: swalMessage,
+
+                        showConfirmButton: true,
+                        confirmButtonText: 'OK',
+
+                        timer: 5000,
+                        timerProgressBar: true
+                    });
+
+                } else {
+                    console.error("SweetAlert is NOT loaded");
+                }
+
+            } catch (e) {
+                console.error("SweetAlert error:", e);
+            }
+        </script>
+    }
+
+
+
+ 
+
+
+</body>
+
+</html>

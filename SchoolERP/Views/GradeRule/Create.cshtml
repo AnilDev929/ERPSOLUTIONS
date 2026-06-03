@@ -1,0 +1,194 @@
+﻿@using SchoolERP.Models.Entities
+@model GradeRule
+@{
+    ViewData["Title"] = "Grade Rule";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <div>
+            <h3 class="mb-0">
+                <i class="bi bi-trophy-fill text-warning"></i>
+                Grade Rule Management
+            </h3>
+            <small class="text-muted">Define grading percentage ranges</small>
+        </div>
+
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+
+    </div>
+
+    <!-- CARD -->
+    <div class="card shadow-sm border-0">
+
+        <div class="card-header bg-primary text-white">
+            <i class="bi bi-plus-circle me-1"></i>
+            @(Model?.GradeRuleID > 0 ? "Edit Grade Rule" : "Create Grade Rule")
+        </div>
+
+        <div class="card-body">
+
+            <form asp-action="Create" method="post">
+
+                <input type="hidden" asp-for="GradeRuleID" />
+
+                <!-- ERROR SUMMARY -->
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="row g-3">
+
+                    <!-- Rule Name -->
+                    <div class="col-md-4">
+                        <label class="form-label">
+                            <i class="bi bi-award"></i> Rule Name
+                        </label>
+                        <input asp-for="RuleName" class="form-control" onkeypress="allowOnlyLetters(event)" placeholder="Excellent / Good" />
+                        <span asp-validation-for="RuleName" class="text-danger"></span>
+                    </div>
+
+                    <!-- Grade Letter -->
+                    <div class="col-md-2">
+                        <label class="form-label">
+                            <i class="bi bi-fonts"></i> Grade Letter
+                        </label>
+                        <input asp-for="GradeLetter" class="form-control text-center" onkeypress="allowOnlyLetters(event)" placeholder="A+, A, B, C..." />
+                        <span asp-validation-for="GradeLetter" class="text-danger"></span>
+                    </div>
+
+                    <!-- Grade Point -->
+                    <div class="col-md-2">
+                        <label class="form-label">
+                            <i class="bi bi-123"></i> GPA
+                        </label>
+                        <input asp-for="GradePoint" type="number" step="0.01" class="form-control" oninput="allowOnlyNumbers(this);" placeholder="4.0" />
+                    </div>
+
+                    <!-- Display Order -->
+                    <div class="col-md-2">
+                        <label class="form-label">
+                            <i class="bi bi-sort-numeric-down"></i> Order
+                        </label>
+                        <input asp-for="DisplayOrder" type="number" oninput="allowOnlyNumbers(this);" class="form-control" />
+                    </div>
+
+                    <!-- Result Status -->
+                    <div class="col-md-2">
+                        <label class="form-label">
+                            <i class="bi bi-check-circle"></i> Result
+                        </label>
+                        <select asp-for="ResultStatus" class="form-select">
+                            <option value="">--Select--</option>
+                            <option value="PASS">PASS</option>
+                            <option value="FAIL">FAIL</option>
+                        </select>
+                    </div>
+
+                    <!-- Min % -->
+                    <div class="col-md-4">
+                        <label class="form-label">
+                            <i class="bi bi-arrow-down-circle"></i> Min Percentage
+                        </label>
+                        <input asp-for="MinScore"
+                               type="number"
+                               step="0.01"
+                               class="form-control"
+                               placeholder="e.g. 40" />
+                        <span asp-validation-for="MinScore" class="text-danger"></span>
+                    </div>
+
+                    <!-- Max % -->
+                    <div class="col-md-4">
+                        <label class="form-label">
+                            <i class="bi bi-arrow-up-circle"></i> Max Percentage
+                        </label>
+                        <input asp-for="MaxScore"
+                               type="number"
+                               step="0.01"
+                               class="form-control"
+                               placeholder="e.g. 100" />
+                        <span asp-validation-for="MaxScore" class="text-danger"></span>
+                    </div>
+
+                    <!-- Color Code -->
+                    <div class="col-md-2">
+                        <label class="form-label">
+                            <i class="bi bi-palette"></i> Color
+                        </label>
+                        <input asp-for="ColorCode" type="color" class="form-control form-control-color" />
+                    </div>
+
+                    <!-- Active -->
+                    <div class="col-md-2 d-flex align-items-end">
+                        <div class="form-check">
+                            <input asp-for="IsActive" class="form-check-input" />
+                            <label class="form-check-label">
+                                Active
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="col-md-12">
+                        <label class="form-label">
+                            <i class="bi bi-card-text"></i> Description
+                        </label>
+                        <textarea asp-for="Description" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+
+                <!-- RANGE PREVIEW -->
+                <div class="alert alert-info mt-4">
+                    <i class="bi bi-info-circle"></i>
+                    Applies for:
+                    <strong id="rangePreview">
+                        @Model?.MinScore% - @Model?.MaxScore%
+                    </strong>
+                </div>
+
+                <!-- BUTTONS -->
+                <div class="mt-4">
+
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle"></i>
+                        Save Grade Rule
+                    </button>
+
+                    <a asp-action="Index" class="btn btn-secondary">
+                        Cancel
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+
+    <script>
+        const minInput = document.querySelector('[name="MinScore"]');
+        const maxInput = document.querySelector('[name="MaxScore"]');
+        const preview = document.getElementById('rangePreview');
+
+        function updatePreview() {
+            const min = minInput.value || 0;
+            const max = maxInput.value || 0;
+            preview.innerText = `${min}% - ${max}%`;
+        }
+
+        minInput.addEventListener('input', updatePreview);
+        maxInput.addEventListener('input', updatePreview);
+    </script>
+
+}

@@ -1,0 +1,220 @@
+﻿@using SchoolERP.Models.ViewModels
+@model MenuPageVM
+
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@* <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"> *@
+
+<div class="container mt-4">
+
+    <!-- Header -->
+    <div class="d-flex align-items-center mb-2 rounded shadow-sm bg-light">
+        <!-- Icon -->
+        <div class="me-3">
+            <i class="bi bi-menu-button-wide-fill text-primary" style="font-size: 3rem;"></i>
+        </div>
+        <!-- Text -->
+        <div>
+            <h1 class="h3 mb-1">Manage Menu Sections</h1>
+            <p class="text-muted mb-0">
+                Create new menu sections and menu items for your application. Use icons, colors, and descriptions to make navigation clear for users.
+            </p>
+        </div>
+    </div>
+
+    <form asp-action="CreateMenu" method="post">
+        <input type="hidden" id="sectionId" asp-for="NewSection.Id" />
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <i class="bi bi-folder-fill"></i> Menu Section
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Title</label>
+                        <input asp-for="NewSection.Title" id="sectionTitle"
+                               placeholder="e.g. Dashboard, Users, Reports" class="form-control" required />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Icon</label>
+                        <input asp-for="NewSection.Icon" placeholder="bi-..." class="form-control" required />
+                        @* <small class="text-muted">Bootstrap icon class</small> *@
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold">Color</label>
+                        <input type="color" asp-for="NewSection.Color"
+                               class="form-control form-control-color" value="" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold">Active</label>
+                        <div class="form-check mt-2">
+                            <input asp-for="NewSection.IsActive" class="form-check-input" />
+                            <label class="form-check-label">Yes</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <label class="form-label fw-semibold">Subtitle</label>
+                    <input asp-for="NewSection.Subtitle" placeholder="Optional subtitle" class="form-control" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Menu Items -->
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <i class="bi bi-list-ul"></i> Menu Items
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered" id="itemsTable">
+                    <thead>
+                        <tr class="table-success">
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>Icon</th>
+                            <th>URL</th>
+                            <th>Active</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <button type="button" class="btn btn-outline-success" onclick="addRow()">
+                    <i class="bi bi-plus-circle"></i> Add Item
+                </button>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-save"></i> Save Menu
+        </button>
+    </form>
+
+    <!-- Display Existing Items -->
+    @if (Model.ExistingSections.Any())
+    {
+        <div class="card mt-4">
+            <div class="card-header bg-info text-white">
+                <i class="bi bi-eye-fill"></i> Existing Menu Items
+            </div>
+            <div class="card-body">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Section/Item</th>
+                            <th>Description</th>
+                            <th>Icon</th>
+                            <th>URL</th>
+                            <th>Active</th>
+                        </tr>
+                    </thead>
+
+
+                    <tbody>
+                        @foreach (var data in Model.ExistingSections)
+                        {
+                            <!-- Parent Row -->
+                            <tr class="table-primary">
+                                            <td><i class="@data.Icon"></i> @data.Title</td>
+                                            <td>@data.Subtitle</td>
+                                            <td>@data.Icon</td>
+                                <td>-</td>
+                                <td>
+                                                @if (data.IsActive)
+                                    {
+                                        <span class="badge bg-success">Yes</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">No</span>
+                                    }
+                                </td>
+                            </tr>
+
+                            <!-- Child Rows -->
+                            @foreach (var item in data.ExistingItems)
+                            {
+                                <tr>
+                                    <td class="ps-5"><i class="@item.Icon"></i> @item.Title</td>
+                                    <td>@item.Subtitle</td>
+                                    <td>@item.Icon</td>
+                                    <td>@item.Url</td>
+                                    <td>
+                                        @if (item.IsActive)
+                                        {
+                                            <span class="badge bg-success">Yes</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">No</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+
+@section Scripts {
+    <!-- JS for adding/removing items -->
+    <script>
+        let index = 0;
+
+        function addRow() {
+            const row = `
+            <tr>
+                <td><input name="NewItems[${index}].Title" class="form-control" required/></td>
+                <td><input name="NewItems[${index}].Description" class="form-control" /></td>
+                <td><input name="NewItems[${index}].Icon" class="form-control" placeholder="bi bi-..." /></td>
+                <td><input name="NewItems[${index}].Url" class="form-control" /></td>
+                <td class="text-center"><input type="checkbox" name="NewItems[${index}].IsActive" value="true" class="form-check-input" /></td>
+                <td class="text-center"><button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)"><i class="bi bi-trash"></i></button></td>
+            </tr>`;
+            document.querySelector("#itemsTable tbody").insertAdjacentHTML("beforeend", row);
+            index++;
+        }
+
+        function removeRow(btn) {
+            btn.closest("tr").remove();
+        }
+
+        $("#sectionTitle").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '/Menu/GetSections',
+                    data: { term: request.term },
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return {
+                                label: item.title,
+                                value: item.title,
+                                id: item.id,
+                                icon: item.icon,
+                                color: item.color,
+                                isActive: item.isActive,
+                                subtitle: item.subtitle
+                            };
+                        }));
+                    }
+                });
+            },
+            select: function (event, ui) {
+                // Fill other fields automatically
+                $("#sectionId").val(ui.item.id);
+                $("#NewSection_Icon").val(ui.item.icon);
+                $("#NewSection_Color").val(ui.item.color);
+                $("#NewSection_IsActive").prop("checked", ui.item.isActive);
+                $("#NewSection_Subtitle").val(ui.item.subtitle);
+            },
+            minLength: 1
+        });
+
+    </script>
+}

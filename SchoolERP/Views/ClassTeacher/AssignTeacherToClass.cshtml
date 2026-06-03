@@ -1,0 +1,510 @@
+﻿@using SchoolERP.Models.ViewModels
+@model ClassTeacherAssignmentViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Class Teacher Assignment";
+}
+
+<style>
+    .page-title {
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    .page-subtitle {
+        color: #6b7280;
+    }
+
+    .filter-card,
+    .assignment-card {
+        border: 1px solid #e7edf5;
+        border-radius: 18px;
+        background: #fff;
+    }
+
+    .assignment-card {
+        transition: all .25s ease;
+        overflow: hidden;
+    }
+
+        .assignment-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 14px 35px rgba(0,0,0,.08);
+            border-color: #cdd8eb;
+        }
+
+    .card-top-border {
+        height: 5px;
+        background: linear-gradient(90deg,#0d6efd,#4f8dfd);
+    }
+
+    .teacher-box {
+        background: linear-gradient(145deg,#f8fbff,#ffffff);
+        border: 1px solid #edf2f7;
+        border-radius: 16px;
+        padding: 16px;
+    }
+
+    .teacher-avatar {
+        width: 54px;
+        height: 54px;
+        border-radius: 50%;
+        background: linear-gradient(135deg,#0d6efd,#4f8dfd);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        box-shadow: 0 6px 18px rgba(13,110,253,.25);
+    }
+
+    .badge-status {
+        border-radius: 30px;
+        padding: .55rem .85rem;
+        font-size: .75rem;
+        font-weight: 600;
+    }
+
+    .badge-assigned {
+        background: rgba(25,135,84,.15);
+        color: #198754;
+    }
+
+    .badge-unassigned {
+        background: rgba(255,193,7,.20);
+        color: #856404;
+    }
+
+    .modal-content {
+        border-radius: 22px;
+    }
+
+    .stats-box {
+        border: 1px dashed #d7e2f0;
+        border-radius: 14px;
+        padding: 16px;
+        background: #fff;
+    }
+
+</style>
+
+<div class="container-fluid py-4">
+
+    <!-- PAGE HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="page-title mb-1"><i class="bi bi-person-workspace text-primary me-2"></i> Class Teacher Assignment</h2>
+            <p class="page-subtitle mb-0"> Manage class teacher assignment section wise</p>
+        </div>
+
+        <!-- NEW ASSIGNMENT BUTTON -->
+        <button class="btn btn-primary shadow-sm" id="btnNewAssignment" data-bs-toggle="modal" data-bs-target="#assignModal">
+            <i class="bi bi-plus-circle-fill me-1"></i> Assign Teacher</button>
+    </div>
+
+    <!-- FILTERS -->
+    <form method="get" asp-action="Index">
+
+        <div class="card border-0 filter-card shadow-sm mb-2">
+
+            <div class="card-body">
+
+                <div class="row g-3 align-items-end">
+
+                    <div class="col-lg-3">
+                        <label class="form-label fw-semibold"><i class="bi bi-building me-1 text-primary"></i> Class </label>
+                        <select class="form-select" name="classId">
+                            <option value="0">All Classes</option>
+                            @foreach (var cls in Model.Classes)
+                            {
+                                <option value="@cls.ClassId">@cls.ClassName</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-lg-3">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-ui-checks-grid me-1 text-success"></i>Status</label>
+
+                        <select class="form-select" name="status">
+                            <option value="">  All </option>
+                            <option value="assigned">Assigned</option>
+                            <option value="unassigned"> Unassigned</option>
+                        </select>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-search me-1"></i> Search</label>
+                        <input type="text" class="form-control"
+                               name="search" placeholder="Search class / section / teacher" />
+                    </div>
+
+                    <div class="col-lg-2">
+                        <button class="btn btn-dark w-100">
+                            <i class="bi bi-funnel-fill me-1"></i>Filter</button>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </form>
+
+    <!-- CARDS -->
+    <div class="row">
+
+        @foreach (var item in Model.Sections)
+        {
+            var assigned = item.ClassTeacher != null;
+
+            <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+
+                <div class="card assignment-card shadow-sm h-100">
+                    <div class="card-top-border"></div>
+                    <div class="card-body d-flex flex-column">
+
+                        <!-- TOP -->
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="fw-bold mb-1"> @item.ClassName - @item.SectionName</h5>
+                                <small class="text-muted"> <i class="bi bi-people-fill me-1"></i>@item.StudentCount Students</small>
+                            </div>
+
+                            @if (assigned)
+                            {
+                                <span class="badge badge-status badge-assigned"><i class="bi bi-check-circle-fill me-1"></i>
+                                    Assigned</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-status badge-unassigned"> <i class="bi bi-exclamation-circle-fill me-1"></i>
+                                    Unassigned
+                                </span>
+                            }
+                        </div>
+
+                        <!-- TEACHER BOX -->
+                        <div class="teacher-box mb-3 flex-grow-1">
+                            @if (assigned)
+                            {
+                                <div class="d-flex align-items-center">
+                                    <div class="teacher-avatar me-3">@item.ClassTeacher.Initials</div>
+                                    <div>
+                                        <div class="fw-semibold"> @item.ClassTeacher.Name</div>
+                                        <small class="text-muted">@item.ClassTeacher.SubjectName</small>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted"> Assigned Sections</span>
+                                    <span class="fw-bold text-primary"> @item.ClassTeacher.TotalAssignedSections </span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-center py-4"> <i class="bi bi-person-x-fill text-warning fs-1 mb-3"></i>
+                                    <div class="fw-semibold"> No Teacher Assigned </div>
+                                </div>
+                            }
+
+                        </div>
+
+                        <!-- ACTIONS -->
+                        <div class="d-grid gap-2">
+                            <!-- CHANGE / ASSIGN -->
+                            <button type="button" class="btn @(assigned ? "btn-outline-primary" : "btn-primary") btnEditAssignment"
+                                    data-id="@item.ClassSectionId">
+                                <i class="bi bi-person-plus-fill me-1"></i> @(assigned ? "Change Teacher" : "Assign Teacher")
+                            </button>
+
+                            <!-- REMOVE ASSIGN-->
+                            @if (assigned)
+                            {
+                                <button type="button" class="btn btn-outline-danger btnRemoveAssignment"
+                                        data-id="@item.ClassSectionId"
+                                        data-name="@item.ClassName - @item.SectionName">
+                                    <i class="bi bi-trash-fill me-1"></i> Remove Assignment
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- ASSIGN MODAL -->
+<div class="modal fade" id="assignModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+
+            <!-- FORM -->
+            <form asp-action="SaveAssignment" asp-controller="ClassTeacher" method="post">
+                <input type="hidden" id="ClassSectionId" name="ClassSectionId" />
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header border-0 pb-0">
+
+                    <div>
+                        <h5 class="fw-bold mb-1">
+                            <i class="bi bi-person-workspace text-primary me-2"></i>Assign Class Teacher</h5>
+                        <small class="text-muted">Assign teacher section wise</small>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <!-- CLASS -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold"> Class <span class="text-danger">*</span></label>
+                        <select class="form-select" id="ddlClass">
+                            <option value="">  Select Class </option>
+                        </select>
+                    </div>
+
+                    <!-- SECTION -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Section<span class="text-danger">*</span></label>
+                        <select class="form-select" id="ddlSection" name="ClassSectionId">
+                            <option value="">Select Section </option>
+
+                        </select>
+                    </div>
+
+                    <!-- TEACHER -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold"> Teacher <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select" id="ddlTeacher" name="TeacherId" required>
+                            <option value="">  Select Teacher </option>
+                        </select>
+                    </div>
+
+                    <!-- WORKLOAD -->
+                    <div class="stats-box">
+                        <div class="fw-bold mb-3">
+                            <i class="bi bi-bar-chart-fill text-primary me-1"></i> Teacher Workload</div>
+
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Assigned Sections</span>
+                            <span id="lblSections">0</span>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <span>Total Students</span>
+                            <span id="lblStudents">0</span>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal"> Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle-fill me-1"></i>Save Assignment
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<!-- REMOVE Teacher MODAL -->
+<div class="modal fade" id="removeModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content border-0 shadow-lg">
+
+            <form asp-action="RemoveAssignment" asp-controller="ClassTeacher" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="removeClassSectionId" name="ClassSectionId" />
+
+                <div class="modal-header border-0">
+                    <h5 class="fw-bold text-danger">
+                        <i class="bi bi-trash-fill me-2"></i> Remove Assignment </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        Are you sure you want to remove assignment from:
+                        <strong id="removeSectionName"></strong> ?
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash-fill me-1"></i> Remove Assignment
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+<script>
+
+    // NEW ASSIGNMENT
+    $("#btnNewAssignment").click(async function () {
+        $("#ddlClass").prop("disabled", false);
+        $("#ddlSection").prop("disabled", false);
+        $("#ddlSection").empty();
+        await loadClasses();
+        await loadTeachers();
+        $("#assignModal").modal("show");
+    });
+
+    // EDIT ASSIGNMENT
+
+    $(".btnEditAssignment").click(async function () {
+
+        const id = $(this).data("id");
+        const response = await fetch(`/ClassTeacher/GetAssignment?classSectionId=${id}`);
+        const data = await response.json();
+        await loadClasses();
+        $("#ddlClass").val(data.classId);
+
+        await loadSections(data.classId);
+        $("#ddlSection").val(data.classSectionId);
+        await loadTeachers();
+        $("#ddlTeacher").val(data.teacherId);
+
+        // LOCK CLASS / SECTION
+        $("#ddlClass").prop("disabled", true);
+        $("#ddlSection").prop("disabled", true);
+        $("#assignModal").modal("show");
+
+    });
+
+    // REMOVE
+    $(".btnRemoveAssignment").click(function () {
+
+        $("#removeClassSectionId").val($(this).data("id"));
+
+        $("#removeSectionName").text($(this).data("name"));
+
+        $("#removeModal").modal("show");
+
+    });
+
+    // LOAD CLASSES
+
+    async function loadClasses()
+    {
+        $("#ddlClass").empty();
+
+        const response = await fetch('/ClassTeacher/GetClasses');
+
+        const data = await response.json();
+
+        $("#ddlClass").append(`
+            <option value="">
+                Select Class
+            </option>`);
+
+        data.forEach(x => {
+
+            $("#ddlClass").append(`
+                <option value="${x.classId}">
+                    ${x.className}
+                </option>`);
+        });
+    }
+
+    // LOAD SECTIONS
+    async function loadSections(classId)
+    {
+        $("#ddlSection").empty();
+
+        const response =
+            await fetch(`/ClassTeacher/GetSectionsByClass?classId=${classId}`);
+
+        const data =
+            await response.json();
+
+        $("#ddlSection").append(`
+            <option value="">
+                Select Section
+            </option>`);
+
+        data.forEach(x => {
+
+            $("#ddlSection").append(`
+                <option value="${x.classSectionId}">
+                    ${x.sectionName}
+                </option>`);
+        });
+    }
+
+    // LOAD TEACHERS
+
+    async function loadTeachers()
+    {
+        $("#ddlTeacher").empty();
+
+        const response =
+            await fetch('/ClassTeacher/GetTeachers');
+
+        const data =
+            await response.json();
+
+        $("#ddlTeacher").append(`
+            <option value="">
+                Select Teacher
+            </option>`);
+
+        data.forEach(x => {
+
+            $("#ddlTeacher").append(`
+                <option value="${x.teacherId}"
+                        data-sections="${x.totalAssignedSections}"
+                        data-students="${x.totalStudents}">
+
+                    ${x.name} (${x.subjectName})
+
+                </option>`);
+        });
+    }
+
+    // CLASS CHANGE
+
+    $("#ddlClass").change(async function () {
+
+        const classId =
+            $(this).val();
+
+        await loadSections(classId);
+
+    });
+
+    // WORKLOAD
+
+    $("#ddlTeacher").change(function () {
+
+        const option = this.options[this.selectedIndex];
+
+        $("#lblSections").text(option.dataset.sections || 0);
+
+        $("#lblStudents") .text(option.dataset.students || 0);
+
+    });
+
+</script>
+
+}
+
+
+
+

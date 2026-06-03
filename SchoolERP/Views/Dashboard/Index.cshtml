@@ -1,0 +1,560 @@
+﻿@using SchoolERP.Models.ViewModels
+@using System.Security.Claims
+@using System.Text.Json
+@model DashboardViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Dashboard";
+    var roleName = User.FindFirst(ClaimTypes.Role)?.Value;
+    var unreadCount = Model.Notifications?.Count(x => !x.IsRead) ?? 0;
+}
+
+<link href="~/css/dashboard.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<div class="container-fluid py-2">
+
+    <div class="row g-4">
+
+        @if (roleName.ToLower() == "admin" || roleName.ToLower() == "superadmin" 
+            || roleName.ToLower() == "teacher")
+        {
+            <!-- Students -->
+            <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+                <div class="app-menu primary-card" onclick="location.href='/Students/Index'">
+                    <!-- Main Icon -->
+                    <div class="app-icon primary-card">
+                        <i class="bi bi-mortarboard-fill"></i>
+                    </div>
+                    <!-- Content -->
+                    <div class="app-info">
+                        <h6>Students</h6>
+                        <span>@Model.StudentCount Active</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Teachers -->
+            <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+                <div class="app-menu success-card" onclick="location.href='/Teacher/Index'">
+                    <!-- Main Icon -->
+                    <div class="app-icon">
+                        <i class="bi bi-person-workspace"></i>
+                    </div>
+                    <!-- Content -->
+                    <div class="app-info">
+                        <h6>Teachers</h6>
+                        <span>@Model.TeacherCount Active</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Classes -->
+            <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+                <div class="app-menu warning-card" onclick="location.href='/Classes/Index'">
+
+                    <div class="app-icon">
+                        <i class="bi bi-building"></i>
+                    </div>
+                    <div class="app-info">
+                        <h6>Classes</h6>
+                        <span>@Model.ClassCount</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subjects -->
+            <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+                <div class="app-menu info-card" onclick="location.href='/Subjects/Index'">
+                    <div class="app-icon">
+                        <i class="bi bi-book-fill"></i>
+                    </div>
+                    <div class="app-info">
+                        <h6>Subjects</h6>
+                        <span>@Model.SubjectCount</span>
+                    </div>
+                </div>
+            </div>
+        }
+
+         <!-- Holidays -->
+        <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+            <div class="app-menu holiday-card" onclick="location.href='/Holiday/Index'">
+                <div class="app-icon">
+                    <i class="bi bi-calendar-event-fill"></i>
+                </div>
+                <div class="app-info">
+                    <h6>Holidays</h6>
+                    <span>@Model.TotalHolidays</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance -->
+        @if (roleName.ToLower() == "admin" || roleName.ToLower() == "superadmin")
+        {
+            <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+                <div class="app-menu dark-card" onclick="location.href='/Attendance/AttendanceReport'">
+                    <div class="app-icon">
+                        <i class="bi bi-clipboard-check-fill"></i>
+                    </div>
+                    <div class="app-info">
+                        <h6>Attendance</h6>
+                        <span>@Model.AttendancePercentage %</span>
+                    </div>
+                </div>
+            </div>
+        }
+        else if (roleName.ToLower() == "teacher")
+        {
+            <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+                <div class="app-menu dark-card" onclick="location.href='/Attendance/Student'">
+                    <div class="app-icon">
+                        <i class="bi bi-clipboard-check-fill"></i>
+                    </div>
+                    <div class="app-info">
+                        <h6>Attendance</h6>
+                        <span>@Model.AttendancePercentage %</span>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+                <div class="app-menu dark-card" onclick="location.href='/Attendance/MyAttendance'">
+                    <div class="app-icon">
+                        <i class="bi bi-clipboard-check-fill"></i>
+                    </div>
+
+                    <div class="app-info">
+                        <h6>Attendance</h6>
+                        <span>@Model.AttendancePercentage %</span>
+                    </div>
+
+                </div>
+            </div>
+        }
+        
+
+        <!-- Exams -->
+        <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+            <div class="app-menu danger-card" onclick="location.href='/ExamSchedule/Index'">
+                <div class="app-icon">
+                    <i class="bi bi-file-earmark-text-fill"></i>
+                </div>
+
+                <div class="app-info">
+                    <h6>Exams</h6>
+                    <span>@Model.UpcomingExamCount</span>
+                    <div class="pulse-dot"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Fees -->
+        <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+            @if (roleName.ToLower() == "admin" || roleName.ToLower() == "superadmin" 
+                || roleName.ToLower() == "teacher")
+            {
+                <div class="app-menu sky-card" onclick="location.href='/Fees/PendingFees'">
+                    <div class="app-icon">
+                        <i class="bi bi-wallet2"></i>
+                    </div>
+                    <div class="app-info">
+                        <h6>Fees</h6>
+                        <span>₹@Model.PendingFees.ToString("N0")</span>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="app-menu sky-card" onclick="location.href='/Fees/Installments'">
+                    <div class="app-icon">
+                        <i class="bi bi-wallet2"></i>
+                    </div>
+                    <div class="app-info">
+                        <h6>Pending Fees</h6>
+                        <span>₹@Model.PendingFees.ToString("N0")</span>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Dashboard Analytics Section -->
+    <div class="row mt-4">
+
+        @if (roleName.ToLower() == "admin"
+                || roleName.ToLower() == "superadmin" || roleName.ToLower() == "teacher")
+        {
+            <!-- BIRTHDAY PANEL (Teachers) -->
+            <div class="col-lg-4">
+                <div class="dashboard-card">
+
+                    <!-- HEADER -->
+                    <div class="card-header-custom">
+                        <div class="header-left">
+                            <div class="header-icon birthday-icon">
+                                <i class="bi bi-gift-fill"></i>
+                            </div>
+                            <div>
+                                <h5>Upcoming Birthday</h5>
+                                <small>Celebrate Teachers birthdays</small>
+                            </div>
+                        </div>
+
+                        <span class="custom-badge pink">
+                            @Model.UpcomingTeacherBirthDay.Count Upcoming
+                        </span>
+                    </div>
+
+                    <!-- BODY -->
+                    <div class="card-body-custom">
+                        @if (Model.UpcomingTeacherBirthDay != null && Model.UpcomingTeacherBirthDay.Any())
+                        {
+                            foreach (var item in Model.UpcomingTeacherBirthDay)
+                            {
+                                var initials = item.TeacherName.Substring(0, 1).ToUpper();
+                                var avatarClass = item.Gender?.ToLower() switch
+                                {
+                                    "female" => "pink-bg",
+                                    "male" => "blue-bg",
+                                    _ => "purple-bg"
+                                };
+
+                                <div class="list-item">
+                                    <!-- AVATAR -->
+                                    <div class="avatar @avatarClass">
+                                        @initials
+                                    </div>
+                                    <!-- DETAILS -->
+                                    <div class="list-content">
+                                        <h6>@item.TeacherName</h6>
+                                        <p>Class @item.Designation</p>
+                                    </div>
+
+                                    @if (item.DOB.Date == DateTime.Today)
+                                    {
+                                        <span class="date-pill">
+                                            Today
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span>
+                                            @item.DOB.ToString("dd MMM")
+                                        </span>
+                                    }
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="empty-state">
+                                <i class="bi bi-gift-fill"></i>
+                                <p>No upcoming birthdays</p>
+                            </div>
+                        }
+                
+                    </div>
+                
+                
+                    @if (Model.UpcomingTeacherBirthDay != null && Model.UpcomingTeacherBirthDay.Any())
+                    {
+                        if (Model.UpcomingTeacherBirthDay.Count() > 4)
+                        {
+                            <!-- FOOTER -->
+                            <div class="panel-footer">
+                                <a href="/TeacherBirthdays/Index">
+                                    View All Birthdays
+                                    <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
+                        }
+                    }
+
+                </div>
+            </div>
+        }
+
+        <!-- BIRTHDAY PANEL (Students) -->
+        <div class="col-lg-4">
+            <div class="dashboard-card">
+
+                <!-- HEADER -->
+                <div class="card-header-custom">
+                    <div class="header-left">
+                        <div class="header-icon birthday-icon">
+                            <i class="bi bi-gift-fill"></i>
+                        </div>
+                        <div>
+                            <h5>Upcoming Birthday</h5>
+                            <small>Celebrate student birthdays</small>
+                        </div>
+                    </div>
+
+                    <span class="custom-badge pink">
+                        @Model.UpcomingBirthdays.Count Upcoming
+                    </span>
+                </div>
+
+                <!-- BODY -->
+                <div class="card-body-custom">
+
+                    @if (Model.UpcomingBirthdays != null && Model.UpcomingBirthdays.Any())
+                    {
+                        foreach (var item in Model.UpcomingBirthdays)
+                        {
+                            var initials = item.StudentName.Substring(0, 1).ToUpper();
+                            var avatarClass = item.Gender?.ToLower() switch
+                            {
+                                "female" => "pink-bg",
+                                "male" => "blue-bg",
+                                _ => "purple-bg"
+                            };
+
+                            <div class="list-item">
+                                <!-- AVATAR -->
+                                <div class="avatar @avatarClass">
+                                    @initials
+                                </div>
+                                <!-- DETAILS -->
+                                <div class="list-content">
+                                    <h6>@item.StudentName</h6>
+                                    <p>Class @item.ClassName</p>
+                                </div>
+
+                                @if (item.DOB.Date == DateTime.Today)
+                                {
+                                    <span class="date-pill">
+                                        Today
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span>
+                                        @item.DOB.ToString("dd MMM")
+                                    </span>
+                                }
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            <i class="bi bi-gift-fill"></i>
+                            <p>No upcoming birthdays</p>
+                        </div>
+                    }
+                </div>
+
+                @if (Model.UpcomingBirthdays != null && Model.UpcomingBirthdays.Any())
+                {
+                    if(Model.UpcomingBirthdays.Count() > 4)
+                    {
+                        <!-- FOOTER -->
+                        <div class="panel-footer">
+                            <a href="/Birthdays/Index">
+                                View All Birthdays
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    }
+                }
+               
+            </div>
+        </div>
+
+        <!-- NOTIFICATION PANEL -->
+        <div class="col-lg-4">
+            <div class="dashboard-card">
+
+                <!-- HEADER -->
+                <div class="card-header-custom">
+
+                    <div class="header-left">
+                        <div class="header-icon notify-icon-header">
+                            <i class="bi bi-bell-fill"></i>
+                        </div>
+
+                        <div>
+                            <h5>Notifications</h5>
+                            <small>Recent system alerts</small>
+                        </div>
+                    </div>
+
+                    <span class="custom-badge warning">
+                        @unreadCount New
+                    </span>
+                </div>
+
+                <!-- BODY -->
+                <div class="card-body-custom">
+
+                    @if (Model.Notifications != null && Model.Notifications.Any())
+                    {
+                        foreach (var item in Model.Notifications)
+                        {
+                            <div class="notify-modern @(item.IsRead ? "" : "active")">
+
+                                <div class="notify-icon bg-@item.ColorClass">
+                                    <i class="@item.Icon"></i>
+                                </div>
+
+                                <div class="notify-details">
+                                    <h6>@item.Title</h6>
+                                    <p>@item.Message</p>
+                                    <span>@item.TimeAgo</span>
+                                </div>
+
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            <i class="bi bi-bell-slash"></i>
+                            <p>No notifications available</p>
+                        </div>
+                    }
+                </div>
+                @if (Model.Notifications != null && Model.Notifications.Any())
+                {
+                    if (Model.Notifications.Count() > 4)
+                    {
+                        <!-- FOOTER -->
+                        <div class="panel-footer">
+                            <a href="/Notification/Index">
+                                View All Notifications
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+
+        <!-- LEFT SIDE : CHARTS -->
+        <div class="col-lg-4">
+            <div class="dashboard-panel chart-panel compact-chart">
+
+                <!-- HEADER -->
+                <div class="panel-header d-flex justify-content-between align-items-start">
+
+                    <div>
+                        <h5 class="mb-1">
+                            <i class="bi bi-graph-up-arrow me-2 text-primary"></i>
+                            Student Analytics
+                        </h5>
+
+                        <small class="text-muted">
+                            Monthly performance overview
+                        </small>
+                    </div>
+
+                    <!-- FILTER -->
+                    <div class="chart-actions">
+                        <select class="form-select form-select-sm">
+                            <option>This Year</option>
+                            <option>This Month</option>
+                            <option>Last 7 Days</option>
+                        </select>
+                    </div>
+
+                </div>
+                @if (roleName.ToLower() == "admin"
+                                || roleName.ToLower() == "superadmin" || roleName.ToLower() == "teacher")
+                {
+                    <!-- KPI STRIP -->
+                    <div class="chart-kpis">
+                        <div class="kpi-box">
+                            <h6>@Model.StudentCount</h6>
+                            <span>Total Students</span>
+                        </div>
+                        <div class="kpi-box">
+                            <h6>@Model.NewStudentCount</h6>
+                            <span>New Admissions</span>
+                        </div>
+
+                        <div class="kpi-box">
+                            <h6>@Model.ClassCount</h6>
+                            <span>Classes</span>
+                        </div>
+                    </div>
+                }
+                <!-- CHART -->
+                <div class="chart-wrapper">
+                    <canvas id="studentChart"></canvas>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div> 
+
+
+
+
+@section Scripts {
+
+    <script>
+
+        const labels = @Html.Raw(JsonSerializer.Serialize(Model.ChartLabels));
+        const chartData = @Html.Raw(JsonSerializer.Serialize(Model.ChartStudentData));
+
+        const ctx = document.getElementById('studentChart');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Students',
+                    data: chartData,
+
+                    borderColor: '#4f46e5',
+                    backgroundColor: 'rgba(79,70,229,0.1)',
+
+                    fill: true,
+                    tension: 0.4,
+
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+
+                    borderWidth: 3
+                }]
+            },
+
+            options: {
+
+                responsive: true,
+                maintainAspectRatio: false,
+
+                plugins: {
+                    legend: {
+                        display: true
+                    }
+                },
+
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: "#f1f5f9"
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+    </script>
+
+}

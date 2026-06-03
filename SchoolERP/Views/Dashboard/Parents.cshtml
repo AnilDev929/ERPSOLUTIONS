@@ -1,0 +1,460 @@
+﻿@using System.Security.Claims
+@using SchoolERP.Models.ViewModels
+@model ParentDashboardViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Dashboard";
+    var userName = User.FindFirst(ClaimTypes.Name)?.Value;
+    var parentName = User.FindFirst("FullName")?.Value;
+}
+
+<style>
+
+    /* Background */
+    .dashboard-bg {
+        background: #f5f7fb;
+    }
+
+    /* Stat Cards */
+    .stat-card {
+        border-radius: 16px;
+        padding: 20px;
+        border: none;
+        transition: 0.3s;
+        cursor: pointer;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    /* Icons */
+    .icon {
+        font-size: 28px;
+        opacity: 0.8;
+    }
+
+    /* Gradients */
+    .bg-gradient-blue {
+        background: linear-gradient(135deg, #4e73df, #224abe);
+    }
+
+    .bg-gradient-green {
+        background: linear-gradient(135deg, #1cc88a, #13855c);
+    }
+
+    .bg-gradient-orange {
+        background: linear-gradient(135deg, #f6c23e, #dda20a);
+    }
+
+    .bg-gradient-purple {
+        background: linear-gradient(135deg, #6f42c1, #4e2a84);
+    }
+
+    /* Notifications */
+    .notification-item {
+        padding: 10px;
+        border-radius: 10px;
+        background: #f8f9fc;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+
+    .notification-card {
+        padding: 14px;
+        border-radius: 14px;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .notification-card:hover {
+        background: #eef4ff;
+        transform: translateY(-2px);
+    }
+
+    .icon-circle {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        flex-shrink: 0;
+    }
+
+
+    /* Actions */
+    .action-grid {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .action-btn {
+        border: none;
+        padding: 10px 15px;
+        border-radius: 12px;
+        background: #eef2ff;
+        transition: 0.3s;
+    }
+
+    .action-btn:hover {
+        transform: scale(1.05);
+    }
+
+    .action-btn.success {
+        background: #d1fae5;
+    }
+
+    .action-btn.warning {
+        background: #fef3c7;
+    }
+
+    .action-btn.info {
+        background: #dbeafe;
+    }
+    .notification-icon-wrapper{
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #ef4444, #f43f5e);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 18px rgba(79, 70, 229, 0.25);
+        border: 2px solid rgba(255, 255, 255, 0.7);
+    }
+
+    .notification-icon {
+        color: #fff;
+        font-size: 22px;
+    }
+</style>
+
+<div class="container-fluid py-4 dashboard-bg">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4 px-2">
+
+        <div>
+            <h3 class="mb-0 fw-bold">Welcome, @parentName 👋</h3>
+            <small class="text-muted">Here’s your child’s overview today</small>
+        </div>
+
+        <div>
+            <button class="btn btn-light shadow-sm rounded-pill px-3">
+                🔔 Notifications
+                @if (Model.Notifications.Count(n => !n.IsRead) > 0)
+                {
+                    <span class="badge bg-danger ms-1">
+                        @Model.Notifications.Count(n => !n.IsRead) New
+                    </span>
+                }
+            </button>
+        </div>
+
+    </div>
+
+    <!-- QUICK STATS -->
+    <div class="row g-4">
+
+        @foreach (var student in Model.Students)
+        {
+            <!-- Child Card -->
+            <div class="col-md-3">
+                <div class="card stat-card bg-gradient-blue text-white">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6>Child</h6>
+                            <h4>@student.StudentName</h4>
+                            <small>Class : @student.ClassName</small>
+                            <small>Roll No: @student.RollNumber</small>
+                        </div>
+                        <div class="icon">🎓</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card stat-card bg-gradient-green text-white">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6>Attendance</h6>
+                            <h4>@student.AttendancePercentage.ToString("0.0")%</h4>
+                        </div>
+                        <div class="icon">📅</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card stat-card bg-gradient-orange text-white">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6>Fees</h6>
+                            <h4>@student.FeeStatus</h4>
+                            <small>Pending: ₹@student.PendingFees</small>
+                        </div>
+                        <div class="icon">💰</div>
+                    </div>
+                </div>
+            </div>
+        }
+        
+
+        @* <div class="col-md-3">
+            <div class="card stat-card bg-gradient-purple text-white">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6>Grade</h6>
+                        <h4>A</h4>
+                    </div>
+                    <div class="icon">📊</div>
+                </div>
+            </div>
+        </div> *@
+
+    </div>
+
+    <!-- MAIN SECTION -->
+    <div class="row mt-4 g-4">
+
+        <!-- CHART -->
+        <div class="col-md-8">
+            <div class="card p-3 shadow-sm border-0">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="mb-0">Attendance Overview</h5>
+                    <span class="small fw-semibold px-2 py-1 rounded"
+                          style="background-color:#e7f1ff; color: #6f42c1;">Last 7 Days</span>
+                </div>
+                <canvas id="attendanceChart" height="100"></canvas>
+            </div>
+        </div>
+        
+        <!-- Dynamic NOTIFICATIONS -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 rounded-4 p-3 h-100">
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <!-- Icon -->
+                        <div class="notification-icon-wrapper">
+                            <i class="bi bi-bell-fill notification-icon"></i>
+                        </div>
+
+                        <!-- Title -->
+                        <div>
+                            <h5 class="mb-0 fw-bold text-dark"> Notifications </h5>
+                            <small class="text-muted"> Stay updated with latest alerts</small>
+                        </div>
+
+                        @if (Model.Notifications.Count(n => !n.IsRead) > 0)
+                        {
+                            <span class="badge bg-danger ms-1">
+                                @Model.Notifications.Count(n => !n.IsRead) New
+                            </span>
+                        }
+                    </div>
+                </div>
+
+                @if (Model.Notifications != null && Model.Notifications.Any())
+                {
+                    @foreach (var item in Model.Notifications)
+                    {
+                        var borderClass = "border-primary";
+                        var iconBgClass = "bg-primary-subtle text-primary";
+                        var icon = "📢";
+
+                        // Dynamic styling based on Priority
+                        switch (item.Priority?.ToLower())
+                        {
+                            case "high":
+                                borderClass = "border-danger";
+                                iconBgClass = "bg-danger-subtle text-danger";
+                                icon = "🚨";
+                                break;
+
+                            case "medium":
+                                borderClass = "border-warning";
+                                iconBgClass = "bg-warning-subtle text-warning";
+                                icon = "⚠️";
+                                break;
+
+                            case "low":
+                                borderClass = "border-success";
+                                iconBgClass = "bg-success-subtle text-success";
+                                icon = "📘";
+                                break;
+                        }
+                        
+                        <div class="notification-card border-start @borderClass border-4 mb-3">
+                            <div class="d-flex align-items-start">
+                                <div class="icon-circle @iconBgClass"> @icon </div>
+                                <div class="ms-3">
+                                    <h6 class="mb-1 fw-semibold"> @item.Title </h6>
+                                    <p class="mb-1 text-muted small"> @item.Message </p>
+                                    <span class="small text-secondary"> @GetTimeAgo(item.StartDate)</span>
+                                </div>
+
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-muted text-center py-3">No notifications available.</div>
+                }
+            </div>
+
+        </div>
+
+
+       @*  <div class="col-md-4">
+
+            <div class="card shadow-sm border-0 rounded-4 p-3 h-100">
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0 fw-bold">Notifications</h5>
+
+                    <span class="badge bg-primary-subtle text-primary">
+                        4 New
+                    </span>
+                </div>
+
+                <!-- Notification Item -->
+                <div class="notification-card border-start border-primary border-4 mb-3">
+                    <div class="d-flex align-items-start">
+                        <div class="icon-circle bg-primary-subtle text-primary">
+                            📢
+                        </div>
+
+                        <div class="ms-3">
+                            <h6 class="mb-1 fw-semibold">PTM Scheduled</h6>
+                            <p class="mb-1 text-muted small"> Parent Teacher Meeting scheduled on Friday.</p>
+                            <span class="small text-secondary">2 hrs ago</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notification Item -->
+                <div class="notification-card border-start border-danger border-4 mb-3">
+                    <div class="d-flex align-items-start">
+                        <div class="icon-circle bg-warning-subtle text-warning">
+                            💰
+                        </div>
+
+                        <div class="ms-3">
+                            <h6 class="mb-1 fw-semibold">
+                                Fee Reminder
+                            </h6>
+
+                            <p class="mb-1 text-muted small">
+                                Fee due date is 10th May.
+                            </p>
+
+                            <span class="small text-secondary">
+                                Today
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notification Item -->
+                <div class="notification-card border-start border-success border-4 mb-3">
+                    <div class="d-flex align-items-start">
+                        <div class="icon-circle bg-success-subtle text-success">
+                            📘
+                        </div>
+
+                        <div class="ms-3">
+                            <h6 class="mb-1 fw-semibold">
+                                Homework Updated
+                            </h6>
+
+                            <p class="mb-1 text-muted small">
+                                Maths homework has been updated.
+                            </p>
+
+                            <span class="small text-secondary">
+                                Yesterday
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notification Item-->
+                <div class="notification-card border-start border-warning border-4">
+                    <div class="d-flex">
+                        <div class="notification-icon text-warning">
+                            <i class="bi bi-bus-front"></i>
+                        </div>
+
+                        <div class="ms-3">
+                            <h6 class="mb-1 fw-semibold">
+                                Bus Delay
+                            </h6>
+
+                            <p class="mb-1 text-muted small">
+                                School bus delayed by 15 minutes today.
+                            </p>
+
+                            <small class="text-secondary">
+                                30 mins ago
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div> *@
+
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+
+            <div class="card p-4 shadow-sm border-0">
+
+                <h5 class="mb-3">Quick Actions</h5>
+
+                <div class="action-grid">
+
+                    <button class="action-btn">📄 View Report</button>
+                    <button class="action-btn success">💳 Pay Fees</button>
+                    <button class="action-btn warning">📚 Homework</button>
+                    <button class="action-btn info">💬 Contact Teacher</button>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+@functions {
+
+    public string GetTimeAgo(DateTime dateTime)
+    {
+        var timeSpan = DateTime.Now - dateTime;
+
+        if (timeSpan.TotalMinutes < 1)
+            return "Just now";
+
+        if (timeSpan.TotalMinutes < 60)
+            return $"{(int)timeSpan.TotalMinutes} mins ago";
+
+        if (timeSpan.TotalHours < 24)
+            return $"{(int)timeSpan.TotalHours} hrs ago";
+
+        if (timeSpan.TotalDays < 2)
+            return "Yesterday";
+
+        return $"{(int)timeSpan.TotalDays} days ago";
+    }
+}

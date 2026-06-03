@@ -1,0 +1,76 @@
+﻿@using SchoolERP.Models.DTOS
+@model List<TeacherLockDTO>
+
+@{
+    ViewData["Title"] = "Lock/Unlock User";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container my-4">
+
+    <h2 class="mb-4">
+        <i class="bi bi-shield-lock-fill"></i> Teacher Lock/Unlock
+    </h2>
+
+    <table class="table table-striped table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Teacher Name</th>
+                <th>User Name</th>
+                <th>Mobile No</th>
+                <th>Email ID</th>
+                <th>Failed Count</th>
+                <th>Last Login</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.Count; i++)
+            {
+                var teacher = Model[i];
+
+                <tr>
+                    <td>@(i + 1)</td>
+                    <td>@teacher.FullName</td>
+                    <td>@teacher.UserName</td>
+                    <td>@teacher.MobileNo</td>
+                    <td>@teacher.EmailID</td>
+                    <td>@teacher.FailedCount</td>
+                    <td>@teacher.LastLogin</td>
+                    <td>
+                        @if (teacher.IsActive)
+                        {
+                            <span class="badge bg-danger">
+                                <i class="bi bi-lock-fill"></i> Locked
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">
+                                <i class="bi bi-unlock-fill"></i> Unlocked
+                            </span>
+                        }
+                    </td>
+                    <td>
+                        <form asp-action="TeacherToggleLock" method="post">
+                            <input type="hidden" name="teacherID" value="@teacher.TeacherID" />
+                            <button type="submit" class="btn btn-sm @(teacher.IsLocked ? "btn-success" : "btn-danger")">
+                                @if (teacher.IsActive)
+                                {
+                                    <i class="bi bi-unlock-fill"></i><text>Unlock</text>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-lock-fill"></i> <text>Lock</text>
+                                }
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>

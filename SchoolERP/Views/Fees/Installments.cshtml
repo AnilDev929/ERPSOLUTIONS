@@ -1,0 +1,431 @@
+﻿@using SchoolERP.Models.ViewModels
+@model StudentFeeDetailViewModel
+
+@{
+    ViewData["Title"] = "Student Fee Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var dueDay = (int)ViewBag.DueDay;
+}
+
+<div class="container-fluid">
+
+    <!-- 👤 STUDENT HEADER -->
+    <div class="card shadow-sm mb-2">
+        <div class="card-body d-flex justify-content-between align-items-center">
+
+            <div class="d-flex align-items-center">
+                <div class="avatar bg-primary text-white rounded-circle me-3 d-flex align-items-center justify-content-center"
+                     style="width:50px;height:50px;">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+
+                <div>
+                    <h5 class="mb-0">@Model.Student.StudentName</h5>
+                    <small class="text-muted">
+                        🎓 Class: @Model.Student.Class | Section: @Model.Student.Section |
+                        🆔 @Model.Student.AdmissionNumber
+                    </small>
+                </div>
+            </div>
+
+            <div class="text-end">
+                <span class="badge bg-@(Model.Fee.Status == "PAID" ? "success" :
+                                                                                    Model.Fee.Status == "PARTIAL" ? "warning" : "danger")">
+                    @Model.Fee.Status
+                </span>
+                <div class="mt-1">
+                    <small>Academic Year: @Model.Fee.AcademicYear.YearName</small>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 💰 KPI CARDS -->
+    <div class="row mb-2">
+
+        <div class="col-md-3">
+            <div class="card shadow-sm text-center p-3">
+                <h6>Total Fee</h6>
+                <h4>₹ @Model.TotalFee</h4>
+                <i class="fas fa-wallet text-primary"></i>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm text-center p-3">
+                <h6>Paid</h6>
+                <h4 class="text-success">
+                    ₹ @(Model.TotalPaid)
+                </h4>
+                <i class="fas fa-circle-check text-success"></i> <!-- Paid -->
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="card shadow-sm text-center p-3">
+                <h6>Remaining</h6>
+                <h4 class="text-danger">₹ @Model.RemainingAmount</h4>
+                <i class="fas fa-hourglass-half text-danger"></i> <!-- Remaining -->
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="card shadow-sm text-center p-3">
+                <h6>Late Fine</h6>
+                <h4 class="text-danger">₹ @Model.LateFine</h4>
+                <i class="fas fa-clock text-danger"></i>         <!-- Late Fine -->
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="card shadow-sm text-center p-3">
+                <h6>Discount</h6>
+                <h4 class="text-info">₹ @Model.Discount</h4>
+                <i class="fas fa-percent text-info"></i>         <!-- Discount -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 📊 PROGRESS BAR -->
+    <div class="card mb-3 shadow-sm">
+        <div class="card-body">
+            <h6>Payment Progress</h6>
+            @{
+                var paid = Model.TotalFee - Model.RemainingAmount;
+                var percent = Model.TotalFee == 0 ? 0 : (paid / Model.TotalFee) * 100;
+            }
+            <div class="progress" style="height: 20px;">
+                <div class="progress-bar bg-success"
+                     style="width:@percent%">
+                    @percent.ToString("0")%
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📜 PAYMENT HISTORY -->
+    <div class="modal fade" id="paymentHistoryModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title"> Payment History</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal">
+                    </button>
+                </div>
+
+                <div class="modal-body" id="paymentHistoryBody">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        
+        <!-- 📅 INSTALLMENT TABLE -->
+        <div class="col-md-7">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    Installments
+                </div>
+                
+                <div class="card-body p-0">
+                    <table class="table table-responsive table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Month</th>
+                                <th>Due Date</th>
+                                <th>Final Date</th>
+                                <th>Amount</th>
+                                <th>Paid Amt</th>
+                                <th>Fine</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var payment in Model.Installments)
+                            {
+                                <tr>
+                                    <td>@payment.MonthName (@payment.MonthNum)</td>
+                                    <td>@payment.DueDate.ToString("dd MMM yyyy")</td>
+                                    <td>@payment.FinalDueDate.ToString("dd MMM yyyy")</td>
+                                    <td>@( "₹ " + payment.Amount )</td>
+                                    <td>@( "₹ " + payment.PaidAmount )</td>
+                                    <td>@( "₹ " + payment.Fine )</td>
+                                    <td>@(payment.Status)</td>
+                                    <td>
+                                        @if (payment.Status == "Paid")
+                                        {
+                                            <span class="badge bg-success">Paid</span>
+                                        }
+                                        @if (payment.Status == "No Fee")
+                                        {
+                                            <span class="badge bg-warning">N/A</span>
+                                        }
+                                        else
+                                        {
+                                            @if (payment.Status != "Paid")
+                                            {
+                                                <a asp-controller="Fees"
+                                                   asp-action="Pay"
+                                                   asp-route-studentId="@Model.Student.StudentId"
+                                                   asp-route-month="@payment.MonthNum"
+                                                   class="btn btn-sm btn-success">
+                                                    <i class="bi bi-credit-card-fill me-1"></i>
+                                                    Pay
+                                                </a>
+                                            }
+                                        }
+                                    </td>
+
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 💳 PAYMENT PANEL -->
+        <div class="col-md-5">
+            <a href="javascript:void(0)"
+               id="lnkPaymentHistory"
+               data-feeid="@Model.Fee.FeeId"
+               class="btn btn-outline-primary btn-sm">
+
+                <i class="bi bi-clock-history me-1"></i>
+                View Payment History
+            </a>
+            <!-- PAY NOW -->
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-primary text-white">
+                    💳 Make Payment
+                </div>
+
+                <div class="card-body">
+                    @{
+                        var monthly = Model.Fee.MonthlyAmount;
+                        var paidMonths = (int)(Model.TotalPaid / monthly);
+
+                        var today = DateTime.Today;
+                        // Next installment month
+                        var nextInstallmentDate = Model.Fee.PaymentDate.AddMonths(paidMonths);
+
+                        // Final due date using configured due day
+                        var nextDueDate = new DateTime(
+                        nextInstallmentDate.Year,
+                        nextInstallmentDate.Month,
+                        dueDay
+                        );
+                        // Late fine calculation
+                        decimal lateFine = 0;
+                        if (today > nextDueDate)
+                        {
+                            int lateMonths =
+                            ((today.Year - nextDueDate.Year) * 12) +
+                            (today.Month - nextDueDate.Month);
+
+                            lateFine = lateMonths * 100;
+                        }
+                        decimal totalPayable = monthly + lateFine;
+
+                        // int nextMonth = paidMonths + 1;
+                        // DateTime nextDueDate = Model.Fee.PaymentDate.AddMonths(nextMonth - 1);
+                        // var dueDate = new DateTime(nextDueDate.Year, nextDueDate.Month, dueDay);
+                        // decimal lateFine1 = 0;
+                        // if (DateTime.Now > nextDueDate)
+                        // {
+                        //     int lateMonths = ((DateTime.Now.Year - nextDueDate.Year) * 12)
+                        //     + DateTime.Now.Month - nextDueDate.Month;
+
+                        //     lateFine1 = lateMonths * 100; // monthly fine
+                        // }
+
+                        // decimal totalPayable = monthly + lateFine1;
+                    }
+                    <div class="row align-items-center g-3 mb-2">
+
+                        <div class="col-md-auto d-flex align-items-center">
+                            <i class="bi bi-cash-stack text-success me-2"></i>
+                            <strong class="me-1">Next Installment:</strong>
+                            <span>₹ @monthly</span>
+                        </div>
+
+                        <div class="col-md-auto d-flex align-items-center">
+                            <i class="bi bi-calendar-event text-primary me-2"></i>
+                            <strong class="me-1">Next Due:</strong>
+                            <span>@nextDueDate.ToString("dd MMM yyyy")</span>
+                        </div>
+
+                        <div class="col-md-auto d-flex align-items-center text-danger">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <strong class="me-1">Late Fine:</strong>
+                            <span>₹ @lateFine</span>
+                        </div>
+
+                    </div>
+                    <hr />
+
+                    <input type="hidden" name="FeeId" value="@Model.Fee.FeeId" />
+
+                    <div class="row mb-2">
+                        <div class="col-md-4">
+                            <strong>Total Payable:</strong>
+                            <input type="number" name="AmountPaid"
+                                   class="form-control"
+                                   value="@totalPayable" readonly />
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+
+    <script>
+
+        $(function () {
+        
+            $(document).on("click", "#lnkPaymentHistory", function () {
+
+                var feeId = $(this).data("feeid");
+
+                $.ajax({
+                    url: '@Url.Action("GetPaymentHistory", "Fees")',
+                     type: 'POST',
+                    data: { FeeId: feeId },
+                            success: function (response) {
+
+            let html = `
+                <div class="card border-0 shadow-sm">
+
+                    <div class="card-header bg-primary text-white d-flex align-items-center">
+                        <i class="bi bi-clock-history fs-5 me-2"></i>
+                        <span class="fw-semibold">Payment History</span>
+                    </div>
+            `;
+
+            if (response && response.length > 0) {
+
+                html += `<div class="list-group list-group-flush">`;
+
+                $.each(response, function (i, p) {
+
+                    var date = new Date(p.paymentDate);
+
+                    html += `
+                        <div class="list-group-item py-3">
+
+                            <div class="d-flex justify-content-between align-items-center flex-wrap">
+
+                                <!-- Left -->
+                                <div class="d-flex align-items-center">
+
+                                    <div class="bg-success-subtle rounded-circle p-2 me-3">
+                                        <i class="bi bi-currency-rupee text-success"></i>
+                                    </div>
+
+                                    <div>
+
+                                        <div class="fw-bold text-success">
+                                            ₹ ${p.amountPaid}
+                                        </div>
+
+                                        <small class="text-muted">
+
+                                            <i class="bi bi-credit-card me-1"></i>
+                                            ${p.paymentMethod || 'N/A'}
+
+                                            &nbsp;&nbsp;
+
+                                            <i class="bi bi-upc-scan me-1"></i>
+                                            ${p.transactionID || '-'}
+
+                                        </small>
+
+                                    </div>
+
+                                </div>
+
+                                <!-- Right -->
+
+                                <div class="text-end">
+
+                                    <span class="badge bg-light text-dark">
+
+                                        <i class="bi bi-calendar-event me-1"></i>
+
+                                        ${date.toLocaleDateString('en-IN', {
+                                            day: '2-digit',
+                                            month: 'short',
+                                            year: 'numeric'
+                                        })}
+
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+            }
+            else {
+
+                html += `
+                    <div class="text-center py-5">
+
+                        <i class="bi bi-wallet2 text-secondary fs-1"></i>
+
+                        <h6 class="mt-3 mb-1">
+                            No Payment History
+                        </h6>
+
+                        <small class="text-muted">
+                            No transactions found for this fee.
+                        </small>
+
+                    </div>
+                `;
+            }
+
+            html += `</div>`;
+
+            $("#paymentHistoryBody").html(html);
+
+            new bootstrap.Modal(
+                document.getElementById("paymentHistoryModal")
+            ).show();
+        },
+                    error: function () {
+
+                        $("#paymentHistoryBody").html(`
+                            <div class="alert alert-danger">
+                                Unable to load payment history.
+                            </div>
+                        `);
+                    }
+                });
+
+            });
+        
+        });
+
+
+    </script>
+
+
+}

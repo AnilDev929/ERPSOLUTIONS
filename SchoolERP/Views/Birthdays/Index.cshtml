@@ -1,0 +1,382 @@
+﻿@using SchoolERP.Models.DTOS
+@model List<UpcomingBirthdayDTO>
+@{
+    ViewBag.Title = "Upcoming Birthday";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+   /* PAGE */
+
+    .birthday-page {
+        padding: 10px 0 30px;
+    }
+
+    /* HEADER */
+
+    .page-header-modern {
+        background: linear-gradient(135deg, #7c3aed, #ec4899);
+        border-radius: 28px;
+        padding: 28px;
+        color: white;
+        margin-bottom: 28px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 18px;
+        box-shadow: 0 15px 40px rgba(124,58,237,0.18);
+    }
+
+    .page-title {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+
+    .page-icon {
+        width: 72px;
+        height: 72px;
+        border-radius: 24px;
+        background: rgba(255,255,255,0.18);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 34px;
+        backdrop-filter: blur(8px);
+    }
+
+    .page-header-modern h2 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 28px;
+    }
+
+    .page-header-modern p {
+        margin: 4px 0 0;
+        opacity: 0.9;
+    }
+
+    /* FILTER */
+
+    .filter-box {
+        min-width: 220px;
+    }
+
+        .filter-box .form-select {
+            border: none;
+            border-radius: 14px;
+            padding: 12px 16px;
+            font-weight: 600;
+            box-shadow: none;
+        }
+
+    /* LIST */
+
+    .birthday-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill,minmax(320px,1fr));
+        gap: 22px;
+    }
+
+    /* CARD */
+
+    .birthday-card-modern {
+        position: relative;
+        background: rgba(255,255,255,0.75);
+        backdrop-filter: blur(12px);
+        border-radius: 28px;
+        padding: 22px;
+        overflow: hidden;
+        transition: all 0.35s ease;
+        border: 1px solid rgba(255,255,255,0.5);
+        box-shadow: 0 10px 30px rgba(15,23,42,0.06);
+    }
+
+        .birthday-card-modern:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 40px rgba(15,23,42,0.12);
+        }
+
+        .birthday-card-modern::before {
+            content: "";
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            background: rgba(124,58,237,0.06);
+            border-radius: 50%;
+            top: -60px;
+            right: -60px;
+        }
+
+    /* TOP */
+
+    .birthday-top {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 18px;
+    }
+
+    /* AVATAR */
+
+    .birthday-avatar-modern {
+        width: 70px;
+        height: 70px;
+        border-radius: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 24px;
+        font-weight: 700;
+        flex-shrink: 0;
+        box-shadow: 0 10px 24px rgba(0,0,0,0.12);
+    }
+
+    .pink-bg {
+        background: linear-gradient(135deg,#ec4899,#f43f5e);
+    }
+
+    .blue-bg {
+        background: linear-gradient(135deg,#3b82f6,#2563eb);
+    }
+
+    .purple-bg {
+        background: linear-gradient(135deg,#8b5cf6,#7c3aed);
+    }
+
+    /* INFO */
+
+    .student-info h5 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .student-info p {
+        margin: 5px 0 0;
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    /* FOOTER */
+
+    .birthday-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* DATE */
+
+    .date-box {
+        background: #f8fafc;
+        border-radius: 14px;
+        padding: 10px 14px;
+    }
+
+        .date-box small {
+            display: block;
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        .date-box strong {
+            font-size: 15px;
+            color: #111827;
+        }
+
+    /* BADGE */
+
+    .days-badge {
+        padding: 10px 16px;
+        border-radius: 30px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .today {
+        background: rgba(236,72,153,0.14);
+        color: #db2777;
+    }
+
+    .upcoming {
+        background: rgba(79,70,229,0.12);
+        color: #4f46e5;
+    }
+
+    /* EMPTY */
+    .empty-state-modern {
+        background: white;
+        border-radius: 28px;
+        padding: 70px 20px;
+        text-align: center;
+        color: #94a3b8;
+        box-shadow: 0 10px 30px rgba(15,23,42,0.06);
+    }
+
+        .empty-state-modern i {
+            font-size: 70px;
+            margin-bottom: 14px;
+        }
+
+    /* MOBILE */
+
+    @@media(max - width:768px) {
+        .page-header-modern
+
+    {
+        padding: 22px;
+    }
+
+    .page-header-modern h2 {
+        font-size: 22px;
+    }
+
+    .birthday-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .birthday-card-modern {
+        padding: 18px;
+    }
+
+    .birthday-avatar-modern {
+        width: 58px;
+        height: 58px;
+        border-radius: 18px;
+        font-size: 20px;
+    }
+
+    .student-info h5 {
+        font-size: 16px;
+    }
+
+    .birthday-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .filter-box {
+        width: 100%;
+    }
+
+    }
+</style>
+
+<div class="container-fluid">
+
+    <div class="birthday-page container-fluid">
+
+        <!-- HEADER -->
+        <div class="page-header-modern">
+
+            <div class="page-title">
+
+                <div class="page-icon">
+                    <i class="bi bi-gift-fill"></i>
+                </div>
+
+                <div>
+                    <h2>Upcoming Birthdays</h2>
+                    <p>
+                        Students celebrating in next 30 days
+                    </p>
+                </div>
+
+            </div>
+
+            @if (!User.IsInRole("Teacher"))
+            {
+                <form method="get" class="filter-box">
+
+                    <select name="classId" class="form-select" onchange="this.form.submit()">
+
+                        <option value="" selected="@(ViewBag.ClassId == null)">
+                            All Classes
+                        </option>
+
+                        @foreach (var cls in ViewBag.Classes)
+                        {
+                            if (ViewBag.ClassId != null && ViewBag.ClassId == cls.ClassId)
+                            {
+                                <option value="@cls.ClassId" selected> @cls.ClassName </option>
+                            }
+                            else
+                            {
+                                <option value="@cls.ClassId">  @cls.ClassName </option>
+                            }
+                        }
+
+                    </select>
+
+                </form>
+            }
+
+        </div>
+
+        <!-- LIST -->
+        @if (Model.Any())
+        {
+            <div class="birthday-grid">
+
+                @foreach (var item in Model)
+                {
+                    var avatarClass = item.Gender?.ToLower() switch
+                    {
+                        "female" => "pink-bg",
+                        "male" => "blue-bg",
+                        _ => "purple-bg"
+                    };
+
+                    <div class="birthday-card-modern">
+
+                        <div class="birthday-top">
+                            <div class="birthday-avatar-modern @avatarClass">
+                                @item.StudentName.Substring(0, 1).ToUpper()
+                            </div>
+                            <div class="student-info">
+                                <h5>@item.StudentName</h5>
+                                <p>@item.ClassName</p>
+                            </div>
+                        </div>
+
+                        <div class="birthday-footer">
+                            <div class="date-box">
+                                <small>Birthday</small>
+                                <strong> @item.DOB.ToString("dd MMM") </strong>
+                            </div>
+
+                            @if (item.DaysRemaining == 0)
+                            {
+                                <div class="days-badge today"> Today 🎉 </div>
+                            }
+                            else
+                            {
+                                <div class="days-badge upcoming">
+                                    @item.DaysRemaining Days Left
+                                </div>
+                            }
+
+                        </div>
+
+                    </div>
+                }
+
+            </div>
+        }
+        else
+        {
+            <div class="empty-state-modern">
+                <i class="bi bi-cake2"></i>
+                <h4>No Upcoming Birthdays</h4>
+                <p> No birthday records available</p>
+            </div>
+        }
+
+    </div>
+
+</div>

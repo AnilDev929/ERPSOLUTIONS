@@ -1,0 +1,113 @@
+﻿@using SchoolERP.Models.Entities
+@model IEnumerable<Subject>
+
+@{
+    ViewBag.Title = "Subjects Management";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <!-- Header & Add Button -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="text-primary">
+                <i class="fas fa-book-reader"></i> @ViewBag.Title
+            </h2>
+            <small class="text-muted">Manage subjects for classes</small>
+        </div>
+        <a href="@Url.Action("Create")" class="btn btn-primary shadow-sm">
+            <i class="fas fa-plus me-2"></i> Add New Subject
+        </a>
+    </div>
+
+    <!-- TempData Messages -->
+    @* @if (TempData["Success"] != null)
+    {
+        <div id="successMessage" class="alert alert-success alert-dismissible fade show">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div id="errorMessage" class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
+        </div>
+    } *@
+
+    <div class="row">
+        @if (Model.Any())
+        {
+            foreach (var subject in Model)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-book"></i> @subject.SubjectName</span>
+                            <span class="badge @(subject.IsActive ? "badge-success" : "badge-secondary")">
+                                <i class="@(subject.IsActive ? "fas fa-check" : "fas fa-ban")"></i>
+                                @(subject.IsActive ? "Active" : "Inactive")
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <p>
+                                <strong>Code:</strong>
+                                @(string.IsNullOrEmpty(subject.SubjectCode) ? (Html.Raw("<i>Not Set</i>")) : subject.SubjectCode)
+                            </p>
+                            <p>
+                                <strong>Description:</strong>
+                                @(string.IsNullOrEmpty(subject.Description) ? (Html.Raw("<i>No description</i>")) : subject.Description)
+                            </p>
+                        </div>
+                        <div class="card-footer d-flex justify-content-between">
+                            <a href="@Url.Action("Edit", new { id = subject.SubjectId })" class="btn btn-sm btn-warning">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <button class="btn btn-sm btn-danger" onclick="confirmDelete(@subject.SubjectId, '@subject.SubjectName')">
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-info-circle"></i> No subjects found. Please add new subjects.
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Auto-hide TempData messages
+        setTimeout(function () {
+            const success = document.getElementById('successMessage');
+            const error = document.getElementById('errorMessage');
+            if (success) { success.classList.remove('show'); success.classList.add('fade'); }
+            if (error) { error.classList.remove('show'); error.classList.add('fade'); }
+        }, 5000);
+
+        // SweetAlert2 delete confirmation
+        function confirmDelete(id, name) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: `You are about to delete the subject "${name}". This action cannot be undone!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '@Url.Action("Delete", "Subjects")/' + id;
+                }
+            });
+        }
+    </script>
+}

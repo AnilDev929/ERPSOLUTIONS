@@ -1,0 +1,348 @@
+﻿@using SchoolERP.Enum
+@using SchoolERP.Models.ViewModels
+@model FeePaymentViewModel
+@{
+    ViewData["Title"] = "Fee Payment";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-2">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-8">
+
+            <!-- Main Card -->
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+
+                <!-- Header -->
+                <div class="bg-primary text-white p-4 rounded">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <!-- Left Content -->
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <i class="bi bi-credit-card-2-front-fill"
+                                   style="font-size:45px;">
+                                </i>
+                            </div>
+
+                            <div>
+                                <h2 class="mb-1 fw-bold">Fee Payment</h2>
+                                <p class="mb-0 opacity-75">
+                                    Secure installment payment portal
+                                </p>
+                            </div>
+
+                        </div>
+
+                        <!-- Back Button -->
+                        <div>
+                            <a asp-action="Installments"
+                               class="btn btn-light btn-sm rounded-pill px-3 shadow-sm">
+
+                                <i class="bi bi-arrow-left me-1"></i>
+                                Back
+                            </a>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- Body -->
+                <div class="card-body p-4">
+
+                    <!-- Student Details -->
+                    <div class="mb-4">
+
+                        <h5 class="fw-bold mb-3">
+                            <i class="bi bi-person-circle text-primary me-2"></i> Student Information </h5>
+
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+                                <div class="border rounded-3 p-3 bg-light d-flex align-items-center gap-2">
+                                    <small class="text-muted mb-0">Student Name</small>
+                                    <h6 class="fw-bold mb-0">@Model.StudentInfoView.StudentName</h6>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="border rounded-3 p-3 bg-light">
+                                    <small class="text-muted">
+                                        🎓 Class: @Model.StudentInfoView.Class | Section: @Model.StudentInfoView.Section |
+                                        🆔 @Model.StudentInfoView.AdmissionNumber
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Fee Summary -->
+
+                    <div class="mb-2">
+
+                        <h5 class="fw-bold">
+                            <i class="bi bi-wallet2 text-success me-2"></i> Fee Summary
+                        </h5>
+
+                        <div class="row g-3 text-center">
+
+                            <div class="col-md-4">
+                                <div class="border rounded-3 p-1">
+                                    <small class="text-muted">  Total Fee </small>
+                                    <h4 class="text-primary mt-2"> ₹ @Model.TotalFee </h4>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="border rounded-3 p-1">
+                                    <small class="text-muted">  Paid Amount </small>
+                                    <h4 class="text-success mt-2"> ₹ @Model.PaidAmount </h4>
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="border rounded-3 p-1">
+                                    <small class="text-muted">Pending Amount </small>
+                                    <h4 class="text-danger mt-2"> ₹ @Model.PendingAmount </h4>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Installment Summary -->
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-3">
+                            <i class="bi bi-receipt-cutoff text-warning me-2"></i>
+                            Current Installment
+                        </h5>
+
+                        <div class="list-group shadow-sm">
+
+                            <div class="list-group-item d-flex justify-content-between">
+                                <span>
+                                    <i class="bi bi-hash me-2"></i> Installment No
+                                </span>
+                                <strong> @Model.InstallmentNo </strong>
+                            </div>
+
+                            <div class="list-group-item d-flex justify-content-between">
+                                <span>
+                                    <i class="bi bi-cash-stack text-success me-2"></i>
+                                    Installment Amount
+                                </span>
+                                <strong> ₹ @Model.MonthlyAmount </strong>
+                            </div>
+
+                            <div class="list-group-item d-flex justify-content-between">
+                                <span> <i class="bi bi-calendar-event text-primary me-2"></i>
+                                    Due Date </span>
+                                <strong> @Model.DueDate.ToString("dd MMM yyyy")</strong>
+
+                            </div>
+
+                            <div class="list-group-item d-flex justify-content-between text-danger">
+                                <span> <i class="bi bi-exclamation-circle-fill me-2"></i>
+                                    Late Fine</span>
+
+                                <strong> ₹ @Model.LateFine </strong>
+
+                            </div>
+
+                            @if (Model.IsFeeWaived)
+                            {
+                                <div class="alert alert-success border-0 shadow-sm">
+
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-check-circle-fill fs-3 me-3"></i>
+                                        <div>
+                                            <h5 class="mb-1"> Fees Waived For This Period </h5>
+
+                                            <p class="mb-0">
+                                                Payment is not required
+                                                for this installment period.
+                                            </p>
+
+                                            @if (!string.IsNullOrEmpty(Model.WaivedReason))
+                                            {
+                                                <small class="fw-bold">
+                                                    Reason: @Model.WaivedReason
+                                                </small>
+                                            }
+                                        </div>
+                                    </div>
+
+                                </div>
+                            }
+
+                            <div class="list-group-item d-flex justify-content-between bg-light fs-5">
+                                <strong>
+                                    <i class="bi bi-credit-card-fill text-success me-2"></i>
+                                    Total Payable
+                                </strong>
+                                <strong class="text-success"> ₹ @Model.FinalAmount </strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Payment Methods -->
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-3">
+                            <i class="bi bi-wallet-fill text-warning me-2"></i>
+                            Select Payment Method
+                        </h5>
+
+                        <form asp-action="Pay" method="post">
+                            @Html.AntiForgeryToken()
+                            <!-- Hidden Fields -->
+                            <input type="hidden"asp-for="FeeId" />
+                            <input type="hidden" asp-for="InstallmentNo" />
+                            <input type="hidden" asp-for="DueDate" />
+
+                            <!-- Cash Deposit -->
+                            <div class="form-check border rounded-3 p-3 mb-2">
+                                <input class="form-check-input"
+                                       type="radio"
+                                       asp-for="SelectedPaymentMethod" value="@PaymentMethod.Cash"
+                                       value="Cash" />
+
+                                <label class="form-check-label ms-2">
+                                    <i class="bi bi-cash-stack text-warning me-2"></i>
+                                    Cash Deposit
+                                </label>
+                            </div>
+
+                            <!-- UPI -->
+                            <div class="form-check border rounded-3 p-3 mb-2">
+                                <input class="form-check-input" type="radio" asp-for="SelectedPaymentMethod" value="@PaymentMethod.UPI" checked />
+                                <label class="form-check-label ms-2">
+                                    <i class="bi bi-phone-fill text-primary me-2"></i>
+                                    UPI / Google Pay / PhonePe
+                                </label>
+
+                            </div>
+
+                            <!-- Card -->
+                            <div class="form-check border rounded-3 p-3 mb-2">
+                                <input class="form-check-input" type="radio" asp-for="SelectedPaymentMethod" value="@PaymentMethod.Card" />
+                                <label class="form-check-label ms-2">
+                                    <i class="bi bi-credit-card-fill text-success me-2"></i>
+                                    Card / Net Banking
+                                </label>
+                            </div>
+
+                            <!-- Pay Button -->
+                            @if (Model.IsFeeWaived)
+                            {
+                                <button type="button" class="btn btn-secondary btn-lg w-100" disabled>
+                                    <i class="bi bi-ban me-2"></i> Payment Disabled
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="submit" id="btnPay" class="btn btn-success btn-lg w-100">
+                                    <i class="bi bi-shield-lock-fill me-2"></i>
+                                    Pay ₹ @Model.FinalAmount
+
+                                    <span class="loading-text d-none">
+                                        <span class="spinner-border spinner-border-sm me-2"></span>
+                                        Processing...
+                                    </span>
+                                </button>
+                            }
+                        </form>
+
+                    </div>
+
+                    <!-- Payment History -->
+                    <div>
+                        <h5 class="fw-bold mb-3">
+                            <i class="bi bi-clock-history text-secondary me-2"></i>Previous Payments </h5>
+
+                        <div class="table-responsive">
+                            @if (Model.PreviousPayments == null || !Model.PreviousPayments.Any())
+                            {
+                                <div class="text-center text-muted mt-5">
+                                    <i class="bi bi-bell-slash fs-1"></i>
+                                    <p>No payment history available</p>
+                                </div>
+                            }
+                            else
+                            {
+                                <table class="table table-bordered align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Month</th>
+                                            <th>Amount</th>
+                                            <th>Date</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.PreviousPayments)
+                                        {
+                                            <tr>
+                                                <td>@item.InstallmentNo</td>
+                                                <td>@item.FeeMonth/@item.FeeYear </td>
+                                                <td>₹ @item.AmountPaid </td>
+                                                <td> @item.PaymentDate.ToString("dd MMM yyyy")</td>
+                                                <td>
+                                                    <span class="badge bg-success">  <i class="fas fa-check me-1"></i>Paid </span>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@section Scripts {
+
+    <script>
+        $(function () {
+
+            $("#paymentForm").on("submit", function () {
+
+                var $btn = $("#btnPay");
+
+                // Stop double submit
+                if ($btn.prop("disabled")) {
+                    return false;
+                }
+
+                // Disable button
+                $btn.prop("disabled", true);
+
+                // Show loading
+                $btn.find(".normal-text").addClass("d-none");
+                $btn.find(".loading-text").removeClass("d-none");
+
+                return true;
+            });
+
+        });
+    </script>
+
+}
+
+
+

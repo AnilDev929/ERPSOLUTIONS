@@ -1,0 +1,19 @@
+﻿@using SchoolERP.Models.Entities
+@model PromotionState
+
+<li class="nav-item">
+    @if (Model.CanAccess)
+    {
+        <a class="nav-link d-flex align-items-center"
+           href="@Url.Action("Student", "Promotion")">
+            <i class="bi bi-mortarboard-fill me-2 "></i>Student Promotion
+        </a>
+    }
+    else
+    {
+        <a class="nav-link d-flex align-items-center disabled"
+           title="Promotion is currently closed">
+            <i class="bi bi-mortarboard-fill me-2 "></i>Student Promotion
+        </a>
+    }
+</li>

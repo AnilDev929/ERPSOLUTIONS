@@ -1,0 +1,137 @@
+﻿@using SchoolERP.Models.ViewModels
+@model List<StudentExamScheduleVM>
+
+@{
+    ViewData["Title"] = "Exam Schedule";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid py-4">
+
+    <!-- Header -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+
+                <div>
+                    <h3 class="fw-bold text-primary mb-1">
+                        <i class="bi bi-calendar-event"></i> Exam Schedule </h3>
+                    <p class="text-muted mb-0">View your upcoming examination timetable</p>
+                </div>
+
+                <!-- Filter -->
+                <form method="get">
+
+                    <select name="examId" class="form-select" onchange="this.form.submit()">
+                        <option value="0">All Exams</option>
+                        @foreach (var exam in ViewBag.Exams)
+                        {
+                            <option value="@exam.ExamId" selected="@(ViewBag.SelectedExamId == exam.ExamId)">
+                                @exam.ExamName
+                            </option>
+                        }
+                    </select>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card shadow-sm border-0">
+
+        <div class="card-body table-responsive">
+
+            <table class="table table-hover align-middle">
+
+                <thead class="table-primary">
+                    <tr>
+                        <th>Exam</th>
+                        <th>Date</th>
+                        <th>Subject</th>
+                        <th>Time Slot</th>
+                        <th>Duration</th>
+                        <th>Floor</th>
+                        <th>Room No</th>
+                        <th>Marks</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    @if (Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            var duration = item.EndTime - item.StartTime;
+                            <tr>
+                                <!-- Exam -->
+                                <td>
+                                    <span class="badge bg-info text-dark px-3 py-2"> @item.ExamName</span>
+                                </td>
+                                <!-- Date -->
+                                <td>
+                                    <div class="fw-semibold"> @item.ExamDate.ToString("dd MMM yyyy")</div>
+                                    <small class="text-muted">@item.ExamDate.ToString("dddd")</small>
+                                </td>
+
+                                <!-- Subject -->
+                                <td>
+                                    <span class="fw-semibold text-dark">@item.SubjectName </span>
+                                </td>
+
+                                <!-- Time -->
+                               @*  <td>
+                                    @item.StartTime.ToString(@"hh\:mm")
+                                    -
+                                    @item.EndTime.ToString(@"hh\:mm")
+                                </td> *@
+                                <td>
+                                    @DateTime.Today.Add(item.StartTime).ToString("hh:mm tt")
+                                    -
+                                    @DateTime.Today.Add(item.EndTime).ToString("hh:mm tt")
+                                </td>
+
+                                <!-- Duration -->
+                                <td>@duration.TotalMinutes mins</td>
+
+                                <!-- Room -->
+                                <td>@(string.IsNullOrWhiteSpace(item.RoomNo) ? "N/A": item.RoomNo) </td>
+
+                                <!-- Floor -->
+                                <td>
+                                    @(string.IsNullOrWhiteSpace(item.FloorNo) ? "N/A" : item.FloorNo)
+                                </td>
+
+                                <!-- Marks -->
+                                <td>
+                                    <div>
+                                        <span class="fw-bold"> @item.MaxMarks </span> Marks
+                                    </div>
+                                    <small class="text-success fw-bold"> Pass: @item.PassingMarks</small>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center py-5">
+                                <i class="bi bi-calendar-x text-secondary"
+                                   style="font-size:60px;"></i>
+                                <div class="mt-3 text-muted fs-5">
+                                    No Exam Schedule Available
+                                </div>
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>

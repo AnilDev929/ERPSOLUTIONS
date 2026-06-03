@@ -1,0 +1,31 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+    <!-- Background Circle -->
+    <circle cx="200" cy="150" r="110" fill="#F4F7FE"></circle>
+
+    <!-- Shadow -->
+    <ellipse cx="200" cy="255" rx="70" ry="12" fill="#DDE5F5"></ellipse>
+
+    <!-- Book -->
+    <rect x="120" y="70" width="160" height="180" rx="16" fill="#ffffff" stroke="#D6E0F5" stroke-width="3"></rect>
+
+    <!-- Book Spine -->
+    <rect x="120" y="70" width="24" height="180" rx="12" fill="#4F8CFF"></rect>
+
+    <!-- Lines -->
+    <rect x="160" y="105" width="90" height="10" rx="5" fill="#DCE6FA"></rect>
+    <rect x="160" y="130" width="70" height="10" rx="5" fill="#E6EEFC"></rect>
+    <rect x="160" y="155" width="95" height="10" rx="5" fill="#DCE6FA"></rect>
+    <rect x="160" y="180" width="60" height="10" rx="5" fill="#E6EEFC"></rect>
+
+    <!-- Homework Icon -->
+    <circle cx="250" cy="85" r="28" fill="#4F8CFF"></circle>
+
+    <path d="M240 85L248 93L262 77" stroke="white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path>
+
+    <!-- Decorative Dots -->
+    <circle cx="95" cy="100" r="6" fill="#DCE6FA"></circle>
+    <circle cx="310" cy="200" r="8" fill="#DCE6FA"></circle>
+    <circle cx="85" cy="210" r="4" fill="#E6EEFC"></circle>
+
+</svg>

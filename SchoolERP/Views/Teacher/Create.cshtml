@@ -1,0 +1,353 @@
+﻿@using SchoolERP.Models.Entities
+@using System.Security.Claims
+@model Teacher
+@{
+    ViewData["Title"] = Model.TeacherID == 0 ? "Add Teacher" : "Edit Teacher Detail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var isTeacher = User.IsInRole("Teacher");
+    bool isEditMode = Model != null && Model.TeacherID > 0;
+    var role = User.FindFirst(ClaimTypes.Role)?.Value;
+}
+
+<div class="container mt-1">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0"><i class="bi bi-person-plus"></i> @ViewData["Title"]</h4>
+        </div>
+
+        @* <form asp-action="Create" method="post"> *@
+        <form asp-action="@(isEditMode ? "Edit" : "Create")" method="post">
+            <div class="card-body">
+                @if (isEditMode)
+                {
+                    <input type="hidden" asp-for="TeacherID" />
+                    <input type="hidden" asp-for="UserID" />
+                }
+
+                @* @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" id="successMessage" role="alert">
+                        <i class="fas fa-check-circle"></i> @TempData["Success"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" id="errorMessage" role="alert">
+                        <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                } *@
+
+                <!-- 🧾 Personal Info -->
+                <h5 class="mb-3 text-secondary"><i class="bi bi-person text-primary"></i> Personal Information</h5>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="FullName" class="form-label required"><i class="bi bi-card-text"></i> Full Name</label>
+                        <input asp-for="FullName" onkeypress="allowOnlyLetters(event)" required placeholder="Enter Teacher Name" maxlength="100" class="form-control" />
+                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-2">
+                        <label asp-for="GenderID" class="form-label required"><i class="bi bi-gender-ambiguous"></i> Gender</label>
+                        <select asp-for="GenderID" required class="form-select">
+                            <option value="">-- Select --</option>
+                            <option value="1">Male</option>
+                            <option value="2">Female</option>
+                            <option value="3">Other</option>
+                        </select>
+                        <span asp-validation-for="GenderID" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-2">
+                        <label asp-for="BloodGroup" class="form-label required"><i class="bi bi-droplet-half"></i> Blood Group</label>
+                        <select class="form-select" required asp-for="BloodGroup">
+                            <option value="">Select</option>
+                            <option>A+</option>
+                            <option>A-</option>
+                            <option>B+</option>
+                            <option>B-</option>
+                            <option>O+</option>
+                            <option>O-</option>
+                            <option>AB+</option>
+                            <option>AB-</option>
+                        </select>
+                        <span asp-validation-for="BloodGroup" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-2">
+                        <label asp-for="DateOfBirth" class="form-label required"><i class="bi bi-calendar-date"></i> DOB</label>
+                        <input asp-for="DateOfBirth" type="date" max="@DateTime.Today.ToString("yyyy-MM-dd")" required class="form-control" />
+                        <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label asp-for="Aadhaar" class="form-label required"><i class="bi bi-credit-card-2-back"></i> Aadhaar</label>
+                        <input asp-for="Aadhaar" maxlength="12" required oninput="allowOnlyNumbers(this);" maxlength="12" class="form-control" />
+                        <span id="AadhaarError" class="text-danger"></span>
+                        <span id="AadhaarSuccess" class="text-success"></span>
+                        <span asp-validation-for="Aadhaar" class=" text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="Phone" class="form-label required"><i class="bi bi-telephone"></i> Mobile No.</label>
+                        <input asp-for="Phone" required oninput="allowOnlyNumbers(this);" maxlength="10" placeholder="Mobile Number" class="form-control" />
+                        <span id="mobileError" class="text-danger"></span>
+                        <span id="mobileSuccess" class="text-success"></span>
+                        <span asp-validation-for="Phone" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="EmailID" class="form-label required"><i class="bi bi-envelope-at"></i> Email</label>
+                        <input asp-for="EmailID" class="form-control" maxlength="100" required />
+                        <span class="input-group-text d-none" id="emailLoader">
+                            <span class="spinner-border spinner-border-sm text-primary"></span>
+                        </span>
+                        <small id="emailError" class="text-danger"></small>
+                        <small id="emailSuccess" class="text-success"></small>
+                        <span asp-validation-for="EmailID" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="EmergencyContact" class="form-label required"><i class="bi bi-exclamation-triangle"></i> Emergency Contact</label>
+                        <input asp-for="EmergencyContact" placeholder="Emergency Contact" oninput="allowOnlyNumbers(this);" maxlength="10" class="form-control" />
+                        <span asp-validation-for="EmergencyContact" class="text-danger"></span>
+                        <span id="mobileError1" class="text-danger"></span>
+                        <span id="mobileSuccess1" class="text-success"></span>
+                    </div>
+                </div>
+
+                <!-- 👨‍👩‍👧 Family Info -->
+                <h5 class="mb-3 text-secondary"><i class="bi bi-people" style="color:hotpink"></i> Family Information</h5>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="FatherName" class="form-label required"><i class="bi bi-person"></i> Father Name</label>
+                        <input asp-for="FatherName" class="form-control" placeholder="Father Name" required maxlength="100" onkeypress="allowOnlyLetters(event)" />
+                        <span asp-validation-for="FatherName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="MotherName" class="form-label required"><i class="bi bi-gender-female"></i> Mother Name</label>
+                        <input asp-for="MotherName" class="form-control" maxlength="100" required maxlength="100" onkeypress="allowOnlyLetters(event)" />
+                        <span asp-validation-for="MotherName" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-3 d-flex align-items-center">
+                        <div class="form-check">
+                            <input asp-for="IsMarried" class="form-check-input" type="checkbox" id="IsMarried">
+                            <label class="form-check-label ms-2" for="IsMarried">
+                                <i class="bi bi-heart"></i> Married
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 spouse-fields" style="display:none;">
+                        <label asp-for="SpouseName" class="form-label"><i class="bi bi-person"></i> Spouse Name</label>
+                        <input asp-for="SpouseName" class="form-control" onkeypress="allowOnlyLetters(event)" />
+                    </div>
+                    <div class="col-md-4 spouse-fields" style="display:none;">
+                        <label asp-for="SpouseContact" class="form-label"><i class="bi bi-telephone"></i> Spouse Contact</label>
+                        <input asp-for="SpouseContact" oninput="allowOnlyNumbers(this);" placeholder="Spouse Contact" maxlength="10" class="form-control" />
+                    </div>
+                </div>
+
+               
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="PermanentAddress" class="form-label required"><i class="bi bi-house-door"></i> Permanent Address</label>
+                        <textarea asp-for="PermanentAddress" maxlength="200" required class="form-control"></textarea>
+                        <span asp-validation-for="PermanentAddress" class="text-danger"></span>
+                    </div>
+
+                    <!-- City -->
+                    <div class="col-md-2">
+                        <label asp-for="City" class="form-label required">
+                            <i class="bi bi-building"></i> City
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-geo-alt"></i>
+                            </span>
+                            <input asp-for="City" onkeypress="allowOnlyLetters(event)" required class="form-control" placeholder="Enter City" />
+                        </div>
+                        <span asp-validation-for="City" class="text-danger"></span>
+                    </div>
+
+                    <!-- State -->
+                    <div class="col-md-2">
+                        <label asp-for="State" class="form-label required">
+                            <i class="bi bi-map"></i> State
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-globe"></i>
+                            </span>
+                            <input asp-for="State" required onkeypress="allowOnlyLetters(event)" class="form-control" placeholder="Enter State" />
+                        </div>
+                        <span asp-validation-for="State" class="text-danger"></span>
+                    </div>
+
+                    <!-- Postal Code -->
+                    <div class="col-md-2">
+                        <label asp-for="PostalCode" class="form-label required">
+                            <i class="bi bi-mailbox"></i> Postal Code
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-hash"></i>
+                            </span>
+                            <input asp-for="PostalCode" maxlength="6" required class="form-control" placeholder="PIN Code" oninput="allowOnlyNumbers(this);" />
+                        </div>
+                        <span asp-validation-for="PostalCode" oninput="allowOnlyNumbers(this);" class="text-danger"></span>
+                    </div>
+
+                </div>
+
+                <!-- 🎓 Professional Info -->
+                <h5 class="mb-3 text-secondary"><i class="bi bi-mortarboard" style="color: green;"></i> Professional Information</h5>
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label asp-for="Qualification" class="form-label required"><i class="bi bi-mortarboard"></i> Qualification</label>
+                        <input asp-for="Qualification" required class="form-control" />
+                        <span asp-validation-for="Qualification" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label asp-for="Specialization" class="form-label required"><i class="bi bi-journal-text"></i> Specialization</label>
+                        <input asp-for="Specialization" class="form-control" onkeypress="allowOnlyLetters(event)" />
+                        <span asp-validation-for="Specialization" class="text-danger" ></span>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label asp-for="Experience" class="form-label"><i class="bi bi-clock-history"></i> Experience (years)</label>
+                        <input asp-for="Experience" type="number" required step="0.1" class="form-control" />
+                        <span asp-validation-for="Experience" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="Designation" class="form-label required"><i class="bi bi-person-badge"></i> Designation</label>
+                        @if (isTeacher)
+                        {
+                            <input asp-for="Designation" class="form-control" disabled />
+                        }
+                        else
+                        {
+                            <input asp-for="Designation" class="form-control" onkeypress="allowOnlyLetters(event)" />
+                        }
+                        <span asp-validation-for="Designation" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="EmploymentType" class="form-label required">
+                            <i class="bi bi-person-workspace"></i> Employment Type
+                        </label>
+
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio"
+                                   class="btn-check"
+                                   asp-for="EmploymentType"
+                                   value="Permanent"
+                                   id="empPermanent" />
+                            <label class="btn btn-outline-primary btn-sm" for="empPermanent">
+                                <i class="bi bi-check-circle"></i> Permanent
+                            </label>
+
+                            <input type="radio"
+                                   class="btn-check"
+                                   asp-for="EmploymentType"
+                                   value="Contract"
+                                   id="empContract" />
+                            <label class="btn btn-outline-secondary btn-sm" for="empContract">
+                                <i class="bi bi-clock-history"></i> Contract
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="JoiningDate" class="form-label required"><i class="bi bi-calendar-check"></i> Joining Date</label>
+                        @if (isTeacher)
+                        {
+                            <input asp-for="JoiningDate" class="form-control" disabled />
+                        }
+                        else
+                        {
+                            <input asp-for="JoiningDate" type="date"
+                                   min="@DateTime.Today.ToString("yyyy-MM-dd")" 
+                                   class="form-control" />
+                        }
+                       
+                        <span asp-validation-for="JoiningDate" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="LastWorkingDate" class="form-label"><i class="bi bi-calendar-x"></i> Last Working Date</label>
+                        @if (isTeacher)
+                        {
+                            <input asp-for="LastWorkingDate" class="form-control" disabled/>
+                        }
+                        else
+                        {
+                            <input asp-for="LastWorkingDate" type="date" class="form-control" />
+                        }
+                    </div>
+                    
+                </div>
+            </div>
+
+            <!-- Footer Save/Update -->
+            <div class="card-footer d-flex justify-content-end gap-2">
+                @if (!isTeacher)
+                {
+                    <a href="@Url.Action("Index", "Teacher")" class="btn btn-secondary px-4">
+                        <i class="fas fa-arrow-left me-1"></i> Back
+                    </a>
+                }
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-save me-1"></i> Save
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ================= Script for Married Toggle ================= -->
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+
+        // Auto-hide TempData messages
+        setTimeout(function () {
+            const success = document.getElementById('successMessage');
+            const error = document.getElementById('errorMessage');
+            if (success) { success.classList.remove('show'); success.classList.add('fade'); }
+            if (error) { error.classList.remove('show'); error.classList.add('fade'); }
+        }, 5000);
+
+        $(document).ready(function () {
+
+             validateMobileNoField(
+                "Phone",
+                "mobileError",
+                "mobileSuccess"
+            );
+            validateMobileNoField(
+                "EmergencyContact",
+                "mobileError1",
+                "mobileSuccess1"
+            );
+
+            validateAadhaarField(
+                "Aadhaar",
+                "AadhaarError",
+                "AadhaarSuccess"
+            );
+
+
+            function toggleSpouseFields() {
+                if ($('#IsMarried').is(':checked')) {
+                    $('.spouse-fields').show();
+                } else {
+                    $('.spouse-fields').hide();
+                    $('.spouse-fields input').val('');
+                }
+            }
+
+            toggleSpouseFields(); // initial check
+            $('#IsMarried').change(toggleSpouseFields);
+        });
+    </script>
+}

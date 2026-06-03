@@ -1,0 +1,350 @@
+﻿@using SchoolERP.Models.ViewModels
+@model ExamScheduleViewModel
+@{
+    ViewData["Title"] = "Exam Schedule";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .subject-card {
+        border-radius: 10px;
+        transition: 0.2s;
+    }
+
+    .subject-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .card-header {
+        font-size: 15px;
+    }
+
+    label {
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .card-header{
+        background: linear-gradient(135deg, #36b9cc, #1a8ca8) !important;
+    }
+</style>
+
+<div class="container mt-4">
+
+    <!-- Header -->
+    <div class="card shadow-sm border-0 mb-2">
+        <div class="card-body text-white" style="background: linear-gradient(45deg, #4e73df, #224abe); border-radius: 8px;">
+            <h4><i class="bi bi-calendar-check"></i> Create Exam Schedule</h4>
+            <p class="mb-0">Define class-wise exam dates and maximum marks for the selected exam and class.</p>
+        </div>
+    </div>
+
+    <!-- Form Card -->
+    @using (Html.BeginForm("Create", "ExamSchedule", FormMethod.Post))
+    {
+        <div class="card shadow border-0">
+            <div class="card-body">
+
+                <div class="d-flex justify-content-between align-items-center mb-2 p-3 rounded shadow-sm"
+                     style="background: linear-gradient(135deg, #eef2ff, #ffffff); border:1px solid #dbe4ff;">
+
+                    <div>
+                        <h5 class="mb-1">
+                            <i class="bi bi-calendar-event me-2 text-primary"></i>
+                            Exam Schedule
+                        </h5>
+
+                        <small class="text-muted">
+                            <i class="bi bi-mortarboard me-1"></i>
+                            Academic Year:
+                            <strong class="text-dark">@ViewBag.AcademicYear</strong>
+                        </small>
+                    </div>
+
+                    <div>
+                        <span class="badge rounded-pill px-3 py-2 text-white shadow-sm"
+                              style="background: linear-gradient(135deg, #1cc88a, #13855c); font-size: 0.85rem;">
+                            <i class="bi bi-check-circle me-1"></i>
+                            Active Year
+                        </span>
+                    </div>
+
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label>Exam</label>
+                        @Html.DropDownListFor(m => m.ExamId, Model.Exams, "-- Select Exam --", new { @class = "form-control" })
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>Class</label>
+                        @Html.DropDownListFor(m => m.ClassId, Model.Classes, "-- Select Class --", new { @class = "form-control", id = "classDropdown" })
+                    </div>
+
+                </div>
+
+                <hr />
+
+                <!-- Subject Table -->
+                <div id="subjectContainer">
+                    <div id="subjects" class="row">
+                        <!-- Dynamic Subject Cards -->
+                    </div>
+                </div>
+
+            <button type="submit" class="btn btn-success mt-3">
+                    <i class="bi bi-save"></i> Save Schedule
+                </button>
+
+            </div>
+        </div>
+    }
+    
+</div>
+
+@section Scripts {
+
+    <script>
+        $(document).ready(function () {
+            // Initial UI setup
+            $("#subjects").html('<div class="text-muted">Select class</div>');
+        });
+
+        function getTodayDate() {
+            let today = new Date();
+            return today.toISOString().split('T')[0];
+        }
+
+        // Extra safety validation
+        $(document).on("change", "input[type='date']", function () {
+            let selected = new Date($(this).val());
+            let today = new Date();
+            today.setHours(0,0,0,0);
+
+            if (selected < today) {
+                alert("Past dates are not allowed.");
+                $(this).val('');
+                $(this).addClass("is-invalid");
+            } else {
+                $(this).removeClass("is-invalid");
+            }
+        });
+
+        // Apply min date dynamically
+        $(document).on("focus", "input[type='date']", function () {
+            $(this).attr("min", getTodayDate());
+        });
+
+        $(document).on("change", ".exam-date", function () {
+
+            let index = $(this).data("index");
+            let date = $(this).val();
+            let examId = $("#ExamId").val();
+
+            loadSlots(index, date, examId);
+        });
+
+        function loadSlots(index, date, examId) {
+
+            if (!date || !examId) return;
+
+            $.get("/ExamSchedule/GetAvailableSlots",
+                { examDate: date, examId: examId },
+                function (data) {
+
+                    let options = `<option value="">Select Slot</option>`;
+
+                    $.each(data, function (i, slot) {
+
+                        options += `
+                            <option value="${slot.examTimeSlotId}"
+                                ${slot.isDisabled ? "disabled" : ""}>
+                                ${slot.slotName}
+                            </option>`;
+                    });
+
+                    $(`select.time-slot[data-index='${index}']`).html(options);
+
+                    // 👉 CALL IT HERE
+                    $('.time-slot').trigger('change');
+                });
+        }
+
+        $("#classDropdown").change(function () {
+            var classId = $(this).val();
+
+            // reset section + subjects
+            $("#subjects").html('<div class="text-muted">Select class </div>');
+
+           // $.get('/ExamSchedule/GetSubjectsByClass', { classId, sectionId })
+            //     .done(function (data) {
+            //         // render
+            //     })
+            //     .fail(function () {
+            //         $("#subjects").html('<p class="text-danger">Failed to load subjects</p>');
+            //     });
+
+            if(classId)
+            {
+                $.get('/ExamSchedule/GetSubjectsByClass', { classId: classId }, function (data) {
+
+                    var rows = '';
+                     var index = 0;
+                    if (data.length === 0) {
+                        $("#subjects").html('<p>No subjects found.</p>');
+                        return;
+                    }
+
+                    $.each(data, function (i, item) {
+
+                        rows += `
+                            <div class="col-md-6 mb-3">
+                                <div class="card shadow-sm">
+
+                                    <div class="card-header text-white">
+                                        <strong>
+                                            <i class="bi bi-book"></i>
+                                            ${item.subjectName}
+                                            <span class="text-muted">(${item.subjectCode})</span>
+                                        </strong>
+                                    </div>
+
+                                    <div class="card-body">
+                                        <div class="row mb-2">
+                                            <input type="hidden"
+                                                   name="Subjects[${index}].SubjectId"
+                                                   value="${item.subjectId}" />
+
+                                            <div class="col-md-6 mb-2">
+                                                <label>Exam Date</label>
+                                                <input type="date"
+                                                       name="Subjects[${index}].ExamDate"
+                                                       class="form-control exam-date" data-index="${index}" required />
+                                            </div>
+
+                                            <div class="col-md-6 mb-2">
+                                                <label>Exam Slots</label>
+                                                 <select class="time-slot form-control"
+                                                     name="Subjects[${index}].ExamTimeSlotId"
+                                                    data-index="${index}">
+                                                    <option value="">Select Slot</option>
+                                                </select>
+                                            </div>
+                                           
+
+                                            <div class="col-md-6 mb-2">
+                                                <label>Max Marks</label>
+                                                <input type="number"
+                                                       name="Subjects[${index}].MaxMarks"
+                                                       class="form-control" min="1" required />
+                                            </div>
+
+                                            <div class="col-md-6 mb-2">
+                                                <label>Passing Marks</label>
+                                                <input type="number"
+                                                       name="Subjects[${index}].PassingMarks"
+                                                       class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`;
+
+                            index++;
+                        });
+
+                    $("#subjects").html(rows);
+                });
+            }
+        });
+
+
+        // $(document).on('change', '.time-slot', function () {
+
+        //     // get all selected slot values
+        //     var selectedValues = [];
+
+        //     $('.time-slot').each(function () {
+        //         var val = $(this).val();
+        //         if (val) {
+        //             selectedValues.push(val);
+        //         }
+        //     });
+
+        //     // loop through all dropdowns again
+        //     $('.time-slot').each(function () {
+
+        //         var currentDropdown = $(this);
+        //         var currentValue = currentDropdown.val();
+
+        //         currentDropdown.find('option').each(function () {
+
+        //             var optionValue = $(this).val();
+
+        //             // skip default option
+        //             if (!optionValue) return;
+
+        //             // disable if selected elsewhere, but NOT in current dropdown
+        //             if (selectedValues.includes(optionValue) && optionValue !== currentValue) {
+        //                 $(this).prop('disabled', true);
+        //             } else {
+        //                 $(this).prop('disabled', false);
+        //             }
+
+        //         });
+        //     });
+
+        // });
+
+
+        // Same slot cannot repeat on the same date
+        // Same slot is allowed on different dates
+        $(document).on('change', '.time-slot, .exam-date', function () {
+
+            // loop through each subject card (by index)
+            $('.time-slot').each(function () {
+
+                var currentDropdown = $(this);
+                var index = currentDropdown.data('index');
+
+                // get this row's date
+                var currentDate = $('.exam-date[data-index="' + index + '"]').val();
+                var currentValue = currentDropdown.val();
+
+                // collect selected slots ONLY for same date
+                var selectedValues = [];
+
+                $('.time-slot').each(function () {
+                    var otherIndex = $(this).data('index');
+                    var otherDate = $('.exam-date[data-index="' + otherIndex + '"]').val();
+                    var val = $(this).val();
+
+                    if (val && otherDate === currentDate) {
+                        selectedValues.push(val);
+                    }
+                });
+
+                // now enable/disable options for this dropdown
+                currentDropdown.find('option').each(function () {
+
+                    var optionValue = $(this).val();
+                    if (!optionValue) return;
+
+                    if (selectedValues.includes(optionValue) && optionValue !== currentValue) {
+                        $(this).prop('disabled', true);
+                    } else {
+                        $(this).prop('disabled', false);
+                    }
+
+                });
+
+            });
+
+        });
+
+
+    </script>
+
+}

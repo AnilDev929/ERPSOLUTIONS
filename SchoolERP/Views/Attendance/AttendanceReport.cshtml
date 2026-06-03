@@ -1,0 +1,954 @@
+﻿@using SchoolERP.Models.DTOS
+@model AttendanceDashboardDto
+@{
+    ViewData["Title"] = "Student Attendance";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --primary: #2563eb;
+        --secondary: #4f46e5;
+        --success: #16a34a;
+        --danger: #dc2626;
+        --warning: #f59e0b;
+        --light: #f8fafc;
+    }
+    /* HERO */
+
+    .attendance-hero {
+        background: linear-gradient( 135deg, var(--primary), var(--secondary) );
+        border-radius: 24px;
+        padding: 28px;
+        color: #fff;
+        margin-bottom: 24px;
+    }
+
+        .attendance-hero h2 {
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .attendance-hero p {
+            opacity: .9;
+            margin: 0;
+        }
+    /* KPI */
+
+    .stat-card {
+        background: #fff;
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,.06);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        height: 100%;
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+
+    .icon-blue {
+        background: #dbeafe;
+        color: #2563eb;
+    }
+
+    .icon-green {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .icon-red {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .icon-purple {
+        background: #ede9fe;
+        color: #7c3aed;
+    }
+
+    .stat-card h3 {
+        margin: 0;
+        font-weight: 700;
+    }
+
+    .stat-card small {
+        color: #64748b;
+    }
+    /* FILTER */
+
+    .filter-card {
+        background: #fff;
+        border-radius: 20px;
+        padding: 20px;
+        margin-bottom: 25px;
+        box-shadow: 0 8px 25px rgba(0,0,0,.05);
+    }
+
+    .filter-title {
+        font-weight: 700;
+        margin-bottom: 15px;
+        color: #334155;
+    }
+
+    .modern-filter {
+        height: 48px;
+        border-radius: 14px;
+    }
+    /* TABLE */
+
+    .table-card {
+        background: #fff;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(0,0,0,.05);
+    }
+
+    .table-header {
+        padding: 18px 24px;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .table-header h5 {
+        margin: 0;
+        font-weight: 700;
+    }
+
+    .attendance-table {
+        margin-bottom: 0;
+    }
+
+    .attendance-table thead {
+        background: #f8fafc;
+    }
+
+    .attendance-table th {
+        font-weight: 700;
+        color: #475569;
+        padding: 16px;
+        border: none;
+    }
+
+    .attendance-table td {
+        padding: 16px;
+        vertical-align: middle;
+    }
+    /* PROGRESS */
+
+    .attendance-progress {
+        height: 8px;
+        border-radius: 20px;
+        margin-bottom: 6px;
+    }
+    /* STATUS */
+
+    .badge-excellent {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .badge-good {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .badge-average {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .badge-low {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .custom-badge {
+        padding: 8px 12px;
+        border-radius: 30px;
+        font-weight: 600;
+    }
+    /* BUTTON */
+
+    .view-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    /* MOBILE */
+
+    @@media(max - width:768px) {
+        .attendance-hero {
+            text-align: center;
+        }
+
+        .table-header {
+            flex-direction: column;
+            gap: 10px;
+        }
+    }
+
+
+    /*Modal Design*/
+    .attendance-modal {
+        border: none;
+        border-radius: 22px;
+        overflow: hidden;
+    }
+
+    .attendance-header {
+        background: linear-gradient(135deg,#2563eb,#4f46e5);
+        color: white;
+    }
+
+    .summary-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 18px;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .summary-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+    }
+
+    .summary-card h4 {
+        margin: 0;
+        font-weight: 700;
+    }
+
+    .summary-card small {
+        color: #64748b;
+    }
+
+    .attendance-thead {
+        background: #f8fafc;
+    }
+
+    .attendance-thead th {
+        color: #475569;
+        font-weight: 700;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .present-badge {
+        background: #dcfce7;
+        color: #166534;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+    }
+
+    .absent-badge {
+        background: #fee2e2;
+        color: #b91c1c;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+    }
+</style>
+
+
+<div class="container-fluid">
+
+    <!-- HERO -->
+    <div class="attendance-hero">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+                <h2>
+                    <i class="bi bi-clipboard2-data-fill me-2"></i>Attendance Analytics
+                </h2>
+                <p>
+                    Daily Class & Section Attendance Report
+                </p>
+            </div>
+            <div>
+                <span class="badge bg-light text-dark fs-6">
+                    @Model.AttendanceDate.ToString("dd MMM yyyy")
+                </span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- KPI -->
+    <div class="row g-4 mb-2">
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="stat-card">
+                <div class="stat-icon icon-blue">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div>
+                    <h3>@Model.TotalStudents</h3>
+                    <small>Total Students</small>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="stat-card">
+                <div class="stat-icon icon-green">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+                <div>
+                    <h3>@Model.PresentStudents</h3>
+                    <small>Present</small>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="stat-card">
+                <div class="stat-icon icon-red">
+                    <i class="bi bi-x-circle-fill"></i>
+                </div>
+                <div>
+                    <h3>@Model.AbsentStudents</h3>
+                    <small>Absent</small>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="stat-card">
+                <div class="stat-icon icon-purple">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+                <div>
+                    <h3>@Model.AttendancePercentage%</h3>
+                    <small>Attendance Rate</small>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- FILTER -->
+    <form method="get">
+
+        <div class="filter-card">
+            <div class="row g-3">
+
+                <div class="col-lg-3">
+
+                    <label class="form-label fw-semibold">
+                        <i class="bi bi-building me-1"></i>
+                        Class
+                    </label>
+                    <select id="classId" name="classId" class="form-select modern-filter">
+                        <option value=""> All Classes </option>
+                        @foreach (var cls in ViewBag.Classes)
+                        {
+                            <option value="@cls.ClassId">
+                                @cls.ClassName
+                            </option>
+                        }
+                    </select>
+
+                </div>
+
+                <div class="col-lg-3">
+
+                    <label class="form-label fw-semibold">
+                        <i class="bi bi-diagram-3-fill me-1"></i>
+                        Section
+                    </label>
+
+                    <select name="sectionId" id="sectionId" class="form-select modern-filter">
+                        <option value="0"> All Section </option>
+                    </select>
+                </div>
+
+                <div class="col-lg-3">
+                    <label class="form-label fw-semibold">
+                        <i class="bi bi-calendar-event me-1"></i>
+                        Date
+                    </label>
+
+                    <input type="date" name="attendanceDate" class="form-control modern-filter"
+                           max="@DateTime.Today.ToString("yyyy-MM-dd")"
+                           value="@Model.AttendanceDate.ToString("yyyy-MM-dd")" />
+                </div>
+
+                <div class="col-lg-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search me-1"></i> Apply Filters
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+    </form>
+
+    <!-- OVERALL PROGRESS -->
+    <div class="table-card mb-2">
+        <div class="p-4">
+            <div class="d-flex justify-content-between">
+                <span class="fw-semibold"> Overall Attendance</span>
+                <span class="fw-bold">  @Model.AttendancePercentage% </span>
+            </div>
+            <div class="progress mt-3 attendance-progress">
+                <div class="progress-bar bg-success"
+                     style="width:@Model.AttendancePercentage%">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="attendanceModal" tabindex="-1"
+         data-bs-backdrop="static" data-bs-keyboard="false">
+
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content attendance-modal">
+
+                <!-- HEADER -->
+                <div class="modal-header attendance-header">
+                    <div>
+                        <h5 class="modal-title mb-1" id="attendanceTitle">
+                            <i class="bi bi-clipboard2-check-fill me-2"></i> Attendance Details
+                        </h5>
+                        <small class="text-white-50" id="attendanceSubTitle">
+                            Class Attendance Summary
+                        </small>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal">
+                    </button>
+                </div>
+
+                <div class="modal-body">
+
+                    <!-- LOADER -->
+                    <div id="attendanceLoader" class="text-center py-5 d-none">
+                        <div class="spinner-border text-primary"></div>
+                        <div class="mt-2 text-muted">
+                            Loading Attendance...
+                        </div>
+                    </div>
+
+                    <!-- SUMMARY -->
+                    <div class="row g-3 mb-4">
+
+                        <div class="col-md-3">
+                            <div class="summary-card">
+                                <div class="summary-icon bg-primary-subtle">
+                                    <i class="bi bi-people-fill text-primary"></i>
+                                </div>
+                                <div>
+                                    <h4 id="totalStudents">0</h4>
+                                    <small>Total Students</small>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-3">
+
+                            <div class="summary-card">
+
+                                <div class="summary-icon bg-success-subtle">
+                                    <i class="bi bi-check-circle-fill text-success"></i>
+                                </div>
+
+                                <div>
+                                    <h4 id="presentStudents">0</h4>
+                                    <small>Present</small>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-3">
+
+                            <div class="summary-card">
+
+                                <div class="summary-icon bg-danger-subtle">
+                                    <i class="bi bi-x-circle-fill text-danger"></i>
+                                </div>
+
+                                <div>
+                                    <h4 id="absentStudents">0</h4>
+                                    <small>Absent</small>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="summary-card">
+                                <div class="summary-icon bg-warning-subtle">
+                                    <i class="bi bi-graph-up-arrow text-warning"></i>
+                                </div>
+                                <div>
+                                    <h4 id="attendancePercent">0%</h4>
+                                    <small>Attendance</small>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- SEARCH -->
+
+                    <div class="row mb-3">
+
+                        <div class="col-md-6">
+
+                            <div class="input-group">
+                                <span class="input-group-text bg-white">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" id="attendanceSearch" class="form-control"
+                                       placeholder="Search Student..." />
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6 text-md-end">
+                            <span class="badge bg-primary fs-6">
+                                <span id="recordCount">0</span> Records
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- TABLE -->
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="attendance-thead">
+                                <tr>
+                                    <th>
+                                        <i class="bi bi-hash me-1"></i>
+                                        Roll No
+                                    </th>
+                                    <th>
+                                        <i class="bi bi-person-fill me-1"></i>
+                                        Student Name
+                                    </th>
+                                    <th class="text-center">
+                                        <i class="bi bi-check2-circle me-1"></i>
+                                        Status
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="attendanceBody">
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-card">
+        <div class="table-header">
+            <h5>
+                <i class="bi bi-table me-2"></i>
+                Class & Section Wise Attendance
+            </h5>
+            <span class="badge bg-primary">
+                @Model.Classes.Count Records
+            </span>
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table attendance-table">
+
+                <thead>
+                    <tr>
+                        <th>
+                            <i class="bi bi-building text-primary me-1"></i>
+                            Class
+                        </th>
+                        <th>
+                            <i class="bi bi-diagram-3-fill text-info me-1"></i>
+                            Section
+                        </th>
+                        <th>
+                            <i class="bi bi-people-fill text-success me-1"></i>
+                            Strength
+                        </th>
+                        <th>
+                            <i class="bi bi-check-circle-fill text-success me-1"></i>
+                            Present
+                        </th>
+                        <th>
+                            <i class="bi bi-x-circle-fill text-danger me-1"></i>
+                            Absent
+                        </th>
+                        <th>
+                            <i class="bi bi-bar-chart-fill text-warning me-1"></i>
+                            %
+                        </th>
+                        <th>
+                            <i class="bi bi-award-fill text-primary me-1"></i>
+                            Status
+                        </th>
+                        <th class="text-center">
+                            <i class="bi bi-eye-fill"></i>
+                        </th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    @foreach (var item in Model.Classes)
+                    {
+                        <tr>
+                            <td>@item.ClassName</td>
+                            <td>@item.SectionName</td>
+                            <td>@item.Strength</td>
+                            <td class="text-success fw-bold">
+                                @item.PresentCount
+                            </td>
+                            <td class="text-danger fw-bold">
+                                @item.AbsentCount
+                            </td>
+
+                            <td style="min-width:180px">
+
+                                <div class="progress attendance-progress">
+
+                                    <div class="progress-bar bg-success"
+                                         style="width:@item.AttendancePercentage%">
+                                    </div>
+
+                                </div>
+
+                                <small>
+                                    @item.AttendancePercentage%
+                                </small>
+
+                            </td>
+
+                            <td>
+
+                                @if (item.AttendancePercentage >= 95)
+                                {
+                                    <span class="custom-badge badge-excellent">
+                                        Excellent
+                                    </span>
+                                }
+                                else if (item.AttendancePercentage >= 90)
+                                {
+                                    <span class="custom-badge badge-good">
+                                        Good
+                                    </span>
+                                }
+                                else if (item.AttendancePercentage >= 80)
+                                {
+                                    <span class="custom-badge badge-average">
+                                        Average
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="custom-badge badge-low">
+                                        Low
+                                    </span>
+                                }
+
+                            </td>
+
+                            <td class="text-center">
+
+                                <button class="btn btn-outline-primary view-btn"
+                                        data-classid="@item.ClassId"
+                                        data-sectionid="@item.SectionId"
+                                        data-class="@item.ClassName"
+                                        data-section="@item.SectionName">
+
+                                    <i class="bi bi-eye-fill"></i>
+
+                                </button>
+
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <script>
+
+        $('#classId').change(function(){
+            var classId = $(this).val();
+
+            if(classId) {
+
+                $.getJSON('/Attendance/GetClassDetails', { classId: classId }, function(data){
+
+                    // Make sure sections exist
+                    if(data.sections && data.sections.length > 0) {
+                        var sectionDropdown = $('#sectionId');
+                        sectionDropdown.empty();
+                        sectionDropdown.append('<option value="">-- All Section --</option>');
+
+                        $.each(data.sections, function(i, section){
+                            sectionDropdown.append('<option value="'+section.sectionId+'" data-classsectionid="'+section.id+'">'+section.sectionName+'</option>');
+                        });
+                        
+                    } else {
+                        $('#sectionId').empty().append('<option value="">-- No Sections --</option>');
+                    }
+
+                });
+            }
+        });
+
+
+        $(document).on("click", ".view-btn", function () {
+
+            let classId = $(this).data("classid");
+            let sectionId = $(this).data("sectionid");
+
+            let className = $(this).data("class");
+            let sectionName = $(this).data("section");
+
+            $("#attendanceTitle").html(
+                `<i class="bi bi-clipboard2-check-fill me-2"></i>
+                 ${className} - ${sectionName}`
+            );
+
+            $("#attendanceSubTitle").text(`Attendance Details`
+            );
+
+            $("#attendanceBody").empty();
+
+            $("#recordCount").text("0");
+
+            $("#totalStudents").text("0");
+            $("#presentStudents").text("0");
+            $("#absentStudents").text("0");
+            $("#attendancePercent").text("0%");
+
+            $("#attendanceLoader").removeClass("d-none");
+
+            $("#attendanceModal").modal("show");
+
+            $.ajax({
+                url: "/Attendance/GetAttendanceDetails",
+                type: "GET",
+                data: {
+                    classId: classId,
+                    sectionId: sectionId,
+                    attendanceDate: $("#attendanceDate").val()
+                },
+                success: function (data) {
+
+                    $("#attendanceLoader").addClass("d-none");
+
+                    renderAttendance(data);
+                },
+                error: function () {
+
+                    $("#attendanceLoader").addClass("d-none");
+
+                    $("#attendanceBody").html(`
+                        <tr>
+                            <td colspan="3" class="text-center text-danger py-4">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                Unable to load attendance data.
+                            </td>
+                        </tr>
+                    `);
+                }
+            });
+        
+        });
+
+        function getStatusBadge(status) 
+        {
+
+            switch (status) 
+            {
+
+                case 0: // Present
+                    return `
+                        <span class="present-badge">
+                            <i class="bi bi-check-circle-fill me-1"></i>
+                            Present
+                        </span>`;
+
+                case 1: // Absent
+                    return `
+                        <span class="absent-badge">
+                            <i class="bi bi-x-circle-fill me-1"></i>
+                            Absent
+                        </span>`;
+
+                case 2: // Leave
+                    return `
+                        <span class="leave-badge">
+                            <i class="bi bi-calendar-check-fill me-1"></i>
+                            Leave
+                        </span>`;
+
+                case 3: // Pending
+                    return `
+                        <span class="pending-badge">
+                            <i class="bi bi-hourglass-split me-1"></i>
+                            Pending
+                        </span>`;
+
+                default:
+                    return `
+                        <span class="badge bg-secondary">
+                            Unknown
+                        </span>`;
+            }
+        }
+
+
+        function renderAttendance(data) {
+
+            if (!data || data.length === 0) {
+
+                $("#attendanceBody").html(`
+                    <tr>
+                        <td colspan="3" class="text-center py-5">
+
+                            <i class="bi bi-inbox display-6 text-muted"></i>
+
+                            <div class="mt-2">
+                                No attendance records found
+                            </div>
+
+                        </td>
+                    </tr>
+                `);
+
+                return;
+            }
+
+            let total = data.length;
+            let present = data.filter(x => x.isPresent).length;
+            let absent = total - present;
+
+            let html = "";
+
+            $.each(data, function (i, item) {
+
+                html += `
+                <tr>
+                    <td>${item.rollNo}</td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="rounded-circle bg-primary text-white
+                                 d-flex align-items-center justify-content-center"
+                                 style="width:35px;height:35px;">
+                                ${item.studentName.substring(0,1).toUpperCase()}
+                            </div>
+                            <div>
+                                <div class="fw-semibold">
+                                    ${item.studentName}
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td class="text-center">
+                        ${getStatusBadge(item.status)}
+                    </td>
+
+                </tr>`;
+            });
+
+            $("#attendanceBody").html(html);
+
+            let percentage =
+                total > 0
+                    ? ((present / total) * 100).toFixed(1)
+                    : 0;
+
+            $("#totalStudents").text(total);
+            $("#presentStudents").text(present);
+            $("#absentStudents").text(absent);
+            $("#attendancePercent").text(percentage + "%");
+            $("#recordCount").text(total);
+        }
+
+
+
+
+
+
+        $("#attendanceSearch").on("keyup", function () {
+
+            let value = $(this)
+                .val()
+                .toLowerCase();
+
+            $("#attendanceBody tr").filter(function () {
+
+                $(this).toggle(
+                    $(this)
+                        .text()
+                        .toLowerCase()
+                        .indexOf(value) > -1
+                );
+
+            });
+
+            $("#recordCount").text(
+                $("#attendanceBody tr:visible").length
+            );
+        });
+
+    </script>
+
+}

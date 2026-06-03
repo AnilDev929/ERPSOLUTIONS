@@ -1,0 +1,36 @@
+﻿@using SchoolERP.Models.DTOS
+@model List<MenuSectionDTO>
+
+@foreach (var data in Model)
+{
+    var collapseId = "menu_" + data.Id;
+
+    <li class="nav-item">
+
+        <a class="nav-link d-flex align-items-center justify-content-between collapsed"
+           data-bs-toggle="collapse"
+           href="#@collapseId">
+            <span><i class="@data.Icon me-1"></i> @data.Title </span> <i class="bi bi-chevron-down toggleicon"></i>
+        </a>
+
+        <div class="collapse" id="@collapseId">
+            <ul class="nav flex-column ms-3">
+
+                @* Normal menu items *@
+                @foreach (var item in data.Items)
+                {
+                    <li>
+                        <a class="nav-link d-flex align-items-center" href="@item.Url"><i class="bi @item.Icon me-2"></i> @item.Title</a>
+                    </li>
+                }
+
+                @* 🔥 Dynamic component rendering *@
+                @if (data.IsComponent.Value && !string.IsNullOrEmpty(data.ComponentName))
+                {
+                    @await Component.InvokeAsync(data.ComponentName)
+                }
+
+            </ul>
+        </div>
+    </li>
+}

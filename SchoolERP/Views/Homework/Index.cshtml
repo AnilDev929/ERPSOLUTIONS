@@ -1,0 +1,504 @@
+﻿@using SchoolERP.Models.ViewModels
+@model TeacherHomeworkDashboardVM
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Homework Dashboard";
+}
+
+<style>
+    .dashboard-card {
+        border-radius: 20px;
+        transition: 0.3s ease;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-4px);
+    }
+
+    .dashboard-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+
+    .homework-card {
+        transition: all 0.3s ease;
+        background: #fff;
+    }
+
+    .homework-card:hover {
+        box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+        transform: translateY(-2px);
+    }
+
+    .subject-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+
+
+
+    .stats-card {
+        position: relative;
+        overflow: hidden;
+        border-radius: 22px;
+        padding: 24px;
+        background: #ffffff;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+        transition: all 0.3s ease;
+        border: 1px solid #f1f3f5;
+        height: 100%;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 16px 40px rgba(0,0,0,0.08);
+    }
+
+    .stats-card-body {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .stats-title {
+        font-size: 14px;
+        color: #6c757d;
+        margin-bottom: 10px;
+        font-weight: 500;
+    }
+
+    .stats-value {
+        font-size: 36px;
+        font-weight: 700;
+        margin-bottom: 6px;
+        color: #111827;
+        line-height: 1;
+    }
+
+    .stats-subtitle {
+        font-size: 13px;
+        color: #9ca3af;
+    }
+
+    .stats-icon {
+        width: 72px;
+        height: 72px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 30px;
+        flex-shrink: 0;
+    }
+
+
+    /* PRIMARY */
+    .primary-card {
+        border-left: 5px solid #0d6efd;
+    }
+
+    .primary-card .stats-icon {
+        background: rgba(13,110,253,0.12);
+        color: #0d6efd;
+    }
+
+
+    /* WARNING */
+    .warning-card {
+        border-left: 5px solid #f59e0b;
+    }
+
+    .warning-card .stats-icon {
+        background: rgba(245,158,11,0.12);
+        color: #f59e0b;
+    }
+
+
+    /* SUCCESS */
+    .success-card {
+        border-left: 5px solid #10b981;
+    }
+
+    .success-card .stats-icon {
+        background: rgba(16,185,129,0.12);
+        color: #10b981;
+    }
+
+
+    /* DANGER */
+    .danger-card {
+        border-left: 5px solid #ef4444;
+    }
+
+    .danger-card .stats-icon {
+        background: rgba(239,68,68,0.12);
+        color: #ef4444;
+    }
+
+</style>
+
+<div class="container-fluid py-4">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold mb-1">
+                📘 Homework Dashboard
+            </h2>
+
+            <p class="text-muted mb-0">
+                Manage homework assignments and student submissions
+            </p>
+        </div>
+
+        <a href="/Homework/Create"
+           class="btn btn-primary rounded-pill shadow-sm px-4">
+            <i class="bi bi-plus-circle me-2"></i>
+            Create Homework
+        </a>
+
+    </div>
+
+
+    <!-- Summary Cards -->
+    <div class="row g-4 mb-4">
+
+        <!-- Total Active -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card primary-card">
+                <div class="stats-card-body">
+                    <div>
+                        <p class="stats-title"> Total Active </p>
+                        <h2 class="stats-value"> @Model.TotalActive </h2>
+                        <span class="stats-subtitle">Active homework assignments</span>
+                    </div>
+                    <div class="stats-icon">
+                        <i class="bi bi-journal-bookmark-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Review -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card warning-card">
+                <div class="stats-card-body">
+                    <div>
+                        <p class="stats-title">Pending Review</p>
+                        <h2 class="stats-value">@Model.PendingReview</h2>
+                        <span class="stats-subtitle"> Awaiting teacher review</span>
+                    </div>
+                    <div class="stats-icon"><i class="bi bi-clock-history"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submitted Today -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card success-card">
+                <div class="stats-card-body">
+                    <div>
+                        <p class="stats-title"> Submitted Today</p>
+                        <h2 class="stats-value">@Model.SubmittedToday</h2>
+                        <span class="stats-subtitle"> Student submissions today</span>
+                    </div>
+                    <div class="stats-icon"><i class="bi bi-check-circle-fill"></i></div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Overdue -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card danger-card">
+                <div class="stats-card-body">
+                    <div>
+                        <p class="stats-title">Overdue</p>
+                        <h2 class="stats-value"> @Model.Overdue</h2>
+                        <span class="stats-subtitle">Homework past due date</span>
+                    </div>
+                    <div class="stats-icon">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+
+    @* <!-- Summary Cards -->
+    <div class="row g-4 mb-4">
+
+        <!-- Active Homework -->
+        <div class="col-md-3">
+            <div class="card dashboard-card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1"> Total Active</p>
+                            <h3 class="fw-bold mb-0"> @Model.TotalActive </h3>
+                        </div>
+                        <div class="dashboard-icon bg-primary-subtle text-primary">
+                            <i class="bi bi-journal-bookmark-fill"></i>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Pending Review -->
+        <div class="col-md-3">
+            <div class="card dashboard-card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <p class="text-muted mb-1">Pending Review </p>
+                            <h3 class="fw-bold mb-0"> @Model.PendingReview</h3>
+                        </div>
+
+                        <div class="dashboard-icon bg-warning-subtle text-warning">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Submitted Today -->
+        <div class="col-md-3">
+            <div class="card dashboard-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Submitted Today</p>
+                            <h3 class="fw-bold mb-0"> @Model.SubmittedToday</h3>
+                        </div>
+                        <div class="dashboard-icon bg-success-subtle text-success">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overdue -->
+        <div class="col-md-3">
+            <div class="card dashboard-card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <p class="text-muted mb-1">Overdue</p>
+                            <h3 class="fw-bold mb-0">@Model.Overdue</h3>
+                        </div>
+
+                        <div class="dashboard-icon bg-danger-subtle text-danger">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div> *@
+
+
+    <!-- Homework List -->
+    <div class="card border-0 shadow-sm rounded-4">
+
+        <div class="card-header bg-white border-0 py-3">
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+
+                <h5 class="fw-bold mb-0">
+                    Recent Homework
+                </h5>
+
+                <div class="d-flex gap-2">
+
+                    <input type="text"
+                           class="form-control rounded-pill"
+                           placeholder="Search Homework..." />
+
+                    <select id="allsubject" class="form-select rounded-pill">
+                        <option>All Subjects</option>
+                    </select>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="card-body">
+
+            @if (Model.Homeworks.Any())
+            {
+                @foreach (var item in Model.Homeworks)
+                {
+                    var badgeClass = "bg-warning";
+
+                    if (item.Status == "Completed")
+                    {
+                        badgeClass = "bg-success";
+                    }
+                    else if (item.Status == "Overdue")
+                    {
+                        badgeClass = "bg-danger";
+                    }
+
+                    <div class="homework-card border rounded-4 p-3 mb-3">
+
+                        <div class="row align-items-center">
+
+                            <!-- Subject -->
+                            <div class="col-md-3">
+
+                                <div class="d-flex align-items-center">
+
+                                    <div class="subject-icon bg-primary-subtle text-primary me-3">
+                                        <i class="bi bi-book-fill"></i>
+                                    </div>
+
+                                    <div>
+                                        <h6 class="fw-bold mb-1">
+                                            @item.SubjectName
+                                        </h6>
+
+                                        <small class="text-muted">
+                                            @item.ClassName
+                                        </small>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- Homework Info -->
+                            <div class="col-md-4">
+
+                                <h6 class="fw-semibold mb-1">
+                                    @item.Title
+                                </h6>
+
+                                <small class="text-muted">
+                                    Due:
+                                    @item.DueDate.ToString("dd MMM yyyy")
+                                </small>
+
+                            </div>
+
+
+                            <!-- Progress -->
+                            <div class="col-md-2">
+
+                                <div class="small text-muted mb-1">
+                                    Submission
+                                </div>
+
+                                <div class="fw-semibold">
+                                    @item.SubmittedCount/@item.TotalStudents
+                                </div>
+
+                                <div class="progress mt-1" style="height:6px;">
+
+                                    @{
+                                        var progress =
+                                        (item.TotalStudents > 0)
+                                        ? ((item.SubmittedCount * 100)
+                                        / item.TotalStudents)
+                                        : 0;
+                                    }
+
+                                    <div class="progress-bar bg-success"
+                                         style="width:@progress%">
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- Status -->
+                            <div class="col-md-1 text-center">
+
+                                <span class="badge @badgeClass rounded-pill px-3 py-2">
+                                    @item.Status
+                                </span>
+
+                            </div>
+
+
+                            <!-- Actions -->
+                            <div class="col-md-2 text-end">
+
+                                <a href="/Homework/Details/@item.HomeworkId"
+                                   class="btn btn-light btn-sm rounded-pill">
+                                    View
+                                </a>
+
+                                <a href="/Homework/Review/@item.HomeworkId"
+                                   class="btn btn-primary btn-sm rounded-pill">
+                                    Review
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center py-5">
+
+                    <img src="/images/empty-homework.svg"
+                         width="120"
+                         class="mb-3" />
+
+                    <h5 class="fw-bold">
+                        No Homework Found
+                    </h5>
+
+                    <p class="text-muted">
+                        Start by creating your first homework assignment.
+                    </p>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>

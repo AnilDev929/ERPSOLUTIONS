@@ -1,0 +1,94 @@
+﻿@using SchoolERP.Models.Entities
+@model Subject
+
+@{
+    var isEdit = Model.SubjectId > 0;
+    ViewBag.Title = isEdit ? "Edit Subject" : "Add Subject";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <div class="card shadow-sm rounded">
+        <!-- Header -->
+        <div class="card-header bg-primary text-white d-flex align-items-center py-3 px-4">
+            <i class="fas fa-book-open fa-2x me-1"></i>
+            <h3 class="mb-0 font-weight-bold">@ViewBag.Title</h3>
+        </div>
+
+        <!-- Body -->
+        <div class="card-body p-4">
+            <p class="text-muted mb-4">Fill in the details below to @ViewBag.Title.ToLower() a subject.</p>
+
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+
+                <!-- Validation Summary -->
+                @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
+
+                <div class="row">
+                    <!-- Is Active Toggle -->
+                    <div class="form-group col-md-4 d-flex align-items-center mb-3">
+                        <div class="custom-control custom-switch">
+                            @Html.CheckBoxFor(m => m.IsActive, new { @class = "custom-control-input", id = "Status" })
+                            <label class="custom-control-label font-weight-bold" for="IsActive">
+                                Active
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- Subject Name -->
+                    <div class="form-group col-md-6 mb-3">
+                        <label for="SubjectName" class="font-weight-bold">
+                            <i class="fas fa-pencil-alt mr-2"></i> Subject Name
+                        </label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text px-3"><i class="fas fa-book"></i></span>
+                            </div>
+                            @Html.TextBoxFor(m => m.SubjectName, new { @class = "form-control", placeholder = "Enter subject name" })
+                        </div>
+                        @Html.ValidationMessageFor(m => m.SubjectName, "", new { @class = "text-danger" })
+                    </div>
+
+                    <!-- Subject Code -->
+                    <div class="form-group col-md-6 mb-3">
+                        <label for="SubjectCode" class="font-weight-bold">
+                            <i class="fas fa-barcode mr-2"></i> Subject Code <small class="text-muted">(optional)</small>
+                        </label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text px-3"><i class="fas fa-code"></i></span>
+                            </div>
+                            @Html.TextBoxFor(m => m.SubjectCode, new { @class = "form-control", placeholder = "Enter subject code" })
+                        </div>
+                        @Html.ValidationMessageFor(m => m.SubjectCode, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Description -->
+                    <div class="form-group col-md-8 mb-3">
+                        <label for="Description" class="font-weight-bold">
+                            <i class="fas fa-align-left mr-2"></i> Description <small class="text-muted">(optional)</small>
+                        </label>
+                        @Html.TextAreaFor(m => m.Description, new { @class = "form-control", rows = 3, placeholder = "Enter description" })
+                    </div>
+
+                    
+                </div>
+
+                <!-- Buttons -->
+                <div class="d-flex justify-content-start gap-2 mt-4">
+                    <button type="submit" class="btn btn-success d-flex align-items-center px-4">
+                        <i class="fas fa-save me-1"></i> @ViewBag.Title
+                    </button>
+                    <a href="@Url.Action("Index", "Subjects")" class="btn btn-secondary d-flex align-items-center px-4">
+                        <i class="fas fa-arrow-left me-1"></i> Back
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,160 @@
+﻿@using SchoolERP.Models.ViewModels
+@using SchoolERP.Enum
+@model StudentAttendanceVM
+@{
+    ViewBag.Title = "My Attendance";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+
+    <!-- 🔹 KPI Cards -->
+    <div class="row g-3 mb-3">
+
+        <div class="col-6 col-md-3">
+            <div class="card text-white border-0 rounded-3 shadow-sm"
+                 style="background: linear-gradient(45deg, #1cc88a, #13855c);">
+                <div class="card-body text-center">
+                    <i class="bi bi-graph-up fs-4 mb-1"></i>
+                    <small class="d-block">Overall</small>
+                    <h3 class="fw-bold">@Model.OverallPercentage.ToString("0.00") %</h3>
+
+                    <div class="progress bg-light mt-2" style="height: 10px;">
+                        <div class="progress-bar bg-dark"
+                             style="width:@($"{Model.OverallPercentage:0.##}%")">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="card text-white border-0 rounded-3 shadow-sm"
+                 style="background: linear-gradient(45deg, #4e73df, #224abe);">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-month fs-4 mb-1"></i>
+                    <small class="d-block">This Month</small>
+                    <h3 class="fw-bold">@Model.MonthPercentage.ToString("0.00") %</h3>
+
+                    <div class="progress bg-light mt-2" style="height: 10px;">
+                        <div class="progress-bar bg-dark"
+                             style="width:@($"{Model.MonthPercentage:0.##}%")">
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="card text-dark border-0 rounded-3 shadow-sm"
+                 style="background: linear-gradient(45deg, #f6c23e, #dda20a);">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-week fs-4 mb-1"></i>
+                    <small class="d-block">This Week</small>
+                    <h3 class="fw-bold">@Model.WeekPercentage.ToString("0.00") %</h3>
+
+                    <div class="progress bg-light mt-2" style="height: 10px;">
+                        <div class="progress-bar bg-dark"
+                             style="width:@($"{Model.WeekPercentage:0.##}%")">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="card text-white border-0 rounded-3 shadow-sm"
+                 style="background: linear-gradient(45deg, #e74a3b, #b02a1f);">
+                <div class="card-body text-center">
+                    <i class="bi bi-person-x fs-4 mb-1"></i>
+                    <small class="d-block">Absents</small>
+                    <h3 class="fw-bold">@Model.TotalAbsent</h3>
+
+                    <div class="progress bg-light mt-2" style="height: 6px;">
+                        <div class="progress-bar bg-dark" style="width:@($"{Model.TotalAbsent:0.##}%")">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🔹 Toggle -->
+    <div class="d-flex justify-content-end mb-2">
+        <a href="?view=week" class="btn btn-sm btn-outline-primary me-2">Week</a>
+        <a href="?view=month" class="btn btn-sm btn-outline-secondary">Month</a>
+    </div>
+
+
+    <div class="row">
+        <div class="col-md-6">
+            <!-- 🔹 Subject Stats -->
+            <div class="card mb-3">
+                <div class="card-header text-white fw-semibold rounded-top d-flex align-items-center gap-2"
+                     style="background: linear-gradient(45deg, #4e73df, #224abe);">
+                    <i class="bi bi-graph-up"></i>
+                    Subject Performance
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table mb-0 text-center">
+                        <thead>
+                            <tr class="table-light">
+                                <th><i class="bi bi-book me-1 text-primary"></i> Subject</th>
+                                <th><i class="bi bi-check-circle me-1 text-success"></i> Present</th>
+                                <th><i class="bi bi-x-circle me-1 text-danger"></i> Absent</th>
+                                <th><i class="bi bi-percent me-1 text-warning"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var s in Model.SubjectStats)
+                            {
+                                <tr>
+                                    <td>@s.Subject</td>
+                                    <td class="text-success">@s.Present</td>
+                                    <td class="text-danger">@s.Absent</td>
+                                    <td>
+                                        <span class="badge @(s.Percentage < 75 ? "bg-danger" : "bg-success")">
+                                            @s.Percentage %
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <!-- 🔹 Recent Attendance -->
+            <div class="card">
+                <div class="card-header text-white fw-semibold rounded-top d-flex align-items-center gap-2"
+                     style="background: linear-gradient(45deg, #1cc88a, #13855c);">
+                    <i class="bi bi-calendar-check"></i>
+                    Recent Attendance
+                </div>
+                <ul class="list-group list-group-flush">
+                    @foreach (var item in Model.AttendanceList)
+                    {
+                        <li class="list-group-item d-flex justify-content-between">
+                            <div>
+                                <div>@item.Subject</div>
+                                <small class="text-muted">@item.Date.ToShortDateString()</small>
+                            </div>
+                            <span class="badge d-inline-flex align-items-center justify-content-center @(item.Status == AttendanceStatus.Present ? "bg-success" : "bg-danger")">
+                                @item.Status
+                            </span>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+
+
+    
+
+   
+
+</div>

@@ -1,0 +1,270 @@
+﻿@using SchoolERP.Enum
+@using SchoolERP.Models.DTOS
+
+@model List<LeaveApprovalDto>
+@{
+    ViewData["Title"] = "Leave";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="container mt-4">
+
+    <!-- HEADER -->
+    <div class="d-flex align-items-center mb-3">
+        <i class="bi bi-person-check fs-3 text-success me-2"></i>
+        <div>
+            <h4 class="mb-0">Leave Approval Page</h4>
+            <small class="text-muted">Review and manage teacher leave requests</small>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+
+        <div class="card-header bg-dark text-white">
+            <i class="bi bi-list-check"></i> Pending Requests
+        </div>
+
+        <div class="card-body">
+
+            <!-- Reject Leave Modal -->
+            <div class="modal fade" id="rejectModal" tabindex="-1" data-bs-backdrop="static"
+                 data-bs-keyboard="false">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 rounded-4 overflow-hidden shadow">
+
+                        <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title">
+                                <i class="bi bi-x-circle me-2"></i>Reject Leave Application
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal">
+                            </button>
+                        </div>
+
+                        <form asp-controller="Leave" asp-action="TakeAction" method="post">
+                            <div class="modal-body">
+                                <input type="hidden" name="id" id="rejectLeaveId" />
+                                <input type="hidden" name="status" value="Rejected" />
+
+                                <!-- Label + Counter -->
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label class="form-label fw-semibold mb-0">Rejection Reason</label>
+                                    <span id="rejectCounter" class="badge rounded-pill bg-primary px-3 py-2 shadow-sm">
+                                        0 / 300
+                                    </span>
+                                </div>
+                                <!-- Textarea -->
+                                <textarea name="comment"
+                                          id="rejectComment"
+                                          class="form-control form-control-lg shadow-sm border-2"
+                                          rows="5" maxlength="300" placeholder="Enter reason for rejection..."
+                                          required></textarea>
+
+                                @* <div class="mb-3">
+                                    <label class="form-label fw-semibold">  Rejection Reason </label>
+                                    <textarea name="comment" class="form-control" rows="4"  placeholder="Enter reason for rejection..."
+                                              required></textarea>
+                                    <div class="form-text"> Employee will be able to view this comment.</div>
+                                </div> *@
+
+                                <!-- Helper Text -->
+                                <div class="d-flex justify-content-between mt-2">
+                                    <div class="form-text"> Employee will be able to view this comment.
+                                    </div>
+                                    <div class="small text-muted"> Max 300 characters</div>
+                                </div>
+
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    Cancel
+                                </button>
+
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="bi bi-x-circle me-1"></i> Confirm Reject</button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Remark Modal -->
+            <div class="modal fade" id="remarkModal" tabindex="-1" data-bs-backdrop="static"
+                 data-bs-keyboard="false">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content shadow">
+
+                        <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title">
+                                <i class="bi bi-chat-left-text me-2"></i>Manager Remark
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal">
+                            </button>
+                        </div>
+
+                        <div class="modal-body">
+                            <div class="alert alert-light border mb-0">
+                                <p id="remarkText" class="mb-0"></p>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"> Close </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <table class="table table-striped">
+                <thead class="table-light">
+                    <tr>
+                        <th>Teacher</th>
+                        <th>Type</th>
+                        <th>Dates</th>
+                        <th>Days</th>
+                        <th>Reason</th>
+                        <th>File</th>
+                        <th>Status</th>
+                        <th>Comment</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var leave in Model)
+                    {
+                        <tr>
+                            <td>@leave.TeacherName</td>
+                            <td>@leave.LeaveType</td>
+                            <td>@leave.FromDate.ToString("dd MMM") - @leave.ToDate.ToString("dd MMM")</td>
+                            <td>@leave.TotalDays</td>
+                            <td>@leave.Reason</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(leave.DocumentPath))
+                                {
+                                    <a href="@leave.DocumentPath"
+                                       target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-paperclip"></i> View
+                                    </a>
+                                }
+                            </td>
+                            <td>
+                                @switch (leave.Status)
+                                {
+                                    case LeaveStatus.Pending:
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="bi bi-hourglass-split"></i> Pending
+                                        </span>
+                                        break;
+                                    case LeaveStatus.Approved:
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle"></i> Approved
+                                        </span>
+                                        break;
+                                    case LeaveStatus.Rejected:
+                                        <span class="badge bg-danger">
+                                            <i class="bi bi-x-circle"></i> Rejected
+                                        </span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(leave.Remark))
+                                {
+                                    <button type="button" title="View Manager Remark"
+                                            class="btn btn-sm btn-outline-danger"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#remarkModal"
+                                            data-remark="@leave.Remark">
+                                        <i class="bi bi-chat-left-text"></i>
+                                    </button>
+                                }
+                            </td>
+                            <td>
+                                @if (leave.Status == LeaveStatus.Pending)
+                                {
+                                    <form asp-action="TakeAction" method="post" class="d-inline">
+                                        <input type="hidden" name="id" value="@leave.Id" />
+                                        <button name="status" value="Approved" class="btn btn-success btn-sm">
+                                            <i class="bi bi-check-circle"></i>
+                                        </button>
+                                    </form>
+
+                                    @* <form asp-action="TakeAction" method="post" class="d-inline">
+                                        <input type="hidden" name="id" value="@leave.Id" />
+                                        <button name="status" value="Rejected" class="btn btn-danger btn-sm">
+                                            <i class="bi bi-x-circle"></i>
+                                        </button>
+                                    </form> *@
+
+                                    <button type="button"
+                                            class="btn btn-danger btn-sm"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#rejectModal"
+                                            data-leaveid="@leave.Id">
+                                        <i class="bi bi-x-circle"></i>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Processed</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <script>
+        const rejectModal = document.getElementById('rejectModal');
+        const remarkModal = document.getElementById('remarkModal');
+        const rejectTextarea = document.getElementById('rejectComment');
+        const rejectCounter = document.getElementById('rejectCounter');
+        const maxChars = 300;
+
+        rejectTextarea.addEventListener('input', function () {
+
+            const count = this.value.length;
+            rejectCounter.textContent = `${count} / ${maxChars}`;
+
+            // Dynamic counter color
+            rejectCounter.classList.remove(
+                'bg-primary',
+                'bg-warning',
+                'bg-danger'
+            );
+
+            if (count >= 250) {
+                rejectCounter.classList.add('bg-danger');
+            }
+            else if (count >= 200) {
+                rejectCounter.classList.add('bg-warning');
+            }
+            else {
+                rejectCounter.classList.add('bg-primary');
+            }
+        });
+
+        rejectModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const leaveId = button.getAttribute('data-leaveid');
+            document.getElementById('rejectLeaveId').value = leaveId;
+        });
+
+        remarkModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const remark = button.getAttribute('data-remark');
+            document.getElementById('remarkText').textContent = remark;
+        });
+    </script>
+}

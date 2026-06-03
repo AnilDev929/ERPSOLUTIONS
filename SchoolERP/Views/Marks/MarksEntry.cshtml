@@ -1,0 +1,318 @@
+﻿
+@using SchoolERP.Models.ViewModels
+@model MarksEntryVM
+@{
+    ViewData["Title"] = "Grade Rule Configuration";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-primary text-white">
+            <h4>
+                <i class="bi bi-journal-check"></i> Marks Entry
+            </h4>
+            <small>Enter student marks based on selected filters</small>
+        </div>
+
+
+        <form method="post" asp-action="SaveMarks" asp-controller="Marks">
+            @Html.AntiForgeryToken()
+
+            <div class="card-body">
+
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold text-secondary">
+                            <i class="bi bi-journal-check text-primary me-2"></i>
+                            Select Exam
+                        </label>
+                        @Html.DropDownListFor(m => m.ExamId, Model.Exams, "Exam",
+                        new { @class = "form-select rounded-3 shadow-sm", id = "ExamId" })
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold text-secondary">
+                            <i class="bi bi-building text-success me-2"></i>
+                            Select Class
+                        </label>
+                        @Html.DropDownListFor(m => m.ClassId, Model.Classes, "Classes",
+                                                new { @class = "form-select rounded-3 shadow-sm", id = "ClassId" })
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold text-secondary">
+                            <i class="bi bi-grid-3x3-gap-fill text-warning me-2"></i>
+                            Select Section
+                        </label>
+                        <select id="SectionId" class="form-select rounded-3 shadow-sm">
+                            <option value="">-- Select Section --</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold text-secondary">
+                            <i class="bi bi-book-half text-danger me-2"></i>
+                            Select Subject
+                        </label>
+                        <select id="SubjectId" class="form-select rounded-3 shadow-sm">
+                            <option value="">-- Select Subject --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <hr />
+
+                <table class="table table-hover mt-3">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Student</th>
+                            <th>Marks</th>
+                            <th>Grade</th>
+                            <th>Absent</th>
+                            <th>Remark</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTable">
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">
+                                Select Class & Section to load students
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <button type="submit" class="btn btn-success w-100" id="saveBtn" disabled>
+                    <i class="bi bi-save"></i> Save Marks
+                </button>
+
+            </div>
+
+        </form>
+    
+    </div>
+</div>
+
+@section Scripts {
+
+    <script>
+        let gradeRules = [];
+
+        $(document).ready(function () {
+
+            $.get("/Marks/GetGradeRules", function (data) {
+                gradeRules = data;
+                console.log("Grade Rules Loaded:", gradeRules);
+            });
+
+        });
+
+        // Load Sections + Subjects
+        $("#ClassId").change(function () {
+
+            let classId = $(this).val();
+
+            // reset section dropdown
+            $("#SectionId").html('<option value="">Loading...</option>');
+             $("#SubjectId").html('<option>Loading...</option>');
+
+            if (classId === "") {
+                $("#SectionId").html('<option value="">-- Select Section --</option>');
+                $("#SubjectId").html('<option>-- Select Subject --</option>');
+                return;
+            }
+
+            $.ajax({
+                url: '/Marks/GetSectionsByClass',
+                type: 'GET',
+                data: { classId: classId },
+                success: function (data) {
+
+                    // Sections
+                    let options = '<option value="">-- Select Section --</option>';
+                    $.each(data, function (i, item) {
+                        options += `<option value="${item.id}">${item.name}</option>`;
+                    });
+                    $("#SectionId").html(options);
+
+                    loadSubject(classId);
+                },
+                error: function () {
+                    alert("Failed to load sections");
+                }
+            });
+
+        });
+
+
+        function loadSubject(classId){
+
+            $.ajax({
+                url: '/Marks/GetSubjectsByClass',
+                type: 'GET',
+                data: { classId: classId },
+                success: function (data) {
+
+                    // Subjects
+                    let subjectOptions = '<option value="">-- Select Subject --</option>';
+                    $.each(data, function (i, item) {
+                        subjectOptions += `<option value="${item.subjectId}">${item.subjectName}</option>`;
+                    });
+                    $("#SubjectId").html(subjectOptions);
+
+                },
+                error: function () {
+                    alert("Failed to load sections");
+                }
+            });
+        }
+
+         // Load Students by section wise
+        $("#SectionId").change(function () {
+
+            let classId = $("#ClassId").val();
+            let sectionId = $(this).val();
+
+            $("#studentTable").html("<tr><td colspan='5'>Loading...</td></tr>");
+            $("#saveBtn").prop("disabled", true);
+
+            $.get("/Marks/GetStudents",
+            {
+                classId, sectionId
+            },
+            function (data) {
+
+                let rows = "";
+
+                $.each(data, function (i, s) {
+
+                    rows += `
+                    <tr>
+                        <td>${s.studentName}</td>
+
+                        <!-- Marks -->
+                        <td>
+                                  <input type="number" min="0" max="100"
+                                   step="1" name="Students[${i}].MarksObtained"
+                                   class="form-control" />
+
+                            <input type="hidden"
+                                   name="Students[${i}].StudentId"
+                                   value="${s.studentId}" />
+                        </td>
+
+                        <!-- Grade -->
+                        <td>
+                            <input type="text"
+                                   name="Students[${i}].Grade"
+                                   class="form-control" readonly
+                                   placeholder="E/A / B / C / F" />
+                        </td>
+
+                        <!-- Is Absent -->
+                        <td class="text-center">
+                            <input type="checkbox"
+                                   name="Students[${i}].IsAbsent"
+                                   value="true" class="absent-checkbox"/>
+
+                            <input type="hidden"
+                                   name="Students[${i}].IsAbsent"
+                                   value="false" />
+                        </td>
+
+                        <!-- Remark -->
+                        <td>
+                            <input type="text"
+                                   name="Students[${i}].Remark"
+                                   class="form-control"
+                                   placeholder="Optional remark" />
+                        </td>
+                    </tr>`;
+                });
+
+                $("#studentTable").html(rows);
+                $("#saveBtn").prop("disabled", false);
+            });
+        });
+
+
+        $(document).on("change", "input[type='checkbox']", function () {
+
+            let row = $(this).closest("tr");
+
+            if ($(this).is(":checked")) {
+                row.find("input[name*='MarksObtained']").val("").prop("disabled", true);
+            } else {
+                row.find("input[name*='MarksObtained']").prop("disabled", false);
+            }
+        });
+
+        $(document).on("change", ".absent-checkbox", function () {
+
+            let row = $(this).closest("tr");
+            let marksInput = row.find("input[name*='MarksObtained']");
+            let gradeInput = row.find("input[name*='Grade']");
+
+            if ($(this).is(":checked")) {
+                marksInput.val("").prop("disabled", true);
+                gradeInput.val("ABSENT")
+                    .css("background-color", "#dc3545")
+                    .css("color", "#fff");
+            } else {
+                marksInput.prop("disabled", false);
+                gradeInput.val("").css({ "background-color": "", "color": "" });
+            }
+        });
+
+        $(document).on("input", "input[name*='MarksObtained']", function () {
+
+            let marks = parseFloat($(this).val());
+            let row = $(this).closest("tr");
+            let gradeInput = row.find("input[name*='Grade']");
+
+            if (isNaN(marks) || marks < 0 || marks > 100) {
+                gradeInput.val("").css({ "background-color": "", "color": "" });
+                return;
+            }
+
+            let matchedRule = gradeRules.find(r => marks >= r.min && marks <= r.max);
+
+            if (matchedRule) {
+                gradeInput.val(matchedRule.grade);
+            } else {
+                gradeInput.val("N/A")
+                    .css("background-color", "#6c757d")
+                    .css("color", "#fff");
+            }
+        });
+
+            // Validation before submit
+        $("form").submit(function () {
+
+            let valid = true;
+
+            $("#studentTable tr").each(function () {
+
+                let isAbsent = $(this).find(".absent-checkbox").is(":checked");
+                let marks = $(this).find(".marks-input").val();
+
+                if (!isAbsent && (marks === "" || marks < 0 || marks > 100)) {
+                    valid = false;
+                    $(this).find(".marks-input").addClass("is-invalid");
+                }
+            });
+
+            if (!valid) {
+                alert("Please enter valid marks for all students.");
+            }
+
+            $("#saveBtn").prop("disabled", true);
+
+            return valid;
+        });
+
+
+    </script>
+
+}

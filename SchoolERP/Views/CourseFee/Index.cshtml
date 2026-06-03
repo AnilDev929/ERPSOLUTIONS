@@ -1,0 +1,430 @@
+﻿
+@{
+    ViewBag.Title = "Corse Fee";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="container mt-4">
+
+    <!-- 🔷 HEADER -->
+    <div class="d-flex align-items-center mb-3">
+        <i class="bi bi-cash-coin fs-2 text-primary me-2"></i>
+        <div>
+            <h4 class="mb-0">Course Fee Management</h4>
+            <small class="text-muted">
+                Configure and manage fee structure for each class and academic year
+            </small>
+        </div>
+    </div>
+    
+    <!-- 🔷 FILTER SECTION -->
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+
+            <div class="row align-items-end">
+
+                <div class="col-md-4">
+                    <label><i class="bi bi-mortarboard"></i> Class</label>
+                    <select id="filterClassId" class="form-control"></select>
+                </div>
+
+                <div class="col-md-4">
+                    <label><i class="bi bi-calendar3"></i> Academic Year</label>
+                    <select id="filterYearId" class="form-control"></select>
+                </div>
+
+                <div class="col-md-4">
+                    <button class="btn btn-success me-4" onclick="loadData()">
+                        <i class="bi bi-search"></i> Load Fees
+                    </button>
+
+                    <!-- 🔷 ACTION BUTTON -->
+                    <button class="btn btn-primary mb-3" onclick="openModal(0)">
+                        <i class="bi bi-plus-circle"></i> Add Fee
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+    
+
+    <!-- 🔷 TABLE -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <table class="table table-bordered table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th><i class="bi bi-mortarboard"></i> Class</th>
+                        <th><i class="bi bi-calendar3"></i> Year</th>
+                        <th>Admission</th>
+                        <th>Tuition</th>
+                        <th>Library Fee</th>
+                        <th>Other Fee</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th width="150">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="tblData"></tbody>
+            </table>
+
+        </div>
+    </div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal fade" id="feeModal" data-bs-backdrop="static"
+     data-bs-keyboard="false">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content shadow-lg border-0">
+
+            <!-- HEADER -->
+            <div class="modal-header bg-primary text-white">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-cash-coin fs-4 me-2"></i>
+                    <div>
+                        <h5 class="mb-0">Fee Configuration</h5>
+                        <small class="opacity-75">Create / Update fee structure</small>
+                    </div>
+                </div>
+                <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- BODY -->
+            <div class="modal-body">
+
+                <input type="hidden" id="CourseFeeId">
+
+                <!-- CLASS + YEAR -->
+                <div class="row g-3 mb-3">
+
+                    <div class="col-md-6">
+                        <label><i class="bi bi-mortarboard"></i> Class</label>
+                        <select id="ClassId" class="form-select"></select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label><i class="bi bi-calendar3"></i> Academic Year</label>
+                        <select id="AcademicYearId" class="form-select"></select>
+                    </div>
+
+                </div>
+
+                <hr>
+
+                <!-- FEES -->
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+                        <label><i class="bi bi-cash"></i> Tuition</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input id="TuitionFee" class="form-control fee-input" type="number" min="0" step="0.01">
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label><i class="bi bi-wallet2"></i> Admission</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input id="AdmissionFee" class="form-control fee-input" type="number" min="0" step="0.01">
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label><i class="bi bi-bus-front"></i> Transport</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input id="TransportFee" class="form-control fee-input" type="number" min="0" step="0.01">
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label><i class="bi bi-book"></i> Library</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input id="LibraryFee" class="form-control fee-input" type="number" min="0" step="0.01">
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label><i class="bi bi-three-dots"></i> Other</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input id="OtherFee" class="form-control fee-input" type="number" min="0" step="0.01">
+                        </div>
+                    </div>
+
+                    <!-- TOTAL -->
+                    <div class="col-md-4">
+                        <label><i class="bi bi-calculator"></i> Total Fee</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input id="TotalFee"
+                                   class="form-control fw-bold text-success bg-light"
+                                   readonly>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ACTIVE SWITCH -->
+                <div class="form-check form-switch mt-4">
+                    <input class="form-check-input" type="checkbox" id="IsActive">
+                    <label class="form-check-label">
+                        <i class="bi bi-check-circle"></i> Set as Active Configuration
+                    </label>
+                </div>
+
+                <small class="text-muted">
+                    <i class="bi bi-info-circle"></i> Only numeric values are allowed (₹ format supported)
+                </small>
+
+            </div>
+
+            <!-- FOOTER -->
+            <div class="modal-footer bg-light">
+
+                <button class="btn btn-success" onclick="saveData()">
+                    <i class="bi bi-save2"></i> Save Changes
+                </button>
+
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cancel
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+
+    <script>
+
+        $(document).ready(function () {
+
+            loadDropdowns();
+
+            $('#filterClassId, #filterYearId').change(function () {
+                loadData();
+            });
+
+            $('#feeModal').on('shown.bs.modal', function () {
+                $('#ClassId').focus();
+            });
+
+            $('.fee-input').on('input', function () {
+
+                let value = $(this).val();
+
+                // remove everything except numbers and dot
+                value = value.replace(/[^0-9.]/g, '');
+
+                // prevent multiple dots
+                value = value.replace(/(\..*)\./g, '$1');
+
+                // prevent negative sign
+                value = value.replace('-', '');
+
+                $(this).val(value);
+
+                calculateTotal();
+            });
+
+        });
+
+        $('input[type="text"]').on('input', function () {
+            if ($(this).val() < 0) $(this).val(0);
+        });
+
+        function loadData() {
+
+            let classId = $('#filterClassId').val();
+            let yearId = $('#filterYearId').val();
+
+            $.get('/CourseFee/GetAll', { classId, yearId }, function (res) {
+
+                let html = '';
+
+                // ✅ Handle empty result
+                if (!res || res.length === 0) {
+                    html = `
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">
+                                <i class="bi bi-info-circle"></i> No records found
+                            </td>
+                        </tr>`;
+                }
+                else {
+                    res.forEach(x => {
+                        html += `
+                        <tr>
+                            <td>${x.className}</td>
+                            <td>${x.year}</td>
+                            <td>${x.admissionFee ?? 0}</td>
+                            <td>${x.tuitionFee}</td>
+                            <td>${x.libraryFee ?? 0}</td>
+                            <td>${x.otherFee ?? 0}</td>
+                            <td><b>${x.totalFee}</b></td>
+                            <td>
+                                ${x.isActive
+                                    ? '<span class="badge bg-success"><i class="bi bi-check-circle"></i> Active</span>'
+                                    : '<span class="badge bg-secondary">Inactive</span>'}
+                            </td>
+                            <td>
+                                <button class="btn btn-warning btn-sm" onclick="edit(${x.courseFeeId})">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm" onclick="removeData(${x.courseFeeId})">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>`;
+                    });
+                }
+
+                $('#tblData').html(html);
+            });
+        }
+
+        function loadDropdowns() {
+
+            $.get('/CourseFee/GetDropdowns', function (res) {
+
+                $('#filterClassId').append('<option value="">-- Select Class --</option>');
+                $('#filterYearId').append('<option value="">-- Select Year --</option>');
+
+                 $('#ClassId').append('<option value="">-- Select Class --</option>');
+                $('#AcademicYearId').append('<option value="">-- Select Year --</option>');
+
+                // res.classes.forEach(x => {
+                //     $('#filterClassId').append(`<option value="${x.classId}">${x.className}</option>`);
+                // });
+
+                // res.years.forEach(x => {
+                //     $('#filterYearId').append(`<option value="${x.academicYearId}">${x.yearName}</option>`);
+                // });
+
+                res.classes.forEach(x => {
+                    $('#ClassId').append(`<option value="${x.classId}">${x.className}</option>`);
+                    $('#filterClassId').append(`<option value="${x.classId}">${x.className}</option>`);
+                });
+
+                res.years.forEach(x => {
+                    $('#AcademicYearId').append(`<option value="${x.academicYearID}">${x.yearName}</option>`);
+                     $('#filterYearId').append(`<option value="${x.academicYearID}">${x.yearName}</option>`);
+                });
+            });
+        }
+    
+
+        function openModal(id) {
+
+            clearForm();
+
+            if (id > 0) {
+
+                $.get('/CourseFee/GetById?id=' + id, function (res) {
+                    $('#CourseFeeId').val(res.courseFeeId);
+                    $('#ClassId').val(res.classId);
+                    $('#AcademicYearId').val(res.academicYearId);
+                    $('#TuitionFee').val(res.tuitionFee);
+                    $('#AdmissionFee').val(res.admissionFee);
+                    $('#TransportFee').val(res.transportFee);
+                    $('#LibraryFee').val(res.libraryFee);
+                    $('#OtherFee').val(res.otherFee);
+                    $('#IsActive').prop('checked', res.isActive);
+
+                    calculateTotal(); // 🔥 IMPORTANT
+                });
+            }
+
+            $('#feeModal').modal('show');
+        }
+
+        $('#TuitionFee, #AdmissionFee, #TransportFee, #LibraryFee, #OtherFee')
+        .on('keyup change', function () {
+            calculateTotal();
+        });
+
+        function calculateTotal() {
+
+            let tuition = parseFloat($('#TuitionFee').val()) || 0;
+            let admission = parseFloat($('#AdmissionFee').val()) || 0;
+            let transport = parseFloat($('#TransportFee').val()) || 0;
+            let library = parseFloat($('#LibraryFee').val()) || 0;
+            let other = parseFloat($('#OtherFee').val()) || 0;
+
+            let total = tuition + admission + transport + library + other;
+
+            $('#TotalFee').val(total.toFixed(2));
+
+            // 🚨 Disable Save if zero
+            if (total <= 0) {
+                $('#btnSave').prop('disabled', true);
+            } else {
+                $('#btnSave').prop('disabled', false);
+            }
+        }
+
+        function saveData() {
+
+            let model = {
+                CourseFeeId: $('#CourseFeeId').val(),
+                ClassId: $('#ClassId').val(),
+                AcademicYearId: $('#AcademicYearId').val(),
+                TuitionFee: $('#TuitionFee').val(),
+                AdmissionFee: $('#AdmissionFee').val(),
+                TransportFee: $('#TransportFee').val(),
+                LibraryFee: $('#LibraryFee').val(),
+                OtherFee: $('#OtherFee').val(),
+                IsActive: $('#IsActive').is(':checked')
+            };
+
+            let total = parseFloat($('#TotalFee').val()) || 0;
+            // 🚨 BLOCK SAVE IF TOTAL = 0
+            if (total <= 0) {
+                alert("Total Fee cannot be zero. Please enter valid fee details.");
+                $('#TuitionFee').focus();
+                return;
+            }
+
+            $.post('/CourseFee/Save', model, function (res) {
+                alert(res.message);
+
+                if (res.success) {
+                    $('#feeModal').modal('hide');
+                    loadData();
+                }
+            });
+        }
+
+        function edit(id) {
+            openModal(id);
+        }
+
+        function removeData(id) {
+            if (!confirm("Are you sure?")) return;
+
+            $.post('/CourseFee/Delete?id=' + id, function (res) {
+                alert(res.message);
+                loadData();
+            });
+        }
+
+        function clearForm() {
+            $('input').val('');
+            $('#IsActive').prop('checked', true);
+            $('#TotalFee').val('0.00');
+        }
+    </script>
+
+}

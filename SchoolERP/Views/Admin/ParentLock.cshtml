@@ -1,0 +1,440 @@
+﻿@using SchoolERP.Models.ViewModels
+@model List<ParentUnlockViewModel>
+@{
+    ViewData["Title"] = "Parent Unlock Management";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var selectedParent = ViewBag.SelectedParent as ParentUnlockViewModel;
+
+    var totalParents = Model.Count(); 
+    var lockedParents = Model.Count(x => x.IsLocked); 
+    var activeParents = Model.Count(x => !x.IsLocked);
+}
+
+<style>
+
+    .page-header {
+        background: linear-gradient(135deg, #0d6efd, #4f8dfd);
+        color: white;
+        border-radius: 18px;
+        padding: 24px;
+        margin-bottom: 24px;
+    }
+
+    .icon-circle {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .stats-card {
+        /* border: none;
+        border-radius: 18px;
+        transition: .3s; */
+        transition: all 0.2s ease-in-out;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-4px);
+    }
+
+    .parent-card {
+        border: none;
+        border-radius: 18px;
+        transition: .2s;
+        cursor: pointer;
+    }
+
+    .parent-card:hover {
+        background: #f8f9fa;
+        transform: scale(1.01);
+    }
+
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .locked {
+        background: #ffe5e5;
+        color: #dc3545;
+    }
+
+    .active {
+        background: #e6f7ec;
+        color: #198754;
+    }
+
+    .details-card {
+        border: none;
+        border-radius: 20px;
+    }
+
+    .child-pill {
+        background: #eef3ff;
+        color: #0d6efd;
+        border-radius: 50px;
+        padding: 8px 16px;
+        display: inline-block;
+        margin: 5px;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .search-box {
+        border-radius: 14px;
+        padding-left: 42px;
+        height: 48px;
+    }
+
+    .search-wrapper {
+        position: relative;
+    }
+
+    .search-wrapper i {
+        position: absolute;
+        top: 14px;
+        left: 15px;
+        color: gray;
+    }
+
+    .info-box {
+        background: #f8f9fa;
+        border-radius: 16px;
+        padding: 16px;
+        height: 100%;
+    }
+
+    .info-icon {
+        width: 42px;
+        height: 42px;
+        background: #eef3ff;
+        color: #0d6efd;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+    }
+
+    .selected-parent {
+        border: 2px solid #0d6efd !important;
+        background: linear-gradient( 135deg, rgba(13,110,253,0.08), rgba(79,141,253,0.12) );
+        box-shadow: 0 8px 22px rgba(13,110,253,0.18);
+        transform: scale(1.01);
+    }
+
+    .selected-parent .fw-bold {
+        color: #0d6efd;
+    }
+
+    .status-badge i {
+        font-size: 24px;
+    }
+</style>
+
+<div class="container-fluid py-4">
+
+    <!-- HEADER -->
+    <div class="page-header shadow-sm">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+                <h2 class="fw-bold mb-2"> <i class="bi bi-shield-lock-fill me-2"></i> Parent Unlock Management</h2>
+                <p class="mb-0"> Manage parent portal access & unlock accounts</p>
+            </div>
+            <button class="btn btn-light rounded-pill px-4">
+                <i class="bi bi-arrow-clockwise me-1"></i>
+                Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm stats-card p-4 rounded-4 bg-primary-subtle">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted">Total Parents</div>
+                        <h2 class="fw-bold text-primary">@totalParents</h2>
+                    </div>
+                    <div class="icon-circle bg-primary">
+                        <i class="bi bi-people-fill text-white fs-1"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm stats-card p-4 rounded-4 bg-danger-subtle">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted"> Locked Parents</div>
+                        <h2 class="fw-bold text-danger">@lockedParents</h2>
+                    </div>
+                    <div class="icon-circle bg-danger">
+                        <i class="bi bi-lock-fill text-white fs-1"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm stats-card p-4 rounded-4 bg-success-subtle">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted">Active Parents </div>
+                        <h2 class="fw-bold text-success"> @activeParents</h2>
+                    </div>
+                    <div class="icon-circle bg-success">
+                        <i class="bi bi-unlock-fill text-white fs-1"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        <!-- LEFT PANEL -->
+        <div class="col-lg-5 mb-4">
+
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body">
+                    <!-- SEARCH -->
+                    <div class="search-wrapper mb-4">
+                        <i class="bi bi-search"></i>
+                        <input type="text" id="parentSearch" class="form-control search-box"
+                               placeholder="Search parent, mobile..." />
+                    </div>
+                    <!-- PARENT LIST -->
+                    @foreach (var parent in Model)
+                    {
+                        <a asp-action="ParentLock"
+                           asp-route-parentId="@parent.ParentId"
+                           class="text-decoration-none text-dark">
+
+                            <div class="card parent-card shadow-sm mb-3 p-3 searchable-parent
+                                @(selectedParent != null && selectedParent.ParentId == parent.ParentId? "selected-parent" : "")"
+                             data-name="@parent.ParentName"
+                                 data-mobile="@parent.MobileNo">
+
+                                <div class="d-flex justify-content-between align-items-start">
+
+                                    <div>
+                                        <h6 class="fw-bold mb-1">
+                                            <i class="bi bi-person-circle text-primary me-1"></i>@parent.ParentName </h6>
+
+                                        <small class="text-muted">
+                                            <i class="bi bi-telephone-fill me-1"></i>@parent.MobileNo</small>
+
+                                        <div class="mt-2">
+
+                                            @if (parent.IsLocked)
+                                            {
+                                                <span class="status-badge locked">
+                                                    <i class="bi bi-lock-fill me-1"></i>Locked
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="status-badge active">
+                                                    <i class="bi bi-unlock-fill me-1"></i>Active</span>
+                                            }
+                                        </div>
+                                    </div>
+
+                                    <div class="text-end">
+
+                                        <small class="text-muted">
+                                            <i class="bi bi-mortarboard-fill me-1"></i> @parent.Children.Count Child(s)
+                                        </small>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </a>
+                    }
+                    <div id="noResults" class="text-center text-muted py-4 d-none">
+                        <i class="bi bi-search fs-1"></i>
+                        <div> No parents found</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div class="col-lg-7">
+
+            @if (selectedParent != null)
+            {
+                <div class="card details-card shadow-sm">
+
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div>
+                                <h3 class="fw-bold mb-1">
+                                    <i class="bi bi-person-badge-fill text-primary me-2"></i>@selectedParent.ParentName</h3>
+                                <small class="text-muted"> Parent Portal Information</small>
+                            </div>
+
+                            @if (selectedParent.IsLocked)
+                            {
+                                <span class="status-badge locked"><i class="bi bi-lock-fill me-1"></i>Locked</span>
+                            }
+                            else
+                            {
+                                <span class="status-badge active"><i class="bi bi-unlock-fill me-1"></i>Active</span>
+                            }
+
+                        </div>
+
+                        <!-- INFO -->
+
+                        <div class="row mb-4">
+
+                            <div class="col-md-6 mb-3">
+                                <div class="info-box">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="info-icon me-3">
+                                            <i class="bi bi-phone-fill"></i>
+                                        </div>
+                                        <div>
+                                            <small class="text-muted">Mobile Number</small>
+                                            <div class="fw-semibold"> @selectedParent.MobileNo</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <div class="info-box">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="info-icon me-3">
+                                            <i class="bi bi-envelope-fill"></i>
+                                        </div>
+                                        <div>
+                                            <small class="text-muted">Email Address</small>
+                                            <div class="fw-semibold">@selectedParent.Email</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <div class="info-box">
+                                    <div class="d-flex align-items-center mb-2">
+
+                                        <div class="info-icon me-3">
+                                            <i class="bi bi-clock-history"></i>
+                                        </div>
+
+                                        <div>
+                                            <small class="text-muted">Last Login</small>
+                                            <div class="fw-semibold">
+                                                @(selectedParent.LastLoginAt?.ToString("dd MMM yyyy hh:mm tt") ?? "N/A")
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+
+                                <div class="info-box">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="info-icon me-3">
+                                            <i class="bi bi-exclamation-triangle-fill"></i>
+                                        </div>
+                                        <div>
+                                            <small class="text-muted">Lock Reason</small>
+                                            <div class="fw-semibold text-danger">
+                                                @selectedParent.LockReason
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <!-- CHILDREN -->
+                        <div class="mb-4">
+
+                            <h5 class="fw-bold mb-3">
+                                <i class="bi bi-mortarboard-fill text-primary me-2"></i>Linked Students
+                            </h5>
+                            @foreach (var child in selectedParent.Children)
+                            {
+                                <span class="child-pill">
+                                    <i class="bi bi-person-fill me-1"></i>
+                                    @child.StudentName • @child.ClassName - @child.SectionName
+                                </span>
+                            }
+                        </div>
+
+                        <!-- ACTION -->
+                        @if (selectedParent.IsLocked)
+                        {
+                            <form asp-action="UnlockParent" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="parentId" value="@selectedParent.ParentId" />
+                                <button type="submit" onclick="return confirm('Are you sure you want to unlock this parent access?')" class="btn btn-success btn-lg rounded-pill px-5 shadow-sm">
+                                    <i class="bi bi-unlock-fill me-2"></i>Unlock Parent Access</button>
+                            </form>
+                        }
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+
+        document.getElementById('parentSearch').addEventListener('keyup', function () 
+        { 
+            let searchValue = this.value.toLowerCase(); 
+            let parents = document.querySelectorAll('.searchable-parent'); 
+            let visibleCount = 0; 
+        
+            parents.forEach(function (parent) 
+            { 
+                let name = parent.dataset.name.toLowerCase(); 
+                let mobile = parent.dataset.mobile.toLowerCase(); 
+                if (name.includes(searchValue) || mobile.includes(searchValue)) 
+                { 
+                    parent.style.display = 'block'; 
+                    visibleCount++; 
+                } else { 
+                    parent.style.display = 'none'; 
+                } 
+            }); 
+            
+            let noResults = document.getElementById('noResults'); 
+            if (visibleCount === 0) 
+            { 
+                noResults.classList.remove('d-none'); } 
+            else 
+            {
+                noResults.classList.add('d-none'); 
+            } 
+        });
+    </script>
+}

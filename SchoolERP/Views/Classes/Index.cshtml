@@ -1,0 +1,99 @@
+﻿@using SchoolERP.Models.Entities
+@model IEnumerable<ClassModel>
+
+@{
+    ViewBag.Title = "Classes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+
+    <!-- Header & Add Button -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="text-primary">
+                <i class="fas fa-chalkboard"></i> Class Management
+            </h2>
+            <small class="text-muted">Manage classes provided by school</small>
+        </div>
+        
+        <a href="@Url.Action("Create")" class="btn btn-primary shadow-sm">
+            <i class="fas fa-plus"></i> Add New Classes
+        </a>
+    </div>
+
+    @* @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" id="successMessage" role="alert">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" id="errorMessage" role="alert">
+            <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    } *@
+
+    <div class="row">
+
+        @if (Model.Any())
+        {
+            foreach (var classModel in Model)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-book"></i> Class : @classModel.ClassName </span>
+                        </div>
+                        <div class="card-body">
+                            <strong>Description:</strong>
+                            @(string.IsNullOrEmpty(classModel.Description) ? (Html.Raw("<i>No description</i>")) : classModel.Description)
+                        </div>
+                        <div class="card-footer d-flex justify-content-between">
+                            <a href="@Url.Action("Edit", new { id = classModel.ClassId })" class="btn btn-sm btn-warning">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <button class="btn btn-sm btn-danger" onclick="confirmDelete(@classModel.ClassId, '@classModel.ClassName')">
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-info-circle"></i> No classes found. Please add new classes.
+                </div>
+            </div>
+        }
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-hide TempData messages
+         document.addEventListener("DOMContentLoaded", function () {
+             setTimeout(function () {
+                 const success = document.getElementById('successMessage');
+                 const error = document.getElementById('errorMessage');
+
+                 if (success) {
+                     success.classList.remove('show');
+                     success.classList.add('fade');
+                 }
+                 if (error) {
+                     error.classList.remove('show');
+                     error.classList.add('fade');
+                 }
+             }, 5000);
+         });
+        
+    </script>
+}

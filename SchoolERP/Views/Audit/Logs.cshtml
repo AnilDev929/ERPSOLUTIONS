@@ -1,0 +1,417 @@
+﻿@using SchoolERP.Models.ViewModels
+@model AuditLogFilterVM
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Audit Log";
+
+    string icon = "bi-info-circle text-secondary";
+}
+
+<style>
+    .audit-header {
+        background: linear-gradient(135deg, #f8faff, #ffffff);
+        border: 1px solid #e9eef7;
+        border-radius: 14px;
+        padding: 18px 20px;
+    }
+
+    .audit-card {
+        border-radius: 14px;
+        border: 1px solid #e9eef7;
+    }
+
+    .table-hover tbody tr:hover {
+        background: #f4f8ff;
+        transition: 0.2s;
+    }
+
+    .soft-box {
+        background: #f8fafc;
+        border: 1px solid #eef2f7;
+        border-radius: 10px;
+        padding: 10px 12px;
+    }
+
+    .badge {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+
+    .icon-circle {
+        width: 28px;
+        height: 28px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #eef4ff;
+        margin-right: 6px;
+    }
+</style>
+
+<div class="container-fluid">
+
+     <!-- HEADER -->
+    <div class="audit-header d-flex justify-content-between align-items-center mb-2">
+        <div>
+            <h3 class="mb-1">
+                <i class="bi bi-shield-check text-primary"></i>
+                Audit Log Dashboard
+            </h3>
+            <small class="text-muted">
+                Secure system activity tracking • server-side monitoring • real-time audit visibility
+            </small>
+        </div>
+
+        <button class="btn btn-success">
+            <i class="bi bi-file-earmark-excel"></i> Export
+        </button>
+    </div>
+
+    <form method="get" class="card audit-card p-3 mb-1">
+
+        <div class="row g-2">
+            <div class="col-md-1">
+                <select name="PageSize" class="form-select">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <input name="Search" value="@Model.Search"
+                       class="form-control"
+                       placeholder="Search user/action/controller">
+            </div>
+
+            <div class="col-md-1">
+                <select name="Status" class="form-select">
+                    <option value="">Status</option>
+                    <option>Success</option>
+                    <option>Failed</option>
+                    <option>Exception</option>
+                </select>
+            </div>
+
+            <div class="col-md-1">
+                <select name="LogLevel" class="form-select">
+                    <option value="">Log Level</option>
+                    <option>Info</option>
+                    <option>Warning</option>
+                    <option>Error</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <input type="date" name="FromDate" class="form-control">
+            </div>
+
+            <div class="col-md-2">
+                <input type="date" name="ToDate" class="form-control">
+            </div>
+
+            <div class="col-md-1">
+                <button class="btn btn-primary w-100">
+                    <i class="fa-solid fa-filter"></i>
+                </button>
+            </div>
+
+        </div>
+
+    </form>
+
+    <div class="modal fade" id="auditModal">
+        <div class="modal-dialog modal-lg">
+
+            <div class="modal-content">
+
+                <div class="modal-header bg-primary text-white">
+                    <h5>
+                        <i class="fa-solid fa-circle-info"></i> Audit Detail
+                    </h5>
+                    <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body position-relative">
+
+                    <!-- LOADER OVERLAY -->
+                    <div id="modalLoader" class="d-none position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
+                         style="background: rgba(255,255,255,0.8); z-index:10;">
+                        <div class="spinner-border text-primary" role="status"></div>
+                    </div>
+
+                    <div class="row g-2">
+
+                        <div class="col-md-6">
+                            <div class="p-2 border rounded bg-light">
+                                <small class="text-muted">User</small>
+                                <div><i class="fa-solid fa-user text-primary"></i> <span id="dUser"></span></div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-2 border rounded bg-light">
+                                <small class="text-muted">Action</small>
+                                <div id="dAction"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-2 border rounded bg-light">
+                                <small class="text-muted">Controller</small>
+                                <div id="dController"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-2 border rounded bg-light">
+                                <small class="text-muted">Status</small>
+                                <div id="dStatus"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="p-2 border rounded bg-light">
+                                <small class="text-muted">Description</small>
+                                <div id="dDesc"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-2 border rounded bg-light">
+                                <small class="text-muted">IP Address</small>
+                                <div><i class="fa-solid fa-network-wired text-secondary"></i> <span id="dIP"></span></div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-2 border rounded bg-light">
+                                <small class="text-muted">Browser</small>
+                                <div><i class="fa-brands fa-chrome text-warning"></i> <span id="dBrowser"></span></div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="p-2 border rounded bg-light">
+                                <small class="text-muted">URL</small>
+                                <div id="dUrl"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="p-2 border rounded bg-light">
+                                <small class="text-muted">Date</small>
+                                <div><i class="fa-regular fa-clock text-info"></i> <span id="dDate"></span></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="card audit-card">
+
+    <div class="table-responsive">
+        <nav class="mt-2">
+    <ul class="pagination justify-content-end">
+
+        <!-- PREVIOUS -->
+        <li class="page-item @(Model.PageNumber == 1 ? "disabled" : "")">
+            <a class="page-link"
+               href="@Url.Action("Logs", new {
+                    PageNumber = Model.PageNumber - 1,
+                    PageSize = Model.PageSize,
+                    Search = Model.Search,
+                    Status = Model.Status,
+                    LogLevel = Model.LogLevel,
+                    FromDate = Model.FromDate,
+                    ToDate = Model.ToDate
+               })">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+        </li>
+
+        <!-- PAGE NUMBERS -->
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                <a class="page-link"
+                   href="@Url.Action("Logs", new {
+                        PageNumber = i,
+                        PageSize = Model.PageSize,
+                        Search = Model.Search,
+                        Status = Model.Status,
+                        LogLevel = Model.LogLevel,
+                        FromDate = Model.FromDate,
+                        ToDate = Model.ToDate
+                   })">
+                    @i
+                </a>
+            </li>
+        }
+
+        <!-- NEXT -->
+        <li class="page-item @(Model.PageNumber == Model.TotalPages ? "disabled" : "")">
+            <a class="page-link"
+               href="@Url.Action("Logs", new {
+                    PageNumber = Model.PageNumber + 1,
+                    PageSize = Model.PageSize,
+                    Search = Model.Search,
+                    Status = Model.Status,
+                    LogLevel = Model.LogLevel,
+                    FromDate = Model.FromDate,
+                    ToDate = Model.ToDate
+               })">
+                <i class="bi bi-chevron-right"></i>
+            </a>
+        </li>
+
+    </ul>
+</nav>
+        <table class="table table-hover align-middle mb-0">
+
+            <thead class="table-dark">
+                <tr>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>Status</th>
+                    <th>Level</th>
+                    <th>IP</th>
+                    <th>Date</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @foreach (var item in Model.Logs)
+                {
+                    string actionIcon = "bi-info-circle text-secondary";
+
+                    switch (item.Action)
+                    {
+                        case "Login": actionIcon = "bi-box-arrow-in-right text-success"; break;
+                        case "Logout": actionIcon = "bi-box-arrow-right text-warning"; break;
+                        case "Create": actionIcon = "bi-plus-circle text-primary"; break;
+                        case "Update": actionIcon = "bi-pencil-square text-info"; break;
+                        case "Delete": actionIcon = "bi-trash text-danger"; break;
+                    }
+
+                    <tr>
+
+                        <!-- USER -->
+                        <td>
+                            <i class="bi bi-person text-primary"></i>
+                            @item.UserName
+                        </td>
+
+                        <!-- ACTION -->
+                        <td>
+                            <i class="bi @actionIcon me-1"></i>
+                            @item.Action
+                        </td>
+
+                        <!-- STATUS -->
+                        <td>
+                            @if (item.Status == "Success")
+                            {
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle"></i> Success
+                                </span>
+                            }
+                            else if (item.Status == "Failed")
+                            {
+                                <span class="badge bg-danger">
+                                    <i class="bi bi-x-circle"></i> Failed
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning text-dark">
+                                    <i class="bi bi-exclamation-triangle"></i> Warning
+                                </span>
+                            }
+                        </td>
+
+                        <!-- LEVEL -->
+                        <td>
+                            <span class="badge bg-info text-dark">
+                                @item.LogLevel
+                            </span>
+                        </td>
+
+                        <td>@item.IPAddress</td>
+
+                        <td>@item.CreatedOn.ToString("dd-MM-yyyy HH:mm")</td>
+
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary"
+                                    onclick="openDetail(@item.AuditLogId)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <!-- FOOTER INFO -->
+    <div class="d-flex justify-content-between p-2 text-muted">
+        <small>
+            Showing @((Model.PageNumber - 1) * Model.PageSize + 1)
+            to @(Math.Min(Model.PageNumber * Model.PageSize, Model.TotalRecords))
+            of @Model.TotalRecords records
+        </small>
+
+        <small>
+            Page @Model.PageNumber of @((int)Math.Ceiling((double)Model.TotalRecords / Model.PageSize))
+        </small>
+    </div>
+
+</div>
+
+</div>
+
+@section Scripts{
+
+    <script>
+        async function openDetail(id) {
+
+            document.getElementById("modalLoader").classList.remove("d-none");
+
+            let res = await fetch('/Audit/GetDetail?id=' + id);
+            let d = await res.json();
+
+            // simulate smooth UX delay (optional)
+            setTimeout(() => {
+
+                document.getElementById("dUser").innerText = d.userName;
+                document.getElementById("dAction").innerText = d.action;
+                document.getElementById("dController").innerText = d.controller;
+                document.getElementById("dStatus").innerText = d.status;
+                document.getElementById("dDesc").innerText = d.description;
+                document.getElementById("dIP").innerText = d.ipAddress;
+                document.getElementById("dBrowser").innerText = d.browser;
+                document.getElementById("dUrl").innerText = d.requestUrl;
+                document.getElementById("dDate").innerText = d.createdOn;
+
+                document.getElementById("modalLoader").classList.add("d-none");
+
+            }, 300);
+
+            new bootstrap.Modal(document.getElementById('auditModal')).show();
+        }
+    </script>
+
+}

@@ -1,0 +1,273 @@
+﻿@using SchoolERP.Models.ViewModels
+@model LoginViewModel
+@{
+    Layout = null;
+    ViewBag.Title = "Login - School ERP";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewBag.Title</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+
+    <link href="~/css/loginpage.css" rel="stylesheet" />
+</head>
+
+<body class="login-page">
+
+    <!-- Animated Background -->
+    <div class="bg-animation"></div>
+
+    <!-- Floating Particles -->
+    <div class="floating-shapes">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+
+    <div class="login-wrapper">
+
+        <div class="login-glass">
+
+            <!-- ========================= -->
+            <!-- LEFT SIDE -->
+            <!-- ========================= -->
+
+            <div class="login-form">
+
+                <!-- BRAND -->
+                <div class="brand">
+                    <div class="brand-icon">
+                        <i class="bi bi-mortarboard-fill"></i>
+                    </div>
+                    <h2>School ERP</h2>
+                    <p> Welcome back! Please login to continue </p>
+                </div>
+
+                <!-- LOGIN FORM -->
+                <form asp-action="Login" method="post">
+
+                    <!-- Username -->
+                    <div class="input-group-modern">
+                        <i class="bi bi-person"></i>
+                        <input asp-for="Username" type="text" required />
+                        <label>User Name</label>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="input-group-modern">
+                        <i class="bi bi-lock"></i>
+                        <input asp-for="Password" type="password"  id="passwordField" required />
+                        <label>Password</label>
+
+                        <button type="button" class="toggle-password" onclick="togglePassword()">
+                            <i class="bi bi-eye"></i>
+                        </button>
+
+                    </div>
+
+                    <!-- Role -->
+                    <div class="input-group-modern">
+                        <i class="bi bi-person-badge"></i>
+                        <select asp-for="SelectedRoleID" asp-items="Model.Roles">
+                            <option value="">Select Role</option>
+                        </select>
+                    </div>
+
+                    <!-- OPTIONS -->
+                    <div class="login-options">
+                        <a href="@Url.Action("ForgotPassword", "Account")"
+                           class="forgot-link">
+                            <i class="bi bi-shield-lock"></i> Forgot Password?
+                        </a>
+                    </div>
+
+                    <!-- LOGIN BUTTON -->
+                    <button type="submit" class="login-btn">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>
+                        Login to Dashboard
+                    </button>
+
+                </form>
+
+            </div>
+
+            <!-- ========================= -->
+            <!-- RIGHT SIDE -->
+            <!-- ========================= -->
+            <div class="login-info">
+                <!-- FLOATING 3D ICONS -->
+                <div class="floating-3d-icons">
+                    <i class="bi bi-mortarboard-fill"></i>
+                    <i class="bi bi-book-fill"></i>
+                    <i class="bi bi-building"></i>
+                    <i class="bi bi-people-fill"></i>
+                    <i class="bi bi-clipboard-check"></i>
+                </div>
+
+                <!-- CONTENT -->
+                <div class="info-content">
+                    <span class="badge-modern">
+                        Smart Education Platform
+                    </span>
+
+                    <h1 class="title"> Smart School ERP </h1>
+
+                    <p class="subtitle">
+                        Manage Students, Teachers, Attendance,
+                        Exams, Fees & Reports in one unified
+                        intelligent platform.
+                    </p>
+
+                    <!-- FEATURES -->
+                    <div class="features">
+
+                        <div class="feature-item">
+                            <i class="bi bi-speedometer2 pulse-icon"></i>
+                            <span>Real-time Dashboard Analytics</span>
+                        </div>
+
+                        <div class="feature-item">
+                            <i class="bi bi-wallet2 pulse-icon"></i>
+                            <span>Advanced Fee Management</span>
+                        </div>
+
+                        <div class="feature-item">
+                            <i class="bi bi-check2-square pulse-icon"></i>
+                            <span>Attendance Tracking System</span>
+                        </div>
+
+                        <div class="feature-item">
+                            <i class="bi bi-file-earmark-bar-graph pulse-icon"></i>
+                            <span>Smart Reports & Insights</span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="erp-footer">
+
+        <div class="footer-brand">
+
+            <i class="bi bi-mortarboard-fill"></i>
+
+            <span>
+                © @DateTime.Now.Year School ERP
+            </span>
+
+        </div>
+
+        <div class="footer-links">
+
+            <a href="#">
+                <i class="bi bi-shield-check"></i>
+                Privacy
+            </a>
+
+            <span class="divider">|</span>
+
+            <a href="#">
+                <i class="bi bi-headset"></i>
+                Support
+            </a>
+
+            <span class="divider">|</span>
+
+            <a href="#">
+                <i class="bi bi-envelope-paper"></i>
+                Contact
+            </a>
+
+        </div>
+
+    </footer>
+
+</body>
+
+</html>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+
+    // document.getElementById("loginForm").addEventListener("submit", async function(e) {
+
+    //     e.preventDefault(); // Stop normal form submit
+
+    //         const passwordInput = this.querySelector("input[name='Password']");
+    //     const password = passwordInput.value;
+
+    //     if (!password) {
+    //         alert("Please enter your password");
+    //         return;
+    //     }
+
+    //     // Hash password using SHA-256
+    //     const msgUint8 = new TextEncoder().encode(password);
+    //     const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+    //     const hashArray = Array.from(new Uint8Array(hashBuffer));
+    //     const hashedPassword = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+    //     // Replace password field value with hashed value
+    //     passwordInput.value = hashedPassword;
+
+    //     // Submit the form normally
+    //     this.submit();
+    // });
+
+
+    // // Auto-hide TempData messages
+    // setTimeout(function () {
+    //     const error = document.getElementById('errorMessage');
+    //     if (error) { error.classList.remove('show'); error.classList.add('fade'); }
+    // }, 5000);
+
+
+    function togglePassword() {
+        const passwordInput = document.getElementById("passwordField");
+        const icon = document.querySelector(".toggle-password i");
+
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            icon.classList.remove("bi-eye");
+            icon.classList.add("bi-eye-slash");
+        } else {
+            passwordInput.type = "password";
+            icon.classList.remove("bi-eye-slash");
+            icon.classList.add("bi-eye");
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var msg = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["Error"] ?? ""));
+
+        if (msg !== "") {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: msg,
+                scrollbarPadding: false,
+                heightAuto: false,
+                backdrop: true
+            });
+        }
+    });
+
+
+</script>

@@ -1,0 +1,368 @@
+﻿@using SchoolERP.Models.ViewModels
+@model PromotionViewModel
+@{
+    ViewData["Title"] = "Student Promotion";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+
+    <!-- HEADER -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body d-flex align-items-center">
+            <i class="bi bi-arrow-left-right fs-2 text-primary me-3"></i>
+            <div>
+                <h4 class="mb-0">Student Promotion</h4>
+                <small class="text-muted">
+                    Promote students from one class/section to another.
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- FROM / TO SECTION -->
+    <div class="row g-4">
+
+        <!-- FROM -->
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-light">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>
+                    <strong>From (Current Class)</strong>
+                </div>
+
+                <div class="card-body">
+
+                    <!-- Class -->
+                    <label class="form-label">Class</label>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text"><i class="bi bi-building"></i></span>
+                        <select id="fromClass" class="form-select">
+                            <option value="">Select Class</option>
+                            @foreach (var c in Model.Classes)
+                            {
+                                <option value="@c.Value">@c.Text</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Section -->
+                    <label class="form-label">Section</label>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text"><i class="bi bi-diagram-3"></i></span>
+                        <select id="fromSection" class="form-select"></select>
+                    </div>
+
+                    <!-- Academic Year -->
+                    <label class="form-label">Academic Year</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
+                        <select id="fromYear" class="form-select">
+                            @foreach (var y in Model.AcademicYears)
+                            {
+                                <option value="@y.Value">@y.Text</option>
+                            }
+                        </select>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- TO -->
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-light">
+                    <i class="bi bi-box-arrow-in-left me-2"></i>
+                    <strong>To (Promoted Class)</strong>
+                </div>
+                <div class="card-body">
+                    <!-- Class -->
+                    <label class="form-label">Class</label>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text"><i class="bi bi-building-add"></i></span>
+                        <select id="toClass" class="form-select">
+                            <option value="">Select Class</option>
+                            @foreach (var c in Model.Classes)
+                            {
+                                <option value="@c.Value">@c.Text</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Section -->
+                    <label class="form-label">Section</label>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text"><i class="bi bi-diagram-3-fill"></i></span>
+                        <select id="toSection" class="form-select"></select>
+                    </div>
+
+                    <!-- Academic Year -->
+                    <label class="form-label">Academic Year</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-calendar-check"></i></span>
+                        <select id="toYear" class="form-select">
+                            @foreach (var y in Model.AcademicYears)
+                            {
+                                <option value="@y.Value">@y.Text</option>
+                            }
+                        </select>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="card shadow-sm mt-2">
+        <div class="card-body d-flex gap-2 flex-wrap">
+
+            <button id="loadStudents" class="btn btn-primary">
+                <i class="bi bi-search me-1"></i> Load Students
+            </button>
+
+            <button id="promoteAll" class="btn btn-success">
+                <i class="bi bi-arrow-up-circle me-1"></i> Promote Entire Class
+            </button>
+
+            <button id="promoteSelected" class="btn btn-warning">
+                <i class="bi bi-check2-square me-1"></i> Promote Selected
+            </button>
+
+        </div>
+    </div>
+
+    <!-- STUDENT TABLE -->
+    <div class="card shadow-sm mt-2">
+
+        <div class="card-header d-flex justify-content-between align-items-center">
+
+            <div class="d-flex align-items-center">
+                <i class="bi bi-people-fill text-primary fs-5 me-2"></i>
+                <span class="fw-semibold">Student List</span>
+            </div>
+
+            <div>
+                <span class="text-muted me-2">Selected Student</span>
+                <span class="badge bg-success fs-6 px-3 py-2" id="selectedCount">0</span>
+            </div>
+
+        </div>
+
+
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width:50px;">
+                            <input type="checkbox" id="selectAll" />
+                        </th>
+                        <th>Name</th>
+                        <th>Roll No</th>
+                    </tr>
+                </thead>
+                <tbody id="studentBody">
+                    <tr>
+                        <td colspan="3" class="text-center text-muted p-4">
+                            <i class="bi bi-inbox fs-3"></i><br />
+                            No students loaded
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <script>
+        $("#fromClass").change(function () {
+
+            let selectedText = $("#fromClass option:selected").text();
+            let classNumber = parseInt(selectedText);
+
+            if (classNumber === 10) {
+                $("#promoteAll, #promoteSelected").hide();
+            }
+            else{
+                $("#promoteAll, #promoteSelected").show();
+            }
+
+            loadSections($(this).val(), "#fromSection");
+        });
+
+        $("#toClass").change(function () {
+            loadSections($(this).val(), "#toSection");
+        });
+
+        function updateCount() {
+            let count = $(".stu:checked").length;
+            $("#selectedCount").text(count);
+        }
+
+        $(document).on("change", "#selectAll", function () {
+            $(".stu").prop("checked", $(this).prop("checked"));
+        });
+
+        $(document).on("change", ".stu, #selectAll", function () {
+            updateCount();
+        });
+
+        $(document).on("change", ".stu", function () {
+
+            let total = $(".stu").length;
+            let checked = $(".stu:checked").length;
+
+            $("#selectAll").prop("checked", total === checked);
+        });
+
+        function loadSections(classId, sectionDropdown) {
+
+            if (!classId) return;
+
+            $.get("/Students/GetSectionsByClass", { classId: classId }, function (data) {
+
+                let options = '<option value="">Select Section</option>';
+
+                data.forEach(s => {
+                    options += `<option value="${s.id}">${s.name}</option>`;
+                });
+
+                $(sectionDropdown).html(options);
+            });
+        }
+
+        $("#loadStudents").click(function () {
+
+            $("#loadStudents").prop("disabled", true);
+
+            $("#studentBody").html(
+                "<tr><td colspan='3' class='text-center text-muted'>Loading...</td></tr>"
+            );
+
+            $.ajax({
+                url: "/Students/GetStudentsForPromotion",
+                type: "GET",
+                data: {
+                    classId: $("#fromClass").val(),
+                    sectionId: $("#fromSection").val()
+                },
+
+                success: function (data) {
+                    $("#selectAll").prop("checked", false);
+                    $("#loadStudents").prop("disabled", false);
+
+                    let rows = "";
+
+                    if (!data || data.length === 0) {
+                        rows = "<tr><td colspan='3' class='text-center text-warning p-4'> <i class='bi bi-inbox fs-3'></i> <br /> No students found</td></tr>";
+                    }
+                    else {
+                        data.forEach(s => {
+                            rows += `
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" class="stu" value="${s.studentId}" />
+                                    </td>
+                                    <td>${s.name}</td>
+                                    <td>${s.rollNo}</td>
+                                </tr>`;
+                        });
+                    }
+
+                    $("#studentBody").html(rows);
+                },
+
+                error: function (xhr) {
+
+                    let msg = "Something went wrong while loading students.";
+
+                    // Try to read server message
+                    if (xhr.responseText) {
+                        msg = xhr.responseText;
+                    }
+
+                    $("#studentBody").html(`
+                        <tr>
+                            <td colspan="3" class="text-center text-danger">
+                                ${msg}
+                            </td>
+                        </tr>
+                    `);
+                }
+            });
+        });
+       
+
+        $("#promoteAll").click(function () {
+
+            let ids = $(".stu").map(function () {
+                return $(this).val();
+            }).get();
+
+            promote(ids);
+        });
+
+        $("#promoteSelected").click(function () {
+
+            let ids = $(".stu:checked").map(function () {
+                return $(this).val();
+            }).get();
+
+            promote(ids);
+        });
+
+        function promote(ids) {
+
+            let model = {
+                fromClassId: $("#fromClass").val(),
+                fromSectionId: $("#fromSection").val(),
+                fromAcademicYearId: $("#fromYear").val(),
+
+                toClassId: $("#toClass").val(),
+                toSectionId: $("#toSection").val(),
+                toAcademicYearId: $("#toYear").val(),
+
+                studentIds: ids
+            };
+
+            $.ajax({
+                url: "/Students/PromoteStudents",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(model),
+                success: function (res) {
+
+                    Swal.fire({
+                        icon: res.success?'success':'error',
+                        title: 'Promotion',
+                        text: res.message
+                    });
+
+                    if(res.success)
+                        location.reload();
+                    else{
+
+                    }
+                },
+                error: function () {
+                    Swal.fire({
+                            icon: 'error',
+                            title: 'Promotion',
+                            text: 'Something went wrong'
+                    });
+                   
+                },
+                complete: function () {
+                    // Re-enable after response
+                }
+            });
+        }
+
+
+    </script>
+}

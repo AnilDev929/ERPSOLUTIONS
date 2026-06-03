@@ -1,0 +1,215 @@
+﻿/* ===== HEADER ===== */
+.student-header {
+     background: linear-gradient(135deg, #5fa8d3, #4c6ef5);
+    color: white;
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+.card {
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    border-left: 4px solid #2563eb;
+}
+/* .card {
+        border: none;
+        border-radius: 14px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    } */
+
+.student-photo {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    object-fit: cover;
+}
+
+.photo-upload {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: #fff;
+    color: #2563eb;
+    border-radius: 50%;
+    padding: 5px;
+    cursor: pointer;
+}
+
+/* ===== TABS ===== */
+.custom-tabs {
+    border-bottom: 1px solid #e5e7eb;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+}
+
+.custom-tabs .nav-link {
+    font-weight: 500;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 10px;
+    background: #f1f5f9;
+    color: #475569;
+    transition: all 0.3s ease;
+}
+
+        /* .custom-tabs .nav-link.active {
+        background: linear-gradient(135deg, #2563eb, #4f46e5);
+        color: #fff !important;
+        box-shadow: 0 4px 10px rgba(37,99,235,0.3);
+    } */
+
+    .custom-tabs .nav-link:hover {
+        transform: translateY(-1px);
+    }
+
+    .custom-tabs .nav-link.basic.active {
+       /* background: #2563eb;*/
+        background: linear-gradient(135deg, #6baed6, #4f8fc0);
+        color: honeydew;
+    }
+
+        .custom-tabs .nav-link.academic.active {
+            background: #7c3aed;
+            color: honeydew;
+        }
+
+        .custom-tabs .nav-link.parents.active {
+            background: #059669;
+            color: honeydew;
+        }
+
+        .custom-tabs .nav-link.address.active {
+            background: #ea580c;
+            color: honeydew;
+        }
+
+        .custom-tabs .nav-link.fees.active {
+            background: #dc2626;
+            color: honeydew;
+        }
+
+        .custom-tabs .nav-link.medical.active {
+            background: #db2777;
+            color: honeydew;
+        }
+
+/* ===== FORM ===== */
+.input-group-text {
+    background: #f8fafc;
+    border-right: 0;
+    border-radius: 10px 0 0 10px;
+    color: #2563eb;
+}
+
+.form-control, .form-select {
+    border-left: 0;
+    border-radius: 0 10px 10px 0;
+}
+
+.input-group:focus-within {
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+}
+
+.changed {
+    background: #fff3cd !important;
+}
+
+/* ===== CARD ===== */
+.section-title {
+    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+/* TABS */
+.nav-tabs .nav-link {
+    border: none;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+    .nav-tabs .nav-link.active {
+        color: #2563eb;
+        border-bottom: 3px solid #2563eb;
+    }
+
+.custom-tabs .nav-link i {
+    transition: 0.3s;
+}
+
+.custom-tabs .nav-link.active i {
+    transform: scale(1.2);
+}
+
+.sticky-save {
+    position: sticky;
+    bottom: 0;
+    background: #fff;
+    padding: 12px;
+    border-top: 1px solid #ddd;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+    z-index: 10;
+}
+
+/* Section Colors */
+.basic-section {
+    /*background: #2563eb;*/
+    background: linear-gradient(135deg, #6baed6, #4f8fc0);
+    color: honeydew;
+}
+
+.academic-section {
+    background: #7c3aed;
+    color: honeydew;
+}
+
+.parents-section {
+    background: #059669;
+    color: honeydew;
+}
+
+.address-section {
+    background: #ea580c;
+    color: honeydew;
+}
+
+.fees-section {
+    background: linear-gradient(135deg, #5fa8d3, #4c6ef5);
+    color: honeydew;
+}
+
+.medical-section {
+    background: #db2777;
+    color: honeydew;
+}
+
+label::after {
+    content: " *";
+    color: red;
+    display: none;
+}
+
+label.required::after {
+    display: inline;
+}
+
+.tab-content {
+    position: relative;
+}
+
+.tab-pane {
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+/* Editable inputs focus */
+.form-control:focus,
+.form-select:focus {
+}

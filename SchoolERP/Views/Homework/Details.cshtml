@@ -1,0 +1,202 @@
+﻿@using SchoolERP.Models.ViewModels
+@model HomeworkDetailsViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Homework Detail";
+}
+
+<div class="container py-4">
+
+    <!-- HEADER -->
+    <div class="bg-primary text-white p-4 rounded-4 shadow-sm mb-4">
+        <div class="d-flex justify-content-between flex-wrap gap-3">
+
+            <div>
+                <h3 class="mb-1">@Model.Title</h3>
+                <div class="small opacity-75">
+                    @Model.SubjectName • Class @Model.ClassName - @Model.SectionName
+                </div>
+            </div>
+
+            <div class="text-end">
+                <span class="badge bg-light text-dark mb-2">
+                    @Model.Status
+                </span><br />
+
+                <a href="/Homework/Review/@Model.HomeworkId"
+                   class="btn btn-light btn-sm rounded-pill">
+                    Review Submissions
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- LEFT: MAIN INFO -->
+        <div class="col-lg-8">
+
+            <!-- OVERVIEW -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body">
+
+                    <h5 class="mb-3">📌 Overview</h5>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-4">
+                            <small class="text-muted">Teacher</small>
+                            <div class="fw-semibold">@Model.TeacherName</div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <small class="text-muted">Assigned Date</small>
+                            <div class="fw-semibold">
+                                @Model.AssignedDate.ToString("dd MMM yyyy")
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <small class="text-muted">Due Date</small>
+                            <div class="fw-semibold text-danger">
+                                @Model.DueDate.ToString("dd MMM yyyy")
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <small class="text-muted">Total Marks</small>
+                            <div class="fw-semibold">@Model.TotalMarks</div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <small class="text-muted">Priority</small>
+                            <div>
+                                <span class="badge bg-warning text-dark">
+                                    @Model.Priority
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <small class="text-muted">Late Submission</small>
+                            <div class="fw-semibold">
+                                @(Model.AllowLateSubmission ? "Allowed" : "Not Allowed")
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- DESCRIPTION -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body">
+                    <h5 class="mb-3">📝 Description</h5>
+                    <p class="mb-0 text-secondary">
+                        @Model.Description
+                    </p>
+                </div>
+            </div>
+
+            <!-- INSTRUCTIONS -->
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body">
+                    <h5 class="mb-3">📋 Instructions</h5>
+
+                    @if (!string.IsNullOrEmpty(Model.Instructions))
+                    {
+                        <p class="mb-0 text-secondary">
+                            @Model.Instructions
+                        </p>
+                    }
+                    else
+                    {
+                        <span class="text-muted">No special instructions provided.</span>
+                    }
+                </div>
+            </div>
+
+            <!-- ATTACHMENTS -->
+            <div class="card border-0 shadow-sm rounded-4 mt-4">
+                <div class="card-body">
+
+                    <h5 class="mb-3">📎 Attachments</h5>
+
+                    @if (Model.Attachments != null && Model.Attachments.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+
+                            @foreach (var file in Model.Attachments)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+
+                                    <div>
+                                        <i class="fa-solid fa-file me-2 text-primary"></i>
+                                        @file.FileName
+                                    </div>
+                                    
+                                    <a href="@Url.Action("DownloadAttachment", "Homework", new { id = file.HomeworkAttachmentId })"
+                                       class="btn btn-sm btn-outline-primary rounded-pill">
+                                        Download
+                                    </a>
+                                </li>
+                            }
+
+                        </ul>
+                    }
+                    else
+                    {
+                        <span class="text-muted">No attachments uploaded.</span>
+                    }
+
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDEBAR -->
+        <div class="col-lg-4">
+
+            <!-- STATUS CARD -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body">
+
+                    <h6 class="mb-3">📊 Status</h6>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Current Status</span>
+                        <span class="badge bg-success">@Model.Status</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Homework Type</span>
+                        <span class="fw-semibold">@Model.HomeworkType</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Late Submission</span>
+                        <span class="fw-semibold">
+                            @(Model.AllowLateSubmission ? "Yes" : "No")
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- QUICK ACTIONS -->
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body">
+                    <h6 class="mb-3">⚡ Actions</h6>
+                    <a href="/Homework/Edit/@Model.HomeworkId"
+                       class="btn btn-outline-primary w-100 mb-2">Edit Homework</a>
+                    <a href="/Homework/Review/@Model.HomeworkId" class="btn btn-primary w-100">
+                        Review Submissions</a>
+                    <a href="/Homework/Index"
+                       class="btn btn-light border btn-custom px-4 py-2"><i class="bi bi-arrow-left me-2"></i>Back to Homework</a>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>

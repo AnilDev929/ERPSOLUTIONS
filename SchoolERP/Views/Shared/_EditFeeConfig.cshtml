@@ -1,0 +1,51 @@
+﻿@using SchoolERP.Models.ViewModels
+@model FeeConfigurationVM
+
+<div class="modal-header bg-warning">
+    <h5 class="modal-title text-white">
+        <i class="bi bi-pencil-square"></i> Edit Configuration
+    </h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+
+    <form id="editForm">
+
+        <input type="hidden" asp-for="ConfigId" />
+
+        <div class="mb-2">
+            <label>Fee Type</label>
+            <input asp-for="FeeType" class="form-control" />
+        </div>
+
+        <div class="mb-2">
+            <label>Due Day</label>
+            <input asp-for="DueDay" class="form-control" />
+        </div>
+
+        <div class="mb-2">
+            <label>Grace Days</label>
+            <input asp-for="GraceDays" class="form-control" />
+        </div>
+
+        <div class="mb-2">
+            <label>Late Fine Amount</label>
+            <input asp-for="LateFineAmount" class="form-control" />
+        </div>
+
+        <div class="form-check mb-2">
+            <input asp-for="IsActive" class="form-check-input" />
+            <label class="form-check-label">Active</label>
+        </div>
+
+    </form>
+
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    <button class="btn btn-success" onclick="saveEdit()">
+        Save Changes
+    </button>
+</div>

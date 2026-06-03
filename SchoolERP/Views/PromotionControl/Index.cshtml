@@ -1,0 +1,199 @@
+﻿@using SchoolERP.Models.Entities
+@model PromotionSetting
+@{
+    ViewData["Title"] = "Promotion Setting";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="container mt-4">
+
+    <!-- HEADER -->
+    <div class="card shadow-sm mb-3">
+        <div class="card-body d-flex align-items-center">
+            <i class="bi bi-mortarboard-fill fs-3 text-success me-2"></i>
+            <h4 class="mb-0">Student Promotion Control Panel</h4>
+        </div>
+
+        <div class="card-body pt-0">
+            <p class="text-muted mb-0">
+                Manage student promotion settings for the academic year. Control promotion window, set date range, and lock or unlock promotions when required.
+            </p>
+        </div>
+    </div>
+
+    <!-- FORM -->
+    <form asp-action="Save" method="post">
+
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="AcademicYearId" />
+
+        <div class="card shadow-sm">
+
+            <div class="card-body">
+
+                <!-- DATE RANGE -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label>Start Date</label>
+                        <input asp-for="PromotionStartDate" type="date" class="form-control"
+                            value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label>End Date</label>
+                        <input asp-for="PromotionEndDate" type="date" class="form-control"
+                            value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                    </div>
+                </div>
+
+                <!-- TOGGLES -->
+                <div class="form-check form-switch mb-2">
+                    <input asp-for="IsPromotionOpen" class="form-check-input" type="checkbox" />
+                    <label class="form-check-label">
+                        Open Promotion Window
+                    </label>
+                </div>
+
+                <div class="form-check form-switch">
+                    <input asp-for="IsLocked" class="form-check-input" type="checkbox" />
+                    <label class="form-check-label text-danger">
+                        Lock Promotion (Final)
+                    </label>
+                </div>
+
+            </div>
+
+            <!-- FOOTER -->
+            <div class="card-footer text-end">
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-save me-1"></i> Save Settings
+                </button>
+            </div>
+
+        </div>
+
+    </form>
+
+    <table class="table table-bordered table-striped table-hover align-middle mt-2">
+        <thead class="text-white" style="background: linear-gradient(90deg, #0d6efd, #6610f2);">
+            <tr>
+                <th><i class="bi bi-calendar"></i> Year</th>
+                <th><i class="bi bi-play-circle"></i> Start</th>
+                <th><i class="bi bi-stop-circle"></i> End</th>
+                <th><i class="bi bi-info-circle"></i> Status</th>
+                <th><i class="bi bi-lock"></i> Lock</th>
+                <th><i class="bi bi-gear"></i> Action</th>
+            </tr>
+        </thead>
+        <tbody id="promotionTableBody">
+            <tr>
+                <td colspan="6" class="text-center text-muted">
+                    <i class="bi bi-hourglass-split"></i> Loading...
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+</div>
+
+
+@section Scripts {
+
+    <script>
+
+        $(document).ready(function () {
+            loadPromotionSettings();
+        });
+
+        function formatDate(dateString) {
+            if (!dateString) return "";
+
+            let d = new Date(dateString);
+
+            if (isNaN(d)) return "";
+
+            let year = d.getFullYear();
+            let month = String(d.getMonth() + 1).padStart(2, '0');
+            let day = String(d.getDate()).padStart(2, '0');
+
+            return `${year}-${month}-${day}`;
+        }
+
+        $(document).on("click", ".editBtn", function () {
+
+            let id = $(this).data("id");
+
+            $.get("/PromotionControl/GetById", { id: id }, function (data) {
+                $("#Id").val(data.id);
+                $("#AcademicYearId").val(data.academicYearId);
+                $("#PromotionStartDate").val(formatDate(data.promotionStartDate));
+                $("#PromotionEndDate").val(formatDate(data.promotionEndDate));
+                $("#IsPromotionOpen").prop("checked", data.isPromotionOpen);
+                $("#IsLocked").prop("checked", data.isLocked);
+
+                // 👇 Scroll to form (nice UX)
+                $('html, body').animate({
+                    scrollTop: $("form").offset().top - 100
+                }, 400);
+            });
+        });
+
+        function loadPromotionSettings() {
+
+            $("#promotionTableBody").html(
+                "<tr><td colspan='6' class='text-center'>Loading...</td></tr>"
+            );
+
+            $.ajax({
+                url: "/PromotionControl/GetPromotionSettings",
+                type: "GET",
+
+                success: function (data) {
+
+                    let rows = "";
+
+                    if (!data || data.length === 0) {
+                        rows = "<tr><td colspan='6' class='text-center text-warning'>No records found</td></tr>";
+                    } else {
+
+                        data.forEach(x => {
+
+                            rows += `
+                                <tr>
+                                    <td>${x.academicYear}</td>
+                                    <td>${x.startDate}</td>
+                                    <td>${x.endDate}</td>
+                                    <td>
+                                        ${x.isOpen
+                                            ? '<span class="badge bg-success">Open</span>'
+                                            : '<span class="badge bg-secondary">Closed</span>'}
+                                    </td>
+                                    <td>
+                                        ${x.isLocked
+                                            ? '<span class="badge bg-danger">Locked</span>'
+                                            : '<span class="badge bg-info">Unlocked</span>'}
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary editBtn" data-id="${x.id}">
+                                            <i class="bi bi-pencil"></i> Edit
+                                        </button>
+                                    </td>
+                                </tr>`;
+                        });
+                    }
+
+                    $("#promotionTableBody").html(rows);
+                },
+
+                error: function () {
+                    $("#promotionTableBody").html(
+                        "<tr><td colspan='6' class='text-danger text-center'>Error while loading data</td></tr>"
+                    );
+                }
+            });
+        }
+
+    </script>
+
+}

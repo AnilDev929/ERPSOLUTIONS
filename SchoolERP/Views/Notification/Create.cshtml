@@ -1,0 +1,326 @@
+﻿@using SchoolERP.Models.ViewModels
+@model NotificationVM
+@{
+    ViewData["Title"] = "Notification";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+    Func<string, string> getRoleIcon = role =>
+   {
+       return role.ToLower() switch
+       {
+           "admin" => "bi-shield-lock-fill",
+           "superadmin" => "bi-stars",
+           "teacher" => "bi-person-workspace",
+           "student" => "bi-mortarboard-fill",
+           "parent" => "bi-people-fill",
+           "accountant" => "bi-cash-stack",
+           "staff" => "bi-briefcase-fill",
+           "principal" => "bi-award-fill",
+           "hr" => "bi-person-vcard-fill",
+           "librarian" => "bi-book-fill",
+           "transport" => "bi-bus-front-fill",
+           _ => "bi-person-badge"
+       };
+   };
+}
+
+<style>
+    .role-card {
+        display: flex;
+        align-items: center;
+        padding: 14px;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        cursor: pointer;
+        transition: .2s;
+        background: #fff;
+    }
+
+        .role-card:hover {
+            transform: translateY(-2px);
+            border-color: #0d6efd;
+            box-shadow: 0 4px 12px rgba(0,0,0,.08);
+        }
+
+        .role-card i {
+            font-size: 20px;
+            width: 28px;
+            text-align: center;
+        }
+
+        .role-card input:checked + span {
+            color: #0d6efd;
+            font-weight: 600;
+        }
+
+    .form-control,
+    .form-select {
+        border-radius: 12px;
+    }
+
+    .card {
+        overflow: hidden;
+    }
+</style>
+
+<div class="container mt-2">
+
+    <div class="card border-0 shadow-sm rounded-4">
+
+        <!-- Header -->
+        <div class="card-header bg-white py-3 px-4 border-bottom">
+
+            <div class="d-flex align-items-center justify-content-between">
+
+                <div class="d-flex align-items-center">
+
+                    <div class="rounded-circle bg-primary-subtle text-primary p-3 me-3">
+                        <i class="bi bi-megaphone-fill fs-5"></i>
+                    </div>
+
+                    <div>
+                        <h5 class="mb-0 fw-bold">
+                            @(Model.NotificationId > 0 ? "Edit Notification" : "Create Notification")
+                        </h5>
+                        <small class="text-muted">
+                            Configure and publish announcement
+                        </small>
+                    </div>
+                </div>
+                <span class="badge rounded-pill text-bg-primary border">
+                    <i class="bi bi-broadcast me-1 fs-4"></i>
+                    Notification
+                </span>
+            </div>
+
+        </div>
+
+        <div class="card-body p-2">
+
+            <form method="post">
+
+                <input type="hidden" asp-for="NotificationId" />
+
+                <div class="row g-4">
+
+                    <!-- Title -->
+                    <div class="col-lg-8">
+
+                        <label class="form-label fw-semibold required">
+                            <i class="bi bi-type me-1"></i> Title
+                        </label>
+                        <input asp-for="Title" onkeypress="allowOnlyLetters(event)"
+                               class="form-control form-control-lg"
+                               placeholder="Example: Holiday Notice / Fee Reminder" />
+                        <span asp-validation-for="Title" class="text-danger small">
+                        </span>
+                    </div>
+
+
+                    <!-- Priority -->
+                    <div class="col-lg-4">
+                        <label class="form-label fw-semibold required">
+                            <i class="bi bi-flag me-1"></i> Priority
+                        </label>
+                        <select asp-for="Priority" class="form-select form-select-lg">
+                            <option>Low</option>
+                            <option>Medium</option>
+                            <option>High</option>
+                        </select>
+                    </div>
+
+                    <!-- Schedule -->
+                    <div class="col-12">
+
+                        <div class="border rounded-4 p-3 bg-light">
+
+                            <div class="fw-semibold mb-3">
+                                <i class="bi bi-calendar-range me-2"></i>
+                                Notification Schedule
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label required">
+                                        <i class="bi bi-calendar-event me-1"></i> Start Date
+                                    </label>
+                                    <input asp-for="StartDate" type="date" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-dd")" value="@(Model.StartDate?.ToString("yyyy-MM-dd"))" id="startDate" />
+                                    <span asp-validation-for="StartDate" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label required">
+                                        <i class="bi bi-calendar-check"></i> End Date
+                                    </label>
+                                    <input asp-for="EndDate" type="date" class="form-control" value="@(Model.EndDate?.ToString("yyyy-MM-dd"))" min="@DateTime.Today.ToString("yyyy-MM-dd")" id="endDate" />
+                                    <span asp-validation-for="EndDate" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- Message -->
+                    <div class="col-12">
+
+                        <label class="form-label fw-semibold required">
+                            <i class="bi bi-chat-left-text"></i> Message
+                        </label>
+
+                        <textarea asp-for="Message" rows="5"
+                                  maxlength="250"
+                                  class="form-control"
+                                  id="messageBox"
+                                  placeholder="Write announcement details...">
+                        </textarea>
+
+                        <div class="d-flex justify-content-between mt-2">
+                            <span asp-validation-for="Message" class="text-danger small">
+                            </span>
+                            <small class="text-muted">
+                                <i class="bi bi-text-paragraph me-1"></i>
+                                <span id="charCount">
+                                    250 remaining
+                                </span>
+                            </small>
+                        </div>
+
+                    </div>
+
+                    <!-- Roles -->
+                    <div class="col-12">
+
+                        <label class="form-label fw-semibold required">
+                            <i class="bi bi-people"></i> Target Audience
+                        </label>
+
+                        <div class="row g-2">
+                            @foreach (var role in Model.Roles)
+                            {
+                                <div class="col-lg-2 col-md-3">
+
+                                    <label class="role-card">
+
+                                        <input type="checkbox"
+                                               hidden
+                                               name="RoleIds"
+                                               value="@role.Value"
+                                               @(Model.RoleIds.Contains(int.Parse(role.Value)) ? "checked" : "") />
+
+                                        <span>
+                                            <i class="bi @getRoleIcon(role.Text) me-2"></i>
+                                            @role.Text
+                                        </span>
+
+                                    </label>
+
+                                </div>
+                            }
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Actions -->
+
+                    <div class="col-12">
+
+                        <div class="border-top pt-4 d-flex justify-content-end gap-2">
+
+                            <a href="/Notification/Index"
+                               class="btn btn-light px-4">
+
+                                <i class="bi bi-arrow-left me-1"></i>
+
+                                Cancel
+
+                            </a>
+
+                            <button class="btn btn-primary px-4">
+
+                                <i class="bi bi-send-check me-2"></i>
+
+                                Save Notification
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <script>
+
+        // $(document).ready(function () {
+
+        //     let maxLength = 250;
+
+        //     function updateCounter() {
+        //         let text = $("#messageBox").val();
+        //         let length = text.length;
+
+        //         $("#charCount").text(length + " / " + maxLength);
+
+        //         // Color feedback
+        //         if (length > maxLength * 0.9) {
+        //             $("#charCount").removeClass("text-muted")
+        //                            .addClass("text-danger");
+        //         } else {
+        //             $("#charCount").removeClass("text-danger")
+        //                            .addClass("text-muted");
+        //         }
+        //     }
+
+        //     // On typing
+        //     $("#messageBox").on("input", function () {
+        //         updateCounter();
+        //     });
+
+        //     // Initial load (for edit mode)
+        //     updateCounter();
+
+        // });
+
+        $(function () {
+
+            const $messageBox = $("#messageBox");
+            const $charCount = $("#charCount");
+            const maxLength = 250;
+
+            function updateCounter() {
+                const length = $messageBox.val().length;
+                const remaining = maxLength - length;
+
+                $charCount.text(`${remaining} left (${length}/${maxLength})`);
+
+                // Better threshold handling
+                $charCount
+                    .toggleClass("text-danger", length > maxLength * 0.9)
+                    .toggleClass("text-muted", length <= maxLength * 0.9);
+            }
+
+            // Bind event
+            $messageBox.on("input", updateCounter);
+
+            // Initial render (edit mode support)
+            updateCounter();
+        });
+    
+    </script>
+}
+
+
+                                        

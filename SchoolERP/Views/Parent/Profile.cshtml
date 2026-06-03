@@ -1,0 +1,389 @@
+﻿@using System.Security.Claims
+@using SchoolERP.Models.ViewModels
+@model ParentProfileViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "My Profile";
+    var userName = User.FindFirst(ClaimTypes.Name)?.Value;
+    var parentName = User.FindFirst("FullName")?.Value;
+}
+
+<style>
+    .student-card {
+        transition: all 0.3s ease;
+        border: 1px solid #eef1f6 !important;
+    }
+
+    .student-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.08) !important;
+    }
+
+    .student-header {
+        height: 70px;
+        background: linear-gradient(135deg, #4f46e5, #3b82f6);
+    }
+
+    .student-img {
+        margin-top: -45px;
+        object-fit: cover;
+        background: #fff;
+    }
+
+    .student-info {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 12px;
+        border-radius: 16px;
+        background: #f8fafc;
+    }
+
+    .info-icon {
+        width: 45px;
+        height: 45px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+    }
+    
+</style>
+
+<!-- Parent Profile Page -->
+<div class="container py-4">
+
+    <!-- Profile Header -->
+    <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+        <div class="bg-primary p-5 text-white position-relative">
+
+            <div class="d-flex align-items-center">
+
+                <!-- Profile Image -->
+                <img src="/images/default-parent.png"
+                     class="rounded-circle border border-4 border-white shadow"
+                     width="120"
+                     height="120"/>
+
+                <!-- Parent Info -->
+                <div class="ms-4">
+                    <h2 class="fw-bold mb-1">@Model.ParentName</h2>
+                    <p class="mb-1">
+                        <i class="bi bi-envelope"></i>
+                        @Model.Email
+                    </p>
+
+                    <p class="mb-1">
+                        <i class="bi bi-telephone"></i>
+                        @Model.MobileNumber
+                    </p>
+
+                    <p class="mb-0">
+                        <i class="bi bi-geo-alt"></i>
+                        @Model.Address
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- Children Section -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+
+        @* <div class="card-header bg-white border-0 pt-4">
+            <h4 class="fw-bold text-primary">
+                👨‍🎓 Children Details
+            </h4>
+        </div> *@
+
+        <div class="card border-0 shadow-sm rounded-4">
+
+            <!-- Header -->
+            <div class="card-header bg-white border-0 pt-4 pb-0">
+                <div class="d-flex align-items-center justify-content-between flex-wrap">
+                    <div>
+                        <h4 class="fw-bold text-primary mb-1">
+                            <i class="bi bi-mortarboard-fill me-2"></i>
+                            Children(s) Overview
+                        </h4>
+                        <p class="text-muted small mb-0">
+                            View academic, attendance and fee information of students
+                        </p>
+                    </div>
+                    <span class="badge bg-primary-subtle text-primary px-4 py-2 rounded-pill fs-6 border border-primary-subtle shadow-sm">
+                        My Children(s) : @Model.Students.Count
+                    </span>
+
+                </div>
+
+            </div>
+
+            <!-- Body -->
+            <div class="card-body p-4">
+
+                <div class="row g-4">
+
+                    @foreach (var child in Model.Students)
+                    {
+                        <div class="col-md-4">
+
+                            <!-- Student Card -->
+                            <div class="card student-card border-0 shadow-sm rounded-4 h-100 overflow-hidden">
+
+                                <!-- Top Gradient -->
+                                <div class="student-header"></div>
+
+                                <div class="card-body pt-0 px-4 pb-4">
+
+                                    <!-- Profile -->
+                                    <div class="text-center">
+
+                                        <img src="@(string.IsNullOrEmpty(child.ProfileImagePath) ? "/images/default-user.png" : child.ProfileImagePath)"
+                                             class="rounded-circle border border-4 border-white shadow-sm student-img"
+                                             width="100"
+                                             height="100" />
+
+                                        <h5 class="fw-bold mt-3 mb-1">
+                                            @child.StudentName
+                                        </h5>
+
+                                        <span class="badge bg-light text-dark border rounded-pill px-3 py-2">
+                                            Roll No: @child.RollNumber
+                                        </span>
+
+                                    </div>
+
+                                    <!-- Divider -->
+                                    <hr class="my-4" />
+
+                                    <!-- Details -->
+                                    <div class="student-info">
+
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="info-item">
+                                                    <div class="info-icon bg-primary-subtle text-primary">
+                                                        <i class="bi bi-building"></i>
+                                                    </div>
+
+                                                    <div>
+                                                        <small class="text-muted d-block">
+                                                            Class
+                                                        </small>
+
+                                                        <span class="fw-semibold">
+                                                            @child.ClassName
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="info-item">
+                                                    <div class="info-icon bg-success-subtle text-success">
+                                                        <i class="bi bi-grid-3x3-gap-fill"></i>
+                                                    </div>
+
+                                                    <div>
+                                                        <small class="text-muted d-block">
+                                                            Section
+                                                        </small>
+
+                                                        <span class="fw-semibold">
+                                                            @child.SectionName
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="info-item">
+                                            <div class="info-icon bg-warning-subtle text-warning">
+                                                <i class="bi bi-bar-chart-fill"></i>
+                                            </div>
+
+                                            <div class="w-100">
+                                                <small class="text-muted d-block">
+                                                    Attendance
+                                                </small>
+
+                                                <div class="d-flex justify-content-between align-items-center">
+
+                                                    <span class="fw-semibold">
+                                                        @child.AttendancePercentage.ToString("0.0")%
+                                                    </span>
+
+                                                    <span class="badge bg-success rounded-pill px-3">
+                                                        Good
+                                                    </span>
+
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                        <div class="info-item">
+
+                                            <div class="info-icon bg-danger-subtle text-danger">
+                                                <i class="bi bi-cash-stack"></i>
+                                            </div>
+
+                                            <div class="w-100">
+
+                                                <small class="text-muted d-block">
+                                                    Fee Status
+                                                </small>
+
+                                                @if (child.PendingFees > 0)
+                                                {
+                                                    <div class="d-flex justify-content-between align-items-center">
+
+                                                        <span class="fw-semibold text-danger">
+                                                            ₹@child.PendingFees Pending
+                                                        </span>
+
+                                                        <span class="badge bg-danger rounded-pill px-3">
+                                                            Due
+                                                        </span>
+
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="d-flex justify-content-between align-items-center">
+
+                                                        <span class="fw-semibold text-success">
+                                                            Fully Paid
+                                                        </span>
+
+                                                        <span class="badge bg-success rounded-pill px-3">
+                                                            Paid
+                                                        </span>
+
+                                                    </div>
+                                                }
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="card shadow-sm rounded-4">
+        <div class="card shadow-sm rounded-4">
+            <div class="card-header bg-white border-0 pt-4 pb-0">
+                <h5 class="fw-bold text-primary mb-1">
+                    <i class="bi bi-people-fill me-2"></i>
+                    Parent Contact
+                </h5>
+                <p class="text-muted small mb-0">
+                    Update parent contact and communication details
+                </p>
+            </div>
+
+            <div class="card-body p-4">
+                <form method="post" asp-action="UpdateContactDetail">
+                    <div class="row g-4">
+                    <input type="hidden" value="@Model.ParentId" name="ParentId" />
+
+                    <!-- Parent Name -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold text-secondary">
+                            <i class="bi bi-person-fill text-primary me-2"></i>
+                            Parent Name
+                        </label>
+                        <label name="ParentName" class="form-control form-control-lg rounded-3 shadow-sm bg-light d-block">
+                            @Model.ParentName
+                        </label>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold text-secondary">
+                            <i class="bi bi-envelope-fill text-danger me-2"></i>
+                            Email Address
+                        </label>
+
+                        <input type="email" name="Email"
+                               class="form-control form-control-lg rounded-3 shadow-sm bg-light"
+                               value="@Model.Email"
+                               placeholder="Enter email address" />
+                    </div>
+
+                    <!-- Mobile -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold text-secondary">
+                            <i class="bi bi-telephone-fill text-success me-2"></i>
+                            Mobile Number
+                        </label>
+
+                        <input type="text" name="MobileNumber"
+                               class="form-control form-control-lg rounded-3 shadow-sm bg-light"
+                               value="@Model.MobileNumber"
+                               placeholder="Enter mobile number" />
+                    </div>
+
+                    <!-- Address -->
+                    <div class="col-md-8">
+                        <label class="form-label fw-semibold text-secondary">
+                            <i class="bi bi-geo-alt-fill text-warning me-2"></i>
+                            Address
+                        </label>
+
+                        <input type="text" name="Address"
+                               class="form-control form-control-lg rounded-3 shadow-sm bg-light"
+                               value="@Model.Address"
+                               placeholder="Enter address" />
+                    </div>
+
+                </div>
+
+                    <!-- Buttons -->
+                    <div class="d-flex justify-content-end gap-2 mt-5">
+
+                        <button type="button"
+                                class="btn btn-light rounded-pill px-4 shadow-sm">
+                            <i class="bi bi-x-circle me-1"></i>
+                            Cancel
+                        </button>
+
+                        <button class="btn btn-primary rounded-pill px-4 shadow-sm">
+                            <i class="bi bi-check-circle-fill me-1"></i>
+                            Save Changes
+                        </button>
+
+                    </div>
+                </form>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

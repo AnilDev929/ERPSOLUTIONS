@@ -1,0 +1,118 @@
+﻿@using SchoolERP.Models.Entities
+@model Holiday
+@{
+    ViewBag.Title = "Create/Edit Holiday";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+
+    <!-- 🔷 HEADER -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body d-flex align-items-center"
+             style="background: linear-gradient(135deg, #1cc88a, #17a673); color: white; border-radius: 8px;">
+
+            <div>
+                <h4 class="mb-1">
+                    @if(Model.Id > 0)
+                    {
+                        <i class="bi bi-calendar-plus me-1"></i>
+                    }
+                    else
+                    {
+                        <i class="bi bi-pencil-square me-1"></i>
+                    }
+                    @(Model.Id > 0 ? "Edit Holiday" : "Add Holiday")
+                    
+                </h4>
+                <small>Create/Update and manage school holidays, vacations, and events</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🔷 FORM CARD -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+
+            <form method="post">
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <!-- 🔹 Title -->
+                        <label class="form-label">
+                            <i class="bi bi-card-text"></i> Holiday Title
+                        </label>
+                        <input asp-for="Title" class="form-control" placeholder="Enter holiday name..." />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <!-- 🔹 Type -->
+                        <label class="form-label">
+                            <i class="bi bi-tags"></i> Holiday Type
+                        </label>
+                        <select asp-for="Type" class="form-select">
+                            <option value="">-- Select Type --</option>
+                            <option value="1">🌍 Public Holiday</option>
+                            <option value="2">🏫 School Holiday</option>
+                            <option value="3">🌴 Vacation</option>
+                            <option value="4">✨ Optional</option>
+                        </select>
+                    </div>
+                </div>
+                
+
+                <!-- 🔹 Dates -->
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">
+                            <i class="bi bi-calendar-date"></i> Start Date
+                        </label>
+                        <input asp-for="StartDate" type="date"
+                               min="@DateTime.Today.ToString("yyyy-MM-dd")" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">
+                            <i class="bi bi-calendar-range"></i> End Date
+                        </label>
+                        <input asp-for="EndDate" type="date" 
+                            min="@DateTime.Today.ToString("yyyy-MM-dd")" class="form-control" />
+                    </div>
+                </div>
+
+                <!-- 🔹 Recurring -->
+                <div class="form-check form-switch mb-3">
+                    <input asp-for="IsRecurring" class="form-check-input" />
+                    <label class="form-check-label">
+                        <i class="bi bi-arrow-repeat"></i> Repeat every year
+                    </label>
+                </div>
+
+                <!-- 🔹 Description -->
+                <div class="mb-3">
+                    <label class="form-label">
+                        <i class="bi bi-chat-left-text"></i> Description
+                    </label>
+                    <textarea asp-for="Description" class="form-control" rows="3"
+                              placeholder="Optional notes about this holiday..."></textarea>
+                </div>
+
+                <!-- 🔷 ACTION BUTTONS -->
+                <div class="d-flex justify-content-between mt-4">
+
+                    <a href="/Holiday/Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </a>
+
+                    <button type="submit" class="btn btn-success px-4">
+                        <i class="bi bi-save"></i>
+                        @(Model.Id > 0 ? "Update Holiday" : "Save Holiday")
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>

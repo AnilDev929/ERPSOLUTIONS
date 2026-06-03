@@ -1,0 +1,346 @@
+﻿@using SchoolERP.Models.ViewModels
+@model CreateHomeworkVM
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ViewBag.IsEdit ? "Edit Homework" : "Create Homework";
+}
+
+<style>
+    attachment-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .attachment-item {
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 12px 16px;
+        transition: 0.3s;
+    }
+
+    .attachment-item:hover {
+        background: #eef2ff;
+        border-color: #c7d2fe;
+    }
+
+    .attachment-link {
+        text-decoration: none;
+        font-weight: 500;
+        color: #374151;
+    }
+
+    .attachment-link:hover {
+        color: #4f46e5;
+    }
+</style>
+
+
+<div class="container-fluid py-4">
+    <input type="hidden" asp-for="HomeworkId" />
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1"> 📘 Create Homework </h2>
+            <p class="text-muted mb-0">Assign homework to students with instructions and attachments</p>
+        </div>
+
+        <a href="/Homework/Index" class="btn btn-light rounded-pill px-4 shadow-sm">
+            <i class="bi bi-arrow-left me-2"></i> Back</a>
+    </div>
+
+
+    <!-- Form Card -->
+    <div class="card border-0 shadow-lg rounded-4">
+
+        <div class="card-body p-4">
+
+            <form asp-action="Create"
+                  asp-controller="Homework"
+                  method="post"
+                  enctype="multipart/form-data">
+
+                <div asp-validation-summary="ModelOnly"
+                     class="alert alert-danger"></div>
+
+                <div class="row g-4">
+
+                    <!-- Class -->
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold"> Class</label>
+                        <select asp-for="ClassId" asp-items="Model.ClassList" class="form-select form-control-lg rounded-3">
+                            <option value="0"> Select Class </option>
+                        </select>
+                        <span asp-validation-for="ClassId" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Section -->
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold"> Section </label>
+                        <select asp-for="SectionId" asp-items="Model.SectionList" class="form-select form-control-lg rounded-3">
+                            <option value="0">Select Section</option>
+                        </select>
+                    </div>
+
+                    <!-- Subject -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Subject</label>
+                        <select asp-for="SubjectId" asp-items="Model.SubjectList" class="form-select form-control-lg rounded-3">
+                            <option value="0">Select Subject</option>
+                        </select>
+                        <span asp-validation-for="SubjectId" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Title -->
+                    <div class="col-md-4">
+
+                        <label class="form-label fw-semibold"> Homework Title </label>
+                        <input asp-for="Title" class="form-control form-control-lg rounded-3"
+                               placeholder="Enter homework title" />
+                        <span asp-validation-for="Title" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">
+                            Description  <small class="text-muted">
+                                (<span id="descriptionCount">0</span>/1000)
+                            </small>
+                        </label>
+                        <textarea asp-for="Description" maxlength="1000"
+                                  rows="4" class="form-control rounded-3" placeholder="Write homework description">
+                        </textarea>
+                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Instructions -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">
+                            Instructions <small class="text-muted">
+                                (<span id="instructionsCount">0</span>/200)
+                            </small>
+                        </label>
+                        <textarea asp-for="Instructions" maxlength="200" rows="4" class="form-control rounded-3"
+                                  placeholder="Additional instructions for students"></textarea>
+
+                    </div>
+
+                    <!-- Assigned Date -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold"> Assigned Date </label>
+                        <input asp-for="AssignedDate"
+                               type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")"
+                               class="form-control form-control-lg rounded-3" />
+                        <span asp-validation-for="AssignedDate" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Due Date -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold"> Due Date </label>
+                        <input asp-for="DueDate"
+                               type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")"
+                               class="form-control form-control-lg rounded-3" />
+                        <span asp-validation-for="DueDate" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Total Marks -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Total Marks</label>
+                        <input asp-for="TotalMarks"
+                               type="number" class="form-control form-control-lg rounded-3"
+                               placeholder="Enter marks" />
+                    </div>
+
+
+                    <!-- Priority -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold"> Priority </label>
+                        <select asp-for="Priority"
+                                class="form-select form-control-lg rounded-3">
+                            <option value="1">Low</option>
+                            <option value="2">Medium</option>
+                            <option value="3">High</option>
+                        </select>
+                    </div>
+
+                    <!-- Homework Type -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">  Homework Type</label>
+                        <select asp-for="HomeworkType"
+                                class="form-select form-control-lg rounded-3">
+                            <option value="1">Normal</option>
+                            <option value="2">Project</option>
+                            <option value="3">Worksheet</option>
+                            <option value="4">Practical</option>
+                        </select>
+                    </div>
+
+                    <!-- Late Submission -->
+                    <div class="col-md-4 d-flex align-items-center">
+
+                        <div class="form-check mt-4">
+                            <input asp-for="AllowLateSubmission"
+                                   class="form-check-input"
+                                   type="checkbox" />
+                            <label class="form-check-label fw-semibold">
+                                Allow Late Submission
+                            </label>
+                        </div>
+
+                    </div>
+
+                    @if (Model.ExistingAttachments != null && Model.ExistingAttachments.Any())
+                    {
+                        <div class="mb-4">
+
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-paperclip me-2"></i> Existing Attachments</label>
+
+                            <div class="attachment-list">
+                                @foreach (var file in Model.ExistingAttachments)
+                                {
+                                    <div class="attachment-item">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-file-earmark-text text-primary me-2"></i>
+                                            <a href="@file.FilePath" target="_blank" class="attachment-link">
+                                                @file.FileName
+                                            </a>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                        </div>
+                    }
+                    <!-- File Upload -->
+                    <div class="col-md-12">
+
+                        <label class="form-label fw-semibold">
+                            Attachments
+                        </label>
+
+                        <input asp-for="Files"
+                               type="file"
+                               multiple
+                               class="form-control rounded-3" />
+
+                        <div class="form-text">
+                            Allowed:
+                            PDF, DOCX, JPG, PNG
+                            (Max 10MB)
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- Footer -->
+                <div class="d-flex justify-content-end gap-3 mt-5">
+
+                    <a href="/Homework/Index"
+                       class="btn btn-light btn-lg rounded-pill px-4">
+                        Cancel
+                    </a>
+
+                    <button type="submit"
+                            class="btn btn-primary btn-lg rounded-pill px-5 shadow">
+
+                        <i class="bi bi-check-circle me-2"></i>
+
+                        Publish Homework
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function () {
+
+            setupCounter('Description', 'descriptionCount', 1000);
+            setupCounter('Instructions', 'instructionsCount', 200);
+
+
+            function setupCounter(textareaId, counterId, maxLength) {
+
+                const textarea = document.getElementById(textareaId);
+                const counter = document.getElementById(counterId);
+
+                function updateCounter() {
+                    counter.textContent = textarea.value.length;
+                }
+
+                textarea.addEventListener('input', updateCounter);
+
+                updateCounter();
+            }
+
+
+            $("#ClassId").change(function () {
+
+                var classId = $(this).val();
+
+                // Load Sections
+                $.get('/Homework/GetSectionsByClass', { classId: classId }, function (data) {
+
+                    $("#SectionId").empty();
+                    $("#SectionId").append('<option value="">Select Section</option>');
+
+                    $.each(data, function (i, item) {
+                        $("#SectionId").append(
+                            `<option value="${item.sectionId}" data-classsectionid="${item.id}">${item.sectionName}</option>`
+                        );
+                    });
+
+                });
+
+            });
+
+            function resetSubjects() {
+                $("#subjectId").empty().append("<option value=''>Select Subject</option>");
+            }
+
+            $('#SectionId').change(async function () {
+
+                // -----------------------------
+                // 1. Get ClassSectionId safely
+                // -----------------------------
+                const selectedOption = $(this).find('option:selected');
+                const classSectionId = selectedOption.data('classsectionid');
+                try{
+
+                    // Load Subjects
+                    $.get('/Homework/GetSubjectsByClass', { classSectionId: classSectionId }, function (data) {
+
+                        $("#SubjectId").empty();
+                        $("#SubjectId").append('<option value="">Select Subject</option>');
+
+                        $.each(data, function (i, item) {
+                            $("#SubjectId").append(
+                                `<option value="${item.subjectId}">${item.subjectName}</option>`
+                            );
+                        });
+                    });
+                }
+                catch (err) {
+                    console.error("Subject load error:", err);
+                    resetSubjects();
+                }
+            });
+
+        });
+    </script>
+}

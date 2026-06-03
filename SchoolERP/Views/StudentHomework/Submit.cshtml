@@ -1,0 +1,351 @@
+﻿@using SchoolERP.Models.ViewModels
+@model SubmitHomeworkVM
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Submit Assignment";
+}
+
+<style>
+
+    body {
+        background: #f4f7fb;
+    }
+
+    .submit-wrapper {
+        max-width: 750px;
+        margin: auto;
+    }
+
+    .submit-card {
+        border: none;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+        background: white;
+    }
+
+    .submit-header {
+        background: linear-gradient(135deg, #16a34a, #22c55e);
+        color: white;
+        padding: 30px;
+    }
+
+    .submit-title {
+        font-size: 30px;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .submit-subtitle {
+        opacity: 0.9;
+        font-size: 15px;
+    }
+
+    .submit-body {
+        padding: 35px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 10px;
+    }
+
+    .form-control {
+        border-radius: 12px;
+        border: 1px solid #dbe3ec;
+        padding: 12px 14px;
+        font-size: 15px;
+        transition: 0.3s;
+    }
+
+    .form-control:focus {
+        border-color: #22c55e;
+        box-shadow: 0 0 0 0.15rem rgba(34,197,94,0.15);
+    }
+
+    textarea.form-control {
+        min-height: 120px;
+        resize: none;
+    }
+
+    .upload-box {
+        border: 2px dashed #cbd5e1;
+        border-radius: 16px;
+        padding: 30px;
+        text-align: center;
+        background: #f9fafb;
+        transition: 0.3s;
+    }
+
+        .upload-box:hover {
+            border-color: #22c55e;
+            background: #f0fdf4;
+        }
+
+    .upload-icon {
+        font-size: 42px;
+        color: #22c55e;
+        margin-bottom: 12px;
+    }
+
+    .btn-custom {
+        border-radius: 12px;
+        padding: 12px 22px;
+        font-weight: 600;
+        transition: 0.3s;
+    }
+
+    .btn-custom:hover {
+        transform: translateY(-2px);
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-top: 25px;
+    }
+
+    .remarks-wrapper {
+        background: #fff;
+        border-radius: 18px;
+        border: 1px solid #e5e7eb;
+        padding: 15px;
+        transition: 0.3s;
+    }
+
+    .remarks-wrapper:focus-within {
+        border-color: #22c55e;
+        box-shadow: 0 0 0 0.15rem rgba(34,197,94,0.12);
+    }
+
+    .remarks-box {
+        border: none !important;
+        box-shadow: none !important;
+        resize: none;
+        min-height: 140px;
+        font-size: 15px;
+        line-height: 1.7;
+        padding: 0;
+        background: transparent;
+    }
+
+    .remarks-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 12px;
+    }
+
+    .counter-section {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .counter-text {
+        font-size: 13px;
+        font-weight: 600;
+        color: #6b7280;
+        transition: 0.3s;
+    }
+
+    .remarks-progress {
+        height: 6px;
+        margin-top: 10px;
+        border-radius: 50px;
+        overflow: hidden;
+        background: #eef2f7;
+    }
+
+    .progress-bar {
+        transition: 0.3s ease;
+    }
+</style>
+
+<div class="container py-2">
+
+    <div class="submit-wrapper">
+
+        <div class="submit-card">
+
+            <!-- Header -->
+            <div class="submit-header">
+
+                <div class="submit-title">
+                    <i class="bi bi-cloud-upload-fill me-2"></i>
+                    Submit Homework
+                </div>
+
+                <div class="submit-subtitle">
+                    Upload your completed assignment before the deadline
+                </div>
+
+            </div>
+
+            <!-- Body -->
+            <div class="submit-body">
+
+                <form method="post" enctype="multipart/form-data">
+                    <input type="hidden" asp-for="HomeworkId" />
+
+                    <!-- Validation Summary -->
+                    <div asp-validation-summary="ModelOnly"
+                         class="alert alert-danger mb-3">
+                    </div>
+                    <!-- Homework Title -->
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            <i class="bi bi-journal-text me-2"></i> Homework Title</label>
+                        <input class="form-control"
+                               asp-for="Title"
+                               readonly />
+                    </div>
+
+                    <!-- Remarks -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-chat-left-text me-2"></i>Remarks / Notes</label>
+
+                        <div class="remarks-wrapper">
+                            <textarea class="form-control remarks-box"
+                                      id="remarksBox"
+                                      asp-for="Remarks"
+                                      maxlength="500"
+                                      placeholder="Write any notes or comments for your teacher...">
+                            </textarea>
+
+                            <!-- Footer -->
+                            <div class="remarks-footer">
+                                <small class="text-muted">
+                                    <i class="bi bi-info-circle me-1"></i>Maximum 500 characters
+                                </small>
+
+                                <div class="counter-section">
+                                    <span id="charCounter" class="counter-text"> 0 / 500</span>
+                                </div>
+                            </div>
+
+                            <!-- Progress -->
+                            <div class="progress remarks-progress">
+                                <div class="progress-bar"
+                                     id="remarksProgress"
+                                     role="progressbar"
+                                     style="width:0%">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Upload -->
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            <i class="bi bi-paperclip me-2"></i> Upload Assignment
+                        </label>
+
+                        <div class="upload-box">
+
+                            <div class="upload-icon">
+                                <i class="bi bi-cloud-arrow-up"></i>
+                            </div>
+
+                            <p class="mb-3 text-muted">
+                                Drag & drop your file here or browse (Allowed: PDF, DOC, DOCX, JPG, PNG (Max: 10MB))
+                            </p>
+
+                            <input type="file" asp-for="File" class="form-control" />
+                        </div>
+
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="action-buttons">
+
+                        <button type="submit"
+                                class="btn btn-success btn-custom shadow-sm">
+                            <i class="bi bi-send-check me-2"></i>
+                            Submit Homework
+                        </button>
+
+                        <a href="/StudentHomework/Index"
+                           class="btn btn-light border btn-custom">
+                            <i class="bi bi-arrow-left-circle me-2"></i>
+                            Cancel
+                        </a>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts
+{
+
+    <script>
+
+        const remarksBox = document.getElementById('remarksBox');
+        const charCounter = document.getElementById('charCounter');
+        const remarksProgress = document.getElementById('remarksProgress');
+        const maxLength = 500;
+
+        remarksBox.addEventListener('input', function () {
+
+            const currentLength = this.value.length;
+
+            // Counter Text
+            charCounter.innerText = `${currentLength} / ${maxLength}`;
+
+            // Progress Width
+            const percent = (currentLength / maxLength) * 100;
+
+            remarksProgress.style.width = percent + '%';
+
+            // Dynamic Colors
+
+            remarksProgress.classList.remove(
+                'bg-success',
+                'bg-warning',
+                'bg-danger'
+            );
+
+            charCounter.classList.remove(
+                'text-success',
+                'text-warning',
+                'text-danger'
+            );
+
+            if (percent < 60) {
+
+                remarksProgress.classList.add('bg-success');
+                charCounter.classList.add('text-success');
+
+            }
+            else if (percent < 90) {
+
+                remarksProgress.classList.add('bg-warning');
+                charCounter.classList.add('text-warning');
+
+            }
+            else {
+
+                remarksProgress.classList.add('bg-danger');
+                charCounter.classList.add('text-danger');
+
+            }
+
+        });
+
+    </script>
+
+}

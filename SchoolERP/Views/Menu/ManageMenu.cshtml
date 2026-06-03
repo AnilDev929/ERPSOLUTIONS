@@ -1,0 +1,145 @@
+﻿@using SchoolERP.Models.DTOS
+@model List<MenuSectionDTO>
+
+@{
+    ViewBag.Title = "Manage Menu";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+
+    @foreach (var item in Model)
+    {
+        <div class="card mb-3 shadow-sm">
+
+            <!-- SECTION HEADER -->
+            <div class="card-header d-flex justify-content-between align-items-center">
+
+                <div class="d-flex align-items-center gap-2">
+
+                    <div class="icon-box bg-primary-subtle text-primary rounded d-flex align-items-center justify-content-center"
+                         style="width:40px;height:40px;">
+                        <i class="@item.Icon"></i>
+                    </div>
+
+                    <div>
+                        <strong class="d-block">@item.Title</strong>
+                        <small class="text-muted">@item.Subtitle</small>
+                    </div>
+                </div>
+
+                <div class="form-check form-switch">
+                    <input type="checkbox"
+                           class="form-check-input toggle-section"
+                           data-id="@item.Id"
+                           @(item.IsActive ? "checked" : "") />
+                </div>
+            </div>
+
+            <!-- SUB ITEMS -->
+            <div class="card-body p-2">
+
+                @foreach (var subitem in item.Items)
+                {
+                    <div class="d-flex justify-content-between align-items-center p-2 border-bottom">
+
+                        <div>
+                            <i class="@subitem.Icon me-2 text-primary"></i>
+                            @subitem.Title
+                        </div>
+
+                        <div class="form-check form-switch">
+                            <input type="checkbox"
+                                   class="form-check-input toggle-item"
+                                   data-id="@subitem.Id"
+                                   @(subitem.IsActive ? "checked" : "") />
+                        </div>
+
+                    </div>
+                }
+
+            </div>
+        </div>
+    }
+
+</div>
+
+
+@section Scripts {
+
+    <script>
+
+        $(document).on("change", ".toggle-section", function () {
+
+            let $el = $(this);
+            let id = $(this).data("id");
+            let status = $(this).is(":checked");
+
+            // optional: disable while processing
+            $el.prop("disabled", true);
+
+            $.ajax({
+                url: "/Menu/ToggleSection",
+                type: "POST",
+                data: { id: id, isActive: status },
+                success: function (res) {
+
+                    // 🔥 Immediate UI update (no delay)
+                    if (!status) {
+                        $el.closest(".card")
+                            .find(".toggle-item")
+                            .prop("disabled", true)
+                            .prop("checked", false); // optional: uncheck too
+                    } else {
+                        $el.closest(".card")
+                            .find(".toggle-item")
+                            .prop("disabled", false);
+                    }
+
+                    // // optional toast (Bootstrap)
+                    // showToast("Updated successfully", "success");
+                },
+                error: function () {
+
+                    // rollback UI if failed
+                    $el.prop("checked", !status);
+                    // showToast("Update failed", "danger");
+                },
+                complete: function () {
+                    $el.prop("disabled", false);
+                }
+            });
+
+        });
+
+        $(document).on("change", ".toggle-item", function () {
+            let $el = $(this);
+            let id = $(this).data("id");
+            let status = $(this).is(":checked");
+
+            $.ajax({
+                url: "/Menu/ToggleItem",
+                type: "POST",
+                data: { id: id, isActive: status },
+                success: function (res) {
+
+                    // // optional toast (Bootstrap)
+                    // showToast("Updated successfully", "success");
+                },
+                error: function () {
+
+                    // rollback UI if failed
+                    $el.prop("checked", !status);
+                    // showToast("Update failed", "danger");
+                },
+                complete: function () {
+                    $el.prop("disabled", false);
+                }
+            });
+
+        });
+
+
+    </script>
+
+}

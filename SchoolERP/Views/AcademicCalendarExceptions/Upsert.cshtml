@@ -1,0 +1,192 @@
+﻿@using SchoolERP.Models.ViewModels
+@model AcademicCalendarExceptionVM
+
+@{
+    ViewBag.Title = "Add/Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0">Add / Edit Academic Exception</h5>
+            <small class="text-muted">
+                Billing will be paused during this period.
+            </small>
+        </div>
+
+        <div class="card-body">
+
+            <form asp-action="Save" method="post" id="exceptionForm">
+                <input type="hidden" asp-for="ExceptionId" />
+
+                <div class="row">
+
+                    <!-- Academic Year -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Academic Year</label>
+                        <select asp-for="AcademicYearId" asp-items="Model.AcademicYears" class="form-select">
+                        </select>
+                    </div>
+
+                    <!-- Exception Type -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Exception Type</label>
+                        <select asp-for="ExceptionType" class="form-select" id="exceptionType">
+                            <option value="">-- Select Type --</option>
+                            <option value="SUMMER_VACATION">🌴 Summer Vacation</option>
+                            <option value="EXAM_BREAK">📘 Exam Break</option>
+                            <option value="HOLIDAY">🎉 Holiday</option>
+                        </select>
+                    </div>
+
+                    <!-- Start Date -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Start Date</label>
+                        <input asp-for="StartDate" type="date" class="form-control" id="startDate"
+                               value="@Model.StartDate?.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                    </div>
+
+                    <!-- End Date -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">End Date</label>
+                        <input asp-for="EndDate" type="date" class="form-control" id="endDate"
+                               value="@Model.EndDate?.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                    </div>
+
+                    <!-- Billing Switch -->
+                    <div class="col-md-6 mb-3 d-flex align-items-center">
+                        <div class="form-check form-switch mt-3">
+                            <input asp-for="IsBillingBlocked" class="form-check-input" type="checkbox" />
+                            <label class="form-check-label ms-2">
+                                Block Fee Billing
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label d-flex justify-content-between">
+                            <span>Description</span>
+                            <small id="charCount" class="text-muted">0 / 200</small>
+                        </label>
+                        <textarea asp-for="Description" class="form-control" maxlength="200" rows="3"
+                                  placeholder="Optional notes about this exception..."></textarea>
+                        @* <small id="charCount" class="text-muted">0 / 200</small> *@
+                    </div>
+
+                </div>
+
+                <!-- Validation -->
+                <div id="validationMessage" class="text-danger mb-3"></div>
+
+                <!-- Buttons -->
+                <div class="d-flex justify-content-between">
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        ← Back
+                    </a>
+
+                    <button type="submit" class="btn btn-primary">
+                        💾 Save Exception
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <script>
+
+        const textarea = document.getElementById("Description");
+        const counter = document.getElementById("charCount");
+
+        textarea.addEventListener("input", function () {
+            const length = textarea.value.length;
+            counter.textContent = `${length} / 200`;
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const startInput = document.getElementById("startDate");
+            const endInput = document.getElementById("endDate");
+
+            const now = new Date();
+            const year = now.getFullYear();
+
+            const minDate = `${year}-01-01`;
+            const maxDate = `${year}-12-31`;
+
+            startInput.setAttribute("min", minDate);
+            startInput.setAttribute("max", maxDate);
+            endInput.setAttribute("min", minDate);
+            endInput.setAttribute("max", maxDate);
+        });
+
+        function getSelectedYear() {
+            const text = $('#AcademicYearId option:selected').text();
+            return text.split('-')[0]; // gets 2025
+        }
+
+        function validateDates() {
+
+            var data = {
+                academicYearId: $('#AcademicYearId').val(),
+                startDate: $('#startDate').val(),
+                endDate: $('#endDate').val(),
+                exceptionId: $('input[name="ExceptionId"]').val()
+            };
+
+            if (!data.startDate || !data.endDate) return;
+
+            if (data.startDate > data.endDate) {
+                $('#validationMessage').text("End date must be after start date.");
+                return;
+            }
+
+            $.ajax({
+                url: '/AcademicCalendarExceptions/ValidateDates',
+                type: 'POST',
+                data: data,
+                success: function (res) {
+
+                    if (!res.isValid) {
+                        $('#validationMessage').text(res.message);
+                        $('#startDate, #endDate').addClass('is-invalid');
+                    } else {
+                        $('#validationMessage').text('');
+                        $('#startDate, #endDate').removeClass('is-invalid');
+                    }
+                }
+            });
+        }
+
+        $('#startDate, #endDate, #AcademicYearId').on('change', function () {
+            validateDates();
+        });
+
+        $('#exceptionType').change(function () {
+            const type = $(this).val();
+            const year = getSelectedYear();
+
+            if (!year) return;
+
+            if (type === "SUMMER_VACATION") {
+                $('#startDate').val(`${year}-05-01`);
+                $('#endDate').val(`${year}-06-15`);
+            }
+
+            if (type === "EXAM_BREAK") {
+                $('#startDate').val(`${year}-03-20`);
+                $('#endDate').val(`${year}-03-31`);
+            }
+
+            validateDates(); // ✅ trigger validation
+        });
+
+    </script>
+}

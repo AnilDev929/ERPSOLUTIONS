@@ -1,0 +1,410 @@
+﻿@using SchoolERP.Models.Entities
+@model List<GradeRule>
+@{
+    ViewData["Title"] = "Grade Rule Configuration";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <div>
+            <h3 class="mb-0">
+                <i class="bi bi-trophy text-warning"></i>
+                Grade Rules
+            </h3>
+            <small class="text-muted">Manage grading percentage rules</small>
+        </div>
+
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus me-1"></i> Add Rule
+        </a>
+
+        @* <button class="btn btn-primary" id="btnAdd">
+            <i class="bi bi-plus me-1"></i> Add Rule
+        </button> *@
+
+    </div>
+
+    <!-- Modal Window -->
+    <div class="modal fade" id="gradeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0 rounded-3">
+
+                <!-- Header -->
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title d-flex align-items-center gap-2">
+                        <i class="bi bi-mortarboard-fill"></i>
+                        Grade Rule Setup
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body p-4">
+
+                    <input type="hidden" id="GradeRuleID" />
+
+                    <!-- Section: Basic Info -->
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-3 d-flex align-items-center gap-2">
+                            <i class="bi bi-info-circle"></i> Basic Information
+                        </h6>
+
+                        <div class="row g-3">
+
+                            <div class="col-md-12">
+                                <label class="form-label">Rule Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-tag"></i>
+                                    </span>
+                                    <input class="form-control" id="RuleName" placeholder="e.g. First Class Distinction">
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Section: Score Range -->
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-3 d-flex align-items-center gap-2">
+                            <i class="bi bi-speedometer2"></i> Score Range
+                        </h6>
+
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+                                <label class="form-label">Min Score</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-arrow-down"></i></span>
+                                    <input type="number" class="form-control" id="MinScore">
+                                </div>
+                                <small class="text-danger d-none" id="minScoreError">
+                                    Min score cannot be greater than max score
+                                </small>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Max Score</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-arrow-up"></i></span>
+                                    <input type="number" class="form-control" id="MaxScore">
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Section: Grade Definition -->
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-3 d-flex align-items-center gap-2">
+                            <i class="bi bi-award"></i> Grade Definition
+                        </h6>
+
+                        <div class="row g-3">
+
+                            <div class="col-md-4">
+                                <label class="form-label">Grade Letter</label>
+                                <input class="form-control text-uppercase" id="GradeLetter" placeholder="A+">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Grade Point</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-bar-chart"></i>
+                                    </span>
+                                    <input type="number" step="0.01" class="form-control" id="GradePoint">
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Color</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-palette"></i>
+                                    </span>
+                                    <input type="color" class="form-control form-control-color w-100" id="ColorCode">
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Footer -->
+                <div class="modal-footer bg-light">
+
+                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </button>
+
+                    <button class="btn btn-success px-4" id="btnSave">
+                        <i class="bi bi-check2-circle me-1"></i> Save Grade Rule
+                    </button>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="card shadow-sm border-2">
+
+        <div class="card-body p-0">
+
+            <table class="table table-hover align-middle mb-0" id="tblGradeRules">
+
+                <thead class="">
+                    <tr>
+                        <th>Rule</th>
+                        <th>Grade</th>
+                        <th>Min %</th>
+                        <th>Max %</th>
+                        <th>Range</th>
+                        <th width="120">Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @foreach (var item in Model)
+                    {
+                        var progressColor =
+                        item.GradeLetter == "E" ? "#22C55E" :
+                        item.GradeLetter == "D" ? "#3B82F6" :
+                        item.GradeLetter == "C" ? "#8B5CF6" :
+                        item.GradeLetter == "B" ? "#F59E0B" :
+                        "#EF4444";
+
+                        <tr>
+                            <td>
+                                @* <span class="badge rounded-pill bg-success text-white px-3 py-2">
+                                    @item.RuleName
+                                </span> *@
+                                <span class="badge rounded-pill px-3 py-2
+                                    @(item.GradeLetter == "E" ? "bg-success-subtle text-success" :
+                                       item.GradeLetter == "D" ? "bg-primary-subtle text-primary" :
+                                        item.GradeLetter == "C" ? "bg-purple-subtle text-purple" :
+                                      item.GradeLetter == "B" ? "bg-warning-subtle text-warning" :
+                                       "bg-danger-subtle text-danger")">
+                                    @item.RuleName
+                                </span>
+                            </td>
+                            <td>@item.GradeLetter</td>
+                            <td>@item.MinScore %</td>
+                            <td>@item.MaxScore %</td>
+                            <td style="min-width: 150px;">
+                                <div class="progress" style="height: 10px; border-radius: 20px;">
+                                    <div class="progress-bar" 
+                                         role="progressbar"
+                                         style="width: @item.MaxScore%; background-color:@progressColor">
+                                    </div>
+                                </div>
+                                <small class="text-muted">
+                                    @item.MinScore% - @item.MaxScore%
+                                </small>
+                            </td>
+                            <td>
+                                <a asp-action="Create" asp-route-id="@item.GradeRuleID" class="btn btn-sm 
+                                    @( item.GradeLetter == "E" ? "btn-outline-success" :
+                                        item.GradeLetter == "D" ? "bg-outline-primary" :
+                                        item.GradeLetter == "C" ? "bg-outline-purple" :
+                                        item.GradeLetter == "B" ? "bg-outline-warning" :
+                                        "bg-outline-danger")">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form method="post" asp-action="Delete" class="d-inline delete-form">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@item.GradeRuleID" />
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                                @* <a class="btn btn-sm btn-danger btn-delete" href="@Url.Action("Delete", new { id = item.GradeRuleID })">
+                                    <i class="bi bi-trash"></i>
+                                </a> *@
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+            <div class="modal fade" id="deleteModal" data-bs-backdrop="static" data-bs-keyboard="false">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="bi bi-exclamation-triangle text-danger me-2"></i> Confirm Delete</h5>
+                            <button class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            Are you sure you want to delete this item?
+                        </div>
+
+                        <div class="modal-footer">
+                            <button class="btn btn-light" data-bs-dismiss="modal"> Cancel </button>
+
+                            <button id="confirmDelete" class="btn btn-danger">
+                                <i class="bi bi-trash me-1"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <script>
+        var selectedForm = null;
+
+        // Intercept submit
+        $(document).on( "submit", ".delete-form", function (e) {
+                
+            e.preventDefault();
+            selectedForm = $(this);
+            $("#deleteModal") .modal("show");
+
+        });
+
+        // Confirm delete
+        $("#confirmDelete").click(function () {
+
+            if (selectedForm) {
+                selectedForm.off("submit");
+                selectedForm.submit();
+            }
+
+        });
+
+
+        $(function () {
+
+            $(".btn-delete").click(function (e) {
+
+                e.preventDefault();
+                var url = $(this).attr("href");
+
+                $("#confirmDelete").attr("href", url);
+
+                $("#deleteModal").modal("show");
+
+            });
+
+        });
+
+
+        $("#btnAdd").click(function () {
+            clearForm();
+            $("#gradeModal").modal("show");
+        });
+
+        function clearForm() {
+
+            $("#GradeRuleID").val(0);
+            $("#RuleName").val("");
+            $("#MinScore").val("");
+            $("#MaxScore").val("");
+            $("#GradeLetter").val("");
+            $("#GradePoint").val("");
+            $("#ColorCode").val("#000000");
+
+            // optional resets
+            $("#Description").val("");
+            $("#IsActive").prop("checked", true);
+        }
+
+        function loadGrid() {
+            $.get("/GradeRule/GetAll", function (data) {
+
+                let rows = "";
+                $.each(data, function (i, item) {
+
+                    rows += `
+                        <tr>
+                            <td>${item.ruleName}</td>
+                            <td>${item.minScore} - ${item.maxScore}</td>
+                            <td><span class="badge" style="background:${item.colorCode}">${item.gradeLetter}</span></td>
+                            <td>${item.gradePoint ?? ""}</td>
+                            <td>${item.resultStatus ?? ""}</td>
+                            <td><span class="badge" style="background:${item.colorCode}">${item.colorCode}</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" onclick="edit(${item.gradeRuleID})">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+
+                                <button class="btn btn-sm btn-secondary" onclick="duplicate(${item.gradeRuleID})">
+                                    <i class="bi bi-files"></i>
+                                </button>
+                            </td>
+                        </tr>`;
+                });
+
+                $("#tblGradeRules tbody").html(rows);
+            });
+        }
+
+        function duplicate(id) {
+            $.post("/GradeRule/Duplicate/" + id, function () {
+                loadGrid();
+            });
+        }
+
+        function edit(id) {
+            $.get("/GradeRule/GetById/" + id, function (data) {
+
+                $("#GradeRuleID").val(data.gradeRuleID);
+                $("#RuleName").val(data.ruleName);
+                $("#MinScore").val(data.minScore);
+                $("#MaxScore").val(data.maxScore);
+                $("#GradeLetter").val(data.gradeLetter);
+                $("#GradePoint").val(data.gradePoint);
+                $("#ColorCode").val(data.colorCode);
+
+                $("#gradeModal").modal("show");
+            });
+        }
+
+        $("#btnSave").click(function () {
+
+            let model = {
+                GradeRuleID: $("#GradeRuleID").val(),
+                RuleName: $("#RuleName").val(),
+                MinScore: $("#MinScore").val(),
+                MaxScore: $("#MaxScore").val(),
+                GradeLetter: $("#GradeLetter").val(),
+                GradePoint: $("#GradePoint").val(),
+                ColorCode: $("#ColorCode").val()
+            };
+
+            $.ajax({
+                url: "/GradeRule/Save",
+                type: "POST",
+                data: model,
+                success: function (res) {
+                    $("#gradeModal").modal("hide");
+                    loadGrid();
+                    alert(res.message);
+                },
+                error: function (err) {
+                    alert(err.responseText);
+                }
+            });
+        });
+
+    </script>
+
+}

@@ -1,0 +1,164 @@
+﻿@using SchoolERP.Models.ViewModels
+@model ExamVM
+@{
+    ViewData["Title"] = "Exam";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    bool isLocked = Model.ExamId > 0 && Model.EndDate.Date < DateTime.Today;
+    bool isEdit = Model?.ExamId > 0;
+}
+
+<div class="container mt-5">
+
+    <!-- Breadcrumb -->
+    <nav>
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+                <a href="@Url.Action("Index", "Exam")">Exams</a>
+            </li>
+            <li class="breadcrumb-item active">
+                Create/ Edit Exam
+            </li>
+        </ol>
+    </nav>
+
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">
+                <i class="bi bi-journal-plus"></i> Create / Edit Exam
+            </h4>
+        </div>
+
+        <div class="card-body">
+
+            <form method="post">
+
+                <input type="hidden" asp-for="ExamId" />
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label required">
+                            <i class="bi bi-pencil-square"></i> Exam Name
+                        </label>
+                        <input asp-for="ExamName" class="form-control" placeholder="e.g. Midterm Exam / Final Exam" />
+                        <small class="text-muted">Enter a unique exam name</small>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">
+                            <i class="bi bi-card-text"></i> Description
+                        </label>
+                        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label required">
+                            <i class="bi bi-calendar-event"></i> Academic Year
+                        </label>
+                        <select asp-for="AcademicYearID" required asp-items="Model.AcademicYears" class="form-select">
+                            <option value="">-- Select Year --</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row g-3 mb-3">
+
+                    <!-- Exam Type -->
+                    <div class="col-md-3">
+                        <label class="form-label required">
+                            <i class="bi bi-journal-text text-primary"></i> Exam Type
+                        </label>
+                        <select asp-for="ExamType" class="form-control">
+                            <option value="">-- Select Type --</option>
+                            <option value="UNIT">📘 Unit Test</option>
+                            <option value="TERM">📗 Term Exam</option>
+                            <option value="FINAL">🎓 Final Exam</option>
+                        </select>
+                    </div>
+
+                    <!-- Start Date -->
+                    <div class="col-md-3">
+                        <label class="form-label required">
+                            <i class="bi bi-calendar-event text-success"></i> Start Date
+                        </label>
+                        <input asp-for="StartDate" type="date" class="form-control" 
+                               min="@(isEdit ? null : DateTime.Today.ToString("yyyy-MM-dd"))"/>
+                    </div>
+
+                    <!-- End Date -->
+                    <div class="col-md-3">
+                        <label class="form-label required">
+                            <i class="bi bi-calendar-check text-danger"></i> End Date
+                        </label>
+                        @* <input asp-for="EndDate" type="date" class="form-control" 
+                            min="@DateTime.Today.ToString("yyyy-MM-dd")" /> *@
+                        <input asp-for="EndDate" type="date" class="form-control"
+                               min="@(isEdit ? null : DateTime.Today.ToString("yyyy-MM-dd"))" />
+                    </div>
+
+                    <!-- Active Status -->
+                    <div class="col-md-3">
+                        <div class="d-flex align-items-end">
+                            <div class="form-check form-switch">
+                                <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                                <label class="form-check-label">
+                                    Active Exam
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        Please fix the following issues before submitting.
+                        <ul class="mb-0">
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <li>@error.ErrorMessage</li>
+                            }
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <a href="/Exam/Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i> Back
+                </a>
+
+                <button type="submit" class="btn btn-success" disabled="@isLocked">
+                    <i class="bi bi-save"></i> Save
+                </button>
+
+                <button type="reset" class="btn btn-secondary">
+                    <i class="bi bi-arrow-counterclockwise"></i> Reset
+                </button>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $("#btnReset").click(function () {
+
+            // Reset form fields
+            $("form")[0].reset();
+
+            // Reset dropdowns
+            $("#sectionDropdown").html('<option value="">-- Select Section --</option>');
+            $("#subjectTable").html('<div class="text-muted">Select class & section</div>');
+
+            // Disable dependent dropdowns
+            $("#sectionDropdown").prop("disabled", true);
+
+            // Clear validation messages
+            $(".text-danger").html("");
+
+            // Reset preview / dynamic UI (if any)
+            $("#examPreview").text("");
+
+        });
+    </script>
+}

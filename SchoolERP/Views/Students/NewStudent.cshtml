@@ -1,0 +1,1374 @@
+﻿@using Newtonsoft.Json
+@using SchoolERP.Models.ViewModels
+@model StudentFormViewModel
+@{
+    ViewData["Title"] = "Student Detail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var classList = ViewBag.ClassList;
+    dynamic modalData = null;
+    if (TempData["StudentCreated"] != null)
+    {
+        modalData = JsonConvert.DeserializeObject<dynamic>(TempData["StudentCreated"].ToString());
+    }
+}
+<link href="~/css/newstudent.css" rel="stylesheet" />
+
+<div class="container my-4">
+    <h2 class="mb-3 text-center"><i class="bi bi-mortarboard me-2"></i>New Student Details</h2>
+
+    @if (modalData != null)
+    {
+        bool isSuccess = modalData.IsSuccess;
+
+        <div class="modal fade" id="statusModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg rounded-4">
+
+                    <!-- HEADER -->
+                    <div class="modal-header @(isSuccess ? "bg-success" : "bg-danger") text-white rounded-top-4">
+
+                        <h5 class="modal-title fw-bold">
+                            @if (isSuccess)
+                            {
+                                <i class="bi bi-check-circle-fill me-2"></i>
+                                <span>Success</span>
+                            }
+                            else
+                            {
+                                <i class="bi bi-x-circle-fill me-2"></i>
+                                <span>Error</span>
+                            }
+                        </h5>
+
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <!-- BODY -->
+                    <div class="modal-body text-center p-4">
+                        @if (isSuccess)
+                        {
+                            <div class="mb-3 success-icon">
+                                <i class="bi bi-person-check-fill text-success"></i>
+                            </div>
+
+                            <h3 class="fw-bold text-success mb-3">
+                                @modalData.Message
+                            </h3>
+
+                            <!-- Message -->
+                            <p class="text-muted fs-5 mb-4">
+                                The student profile has been created successfully.
+                                Login credentials have been generated and are ready for use.
+                            </p>
+
+                            <div class="card border-0 shadow-sm rounded-4 mx-auto">
+
+                                <div class="card-body p-4">
+
+                                    <div class="row align-items-center py-3 border-bottom">
+                                        <div class="col-md-6 fw-semibold text-start">
+                                            <i class="bi bi-person-badge-fill text-success me-2"></i>
+                                            Roll Number
+                                        </div>
+                                        <div class="col-md-6 text-success fw-bold text-start">
+                                            @modalData.RollNumber
+                                        </div>
+                                    </div>
+
+                                    <div class="row align-items-center py-3 border-bottom">
+                                        <div class="col-md-6 fw-semibold text-start">
+                                            <i class="bi bi-person-fill text-primary me-2"></i>
+                                            Username
+                                        </div>
+                                        <div class="col-md-6 text-primary fw-bold text-start">
+                                            @modalData.UserName
+                                        </div>
+                                    </div>
+
+                                    <div class="row align-items-center py-3">
+
+                                        <div class="col-md-6 fw-semibold text-start">
+                                            <i class="bi bi-key-fill text-purple me-2"></i> Password
+                                        </div>
+                                        <div class="col-md-6 text-start">
+                                            <span class="fw-bold text-danger"> @modalData.Password
+                                            </span>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <!-- Info -->
+                                <div class="alert alert-light border mt-4 rounded-3">
+                                    <i class="bi bi-info-circle-fill text-primary me-2"></i>
+                                    Please save these credentials securely and share them
+                                    with the parent/guardian if required.
+                                </div>
+
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="mb-3">
+                                <i class="bi bi-exclamation-triangle-fill text-danger"
+                                   style="font-size:70px;"></i>
+                            </div>
+                            <h3 class="fw-bold text-danger">
+                                Failed
+                            </h3>
+                            <p class="text-muted">
+                                @modalData.Message
+                            </p>
+                        }
+
+                    </div>
+
+                    <!-- FOOTER -->
+                    <div class="modal-footer border-0 justify-content-center pb-4">
+                        <a href="/Students/Edit/@modalData.StudentId"
+                           class="btn btn-outline-primary px-4">
+                            <i class="bi bi-eye-fill me-2"></i> View Student
+                        </a>
+                        
+                        <button type="button"
+                                class="btn btn-success rounded-pill px-4"
+                                data-bs-dismiss="modal">
+                            <i class="bi bi-check me-2"></i>Got it!
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                let modalEl = document.getElementById('statusModal');
+                if (modalEl) {
+                    let modal = new bootstrap.Modal(modalEl);
+                    modal.show();
+                }
+            });
+        </script>
+    }
+
+
+    <form id="studentForm" name="studentForm" asp-action="NewStudent" method="post">
+        <!-- ===== Tabs ===== -->
+        <ul class="nav nav-tabs custom-tabs mb-3" id="studentFormTabs" role="tablist">
+
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="student-tab"
+                        data-bs-toggle="tab" data-bs-target="#student" type="button" role="tab">
+                    <i class="bi bi-person me-2"></i> Student Details
+                </button>
+            </li>
+
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="family-tab"
+                        data-bs-toggle="tab" data-bs-target="#family" type="button" role="tab" disabled>
+                    <i class="bi bi-people me-2"></i> Family Details
+                </button>
+            </li>
+
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="class-tab"
+                        data-bs-toggle="tab" data-bs-target="#class" type="button" role="tab" disabled>
+                    <i class="bi bi-mortarboard me-2"></i> Class & Fees
+                </button>
+            </li>
+
+        </ul>
+
+        <div class="tab-content">
+            <!-- ================= Student Detail Tab ================= -->
+            <div class="tab-pane fade show active" id="student" role="tabpanel">
+                <!-- Use your existing Student Detail card -->
+                <div class="card mb-2 shadow-sm rounded-4 border-0 hover-shadow">
+                    <div class="card-header text-white rounded-top-4 mb-2" style="background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);">
+                        <i class="bi bi-person-circle me-2"></i>Basic Information
+                    </div>
+                    <div class="card-body row g-3">
+                        <!-- StudentName, Gender, DOB, etc -->
+                        <div class="col-md-6">
+                            <label class="required fw-semibold">Student Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person text-primary"></i></span>
+                                <input type="text" asp-for="StudentName" required onkeypress="allowOnlyLetters(event)"
+                                       class="form-control" placeholder="Enter Student Name"
+                                       maxlength="100" oninput="updateCounter('StudentName','studentNameCounter',100)">
+                            </div>
+                            <small id="studentNameCounter" class="text-muted">100 characters remaining</small>
+                            <span asp-validation-for="StudentName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="required fw-semibold"> Gender</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-gender-ambiguous text-primary"></i></span>
+                                <select asp-for="GenderID" asp-items="Model.Genders" class="form-control" required>
+                                    <option value="">-- Select Gender --</option>
+                                </select>
+                            </div>
+                            <span asp-validation-for="GenderID" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="required fw-semibold">Date of Birth</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-calendar-date text-primary"></i></span>
+                                <input type="date" asp-for="DateOfBirth" id="DateOfBirth"
+                                       class="form-control" required
+                                       max="@DateTime.Today.AddYears(-5).ToString("yyyy-MM-dd")"
+                                       min="@DateTime.Today.AddYears(-100).ToString("yyyy-MM-dd")">
+                                <span id="dobError" class="text-danger"></span>
+                            </div>
+                            <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            
+                <!-- Personal Details Card -->
+                <div class="card mb-2 shadow-sm rounded-4 border-0 hover-shadow">
+                    <div class="card-header text-white rounded-top-4 mb-2"
+                         style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                        <i class="bi bi-house-door me-2"></i>Personal Details
+                    </div>
+
+                    <div class="card-body row g-3">
+
+                        <div class="col-md-4">
+                            <label class="required fw-semibold"> Blood Group</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-droplet text-primary"></i></span>
+                                <select class="form-select" required asp-for="BloodGroup">
+                                    <option value="">Select</option>
+                                    <option>A+</option>
+                                    <option>A-</option>
+                                    <option>B+</option>
+                                    <option>B-</option>
+                                    <option>O+</option>
+                                    <option>O-</option>
+                                    <option>AB+</option>
+                                    <option>AB-</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Identity Info -->
+                        <div class="col-md-4">
+                            <label class="required fw-semibold">Aadhaar Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-credit-card text-primary"></i></span>
+                                <input type="text" asp-for="Aadhaar"
+                                       class="form-control"
+                                       maxlength="12" required                                       
+                                       oninput="allowOnlyNumbers(this); updateCounter('Aadhaar','aadhaarCounter',12)"
+                                       placeholder="Aadhaar Number">
+                            </div>
+                            <small id="aadhaarCounter" class="text-muted">12 characters remaining</small>
+                            <small id="AadhaarError" class="text-danger"></small>
+                            <small id="AadhaarSuccess" class="text-success"></small>
+                            <span asp-validation-for="Aadhaar" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="fw-semibold">APAAR ID</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-credit-card-2-front text-primary"></i></span>
+                                <input type="text" asp-for="ApaarID"
+                                       class="form-control"
+                                       maxlength="12"
+                                       oninput="allowOnlyNumbers(this); updateCounter('ApaarID','apaaridCounter',12)"
+                                       placeholder="APAAR ID">
+                            </div>
+                            <small id="apaaridCounter" class="text-muted">12 characters remaining</small>
+                        </div>
+
+                        <!-- Contact Info -->
+                        <div class="col-md-4">
+                            <label class="required fw-semibold">Phone Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-telephone text-primary"></i></span>
+                                <input type="text" asp-for="PhoneNo" id="PhoneNo"
+                                       class="form-control"
+                                       maxlength="10" required
+                                       oninput="allowOnlyNumbers(this); updateCounter('PhoneNo','phoneCounter',10)"
+                                       placeholder="Mobile Number">
+                            </div>
+                            <small id="phoneCounter" class="text-muted">10 characters remaining</small>
+                            <span asp-validation-for="PhoneNo" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="required fw-semibold">Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-envelope-at text-primary"></i></span>
+                                <input type="email" asp-for="EmailID"
+                                       class="form-control"
+                                       maxlength="100" required
+                                       oninput="updateCounter('EmailID','emailCounter',100)"
+                                       placeholder="Email Address">
+                                <span class="input-group-text d-none" id="emailLoader">
+                                    <span class="spinner-border spinner-border-sm text-primary"></span>
+                                </span>
+                            </div>
+                            <small id="emailCounter" class="text-muted">100 characters remaining</small>
+                            <small id="emailError" class="text-danger"></small>
+                            <small id="emailSuccess" class="text-success"></small>
+                            <span asp-validation-for="EmailID" class="text-danger"></span>
+                        </div>
+                        <!-- Medical -->
+                        <div class="col-md-4">
+                            <label class="required fw-semibold">Medical Condition</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-heart-pulse text-primary"></i></span>
+                                <textarea asp-for="MedicalCondition" required
+                                          class="form-control"
+                                          placeholder="Any medical notes"></textarea>
+                            </div>
+                        </div>
+                        <!-- Address Section -->
+                        <div class="col-md-6">
+                            <label class="required fw-semibold">Permanent Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-geo-alt text-primary"></i></span>
+                                <textarea asp-for="PermanentAddress"
+                                          class="form-control" placeholder="Enter Address"
+                                          maxlength="250" required
+                                          oninput="updateCounter('PermanentAddress','addressCounter',250)"></textarea>
+                            </div>
+                            <small id="addressCounter" class="text-muted">250 characters remaining</small>
+                            <span asp-validation-for="PermanentAddress" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="required fw-semibold">City</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-building text-primary"></i></span>
+                                <input asp-for="City" 
+                                oninput="cleanLetters(this)" 
+                                onkeypress="allowOnlyLetters(event)" class="form-control" placeholder="City" required />
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="required fw-semibold">State</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-map text-primary"></i></span>
+                                <input asp-for="State" class="form-control" 
+                                oninput="cleanLetters(this)" onkeypress="allowOnlyLetters(event)"
+                                placeholder="State" required />
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="required fw-semibold">Pincode</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-mailbox text-primary"></i></span>
+                                <input asp-for="Pincode" class="form-control"
+                                       maxlength="6" required
+                                       oninput="allowOnlyNumbers(this)"
+                                       placeholder="Pincode" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="required fw-semibold">Category</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-tags text-primary"></i></span>
+                                <select asp-for="Category" class="form-select" required>
+                                    <option value="">Select</option>
+                                    <option>General</option>
+                                    <option>OBC</option>
+                                    <option>SC</option>
+                                    <option>ST</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="required fw-semibold">Religion</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person-badge text-primary"></i></span>
+                                <input asp-for="Religion" class="form-control" placeholder="Religion" 
+                                    onkeypress="allowOnlyLetters(event)" required />
+                            </div>
+                        </div>
+
+                       
+
+                    </div>
+                </div>
+
+                <div class="card mb-3 shadow-sm rounded-4 border-0 hover-shadow">
+
+                    <div class="card-header text-white rounded-top-4 mb-2"
+                         style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <span>
+                            <i class="bi bi-mortarboard me-2"></i> Academic Background
+                        </span>
+                        <small class="ms-3 text-warning">This section is optional</small>
+                    </div>
+
+                    <div class="card-body row g-3">
+
+                        <!-- Previous School Name -->
+                        <div class="col-md-6">
+                            <label class="fw-semibold">Previous School Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-building text-primary"></i>
+                                </span>
+                                <input type="text" asp-for="PreviousSchoolName"
+                                       class="form-control"
+                                       placeholder="Enter previous school name"
+                                       maxlength="150" 
+                                       oninput="updateCounter('PreviousSchoolName','schoolCounter',150)">
+                            </div>
+                            <small id="schoolCounter" class="text-muted">150 characters remaining</small>
+                            <span asp-validation-for="PreviousSchoolName" class="text-danger"></span>
+                        </div>
+
+                        <!-- Last Class Studied -->
+                        <div class="col-md-6">
+                            <label class="fw-semibold">Last Class Studied</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-journal-text text-primary"></i>
+                                </span>
+                                <!-- Last Class Studied -->
+                                <select id="LastClassStudied" name="LastClassStudied" class="form-control">
+                                    <option value="0">-- Class Studied --</option>
+
+                                    @foreach (var item in classList)
+                                    {
+                                        <option value="@item.ClassId"
+                                                data-order="@item.ClassOrder">
+                                            @item.ClassName
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Last Class Result -->
+                        <div class="col-md-2">
+                            <label class="fw-semibold">Last Class Result</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-bar-chart text-primary"></i>
+                                </span>
+                                <input type="number" asp-for="LastClassResult"
+                                       class="form-control" min="0"
+                                       max="100"
+                                       step="0.01"
+                                       oninput="preventNegative(this)"
+                                       onkeydown="return event.key !== '-'"
+                                       placeholder="e.g. 85%">
+                            </div>
+                            <small class="text-muted">Enter percentage</small>
+                        </div>
+
+                        <!-- Medium of Education -->
+                        <div class="col-md-6">
+                            <label class="fw-semibold">Medium of Education</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-translate text-primary"></i>
+                                </span>
+                                <select asp-for="MediumOfEducation" class="form-control">
+                                    <option value="">-- Select Medium --</option>
+                                    <option>English</option>
+                                    <option>Odia</option>
+                                    <option>Tamil</option>
+                                    <option>Telugu</option>
+                                    <option>Bengoli</option>
+                                    <option>Hindi</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end mt-3">
+                    <button type="button" class="btn btn-primary" onclick="nextTab('student')">Next <i class="bi bi-arrow-right ms-1"></i></button>
+                </div>
+            </div>
+
+            <!-- ================= Family Detail Tab ================= -->
+            <div class="tab-pane fade" id="family" role="tabpanel">
+                <!-- Use your existing Family Information card -->
+                <div class="card mb-2 shadow-sm rounded-4 border-0 hover-shadow">
+                    <div class="card-header text-white rounded-top-4 mb-2" style="background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);">
+                        <i class="bi bi-people me-2"></i>Family Information
+                    </div>
+                    <div class="card-body row g-3">
+                        <div class="col-md-4">
+                            <label class="required fw-semibold">Father Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person text-primary"></i></span>
+                                <input type="text" asp-for="FatherName" required onkeypress="allowOnlyLetters(event)"
+                                       class="form-control" placeholder="Father Name"
+                                       maxlength="100" oninput="updateCounter('FatherName','fatherCounter',100)">
+                            </div>
+                            <small id="fatherCounter" class="text-muted">100 characters remaining</small>
+                            <span asp-validation-for="FatherName" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="required fw-semibold">Father Aadhaar No</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-credit-card text-primary"></i></span>
+                                <input type="text" asp-for="FatherAadhaar"
+                                       required class="form-control" placeholder="Enter Aadhaar" maxlength="12"
+                                       oninput="allowOnlyNumbers(this); updateCounter('FatherAadhaar','faaadhaarCounter',12)">
+                            </div>
+                            <small id="faaadhaarCounter" class="text-muted">12 characters remaining</small>
+                            <small id="AadhaarError1" class="text-danger"></small>
+                            <small id="AadhaarSuccess1" class="text-success"></small>
+                            <span asp-validation-for="FatherAadhaar" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="required fw-semibold">Emergency Contact</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-telephone-forward text-primary"></i></span>
+                                <input type="text" asp-for="EmergencyContact" maxlength="10"
+                                       required class="form-control" placeholder="Emergency Contact"
+                                       maxlength="10" oninput="allowOnlyNumbers(this); updateCounter('EmergencyContact','emergencyCounter',10)">
+                            </div>
+                            <small id="emergencyCounter" class="text-muted">10 characters remaining</small>
+                            <span id="mobileError1" class="text-danger"></span>
+                            <span id="mobileSuccess1" class="text-success"></span>
+                            <span asp-validation-for="EmergencyContact" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="required fw-semibold">Mother Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person-heart text-primary"></i></span>
+                                <input type="text" asp-for="MotherName" required onkeypress="allowOnlyLetters(event)"
+                                       class="form-control" placeholder="Mother Name"
+                                       maxlength="100" oninput="updateCounter('MotherName','motherCounter',100)">
+                            </div>
+                            <small id="motherCounter" class="text-muted">100 characters remaining</small>
+                            <span asp-validation-for="MotherName" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="required fw-semibold">Mother Aadhaar No</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-credit-card text-primary"></i></span>
+                                <input type="text" asp-for="MotherAadhaar" required
+                                       class="form-control" placeholder="Enter Aadhaar" maxlength="12"
+                                       oninput="allowOnlyNumbers(this); updateCounter('MotherAadhaar','maadhaarCounter',12)">
+                            </div>
+                            <small id="maadhaarCounter" class="text-muted">12 characters remaining</small>
+                            <small id="AadhaarError2" class="text-danger"></small>
+                            <small id="AadhaarSuccess2" class="text-success"></small>
+                            <span asp-validation-for="MotherAadhaar" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="fw-semibold">Parent Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-envelope-at text-primary"></i>
+                                </span>
+                                <input asp-for="ParentEmail" type="email" class="form-control" placeholder="Parent Email" />
+                                <span class="input-group-text d-none" id="fatherEmailLoader">
+                                    <span class="spinner-border spinner-border-sm text-primary"></span>
+                                </span>
+                            </div>
+                            <small id="fatherEmailError" class="text-danger"></small>
+                            <small id="fatherEmailSuccess" class="text-success"></small>
+                        </div>
+                        
+                        <div class="col-md-5">
+                            <label class="required fw-semibold">Parent Occupation</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-briefcase text-primary"></i>
+                                </span>
+                                <input asp-for="ParentOccupation" class="form-control"
+                                    onkeypress="allowOnlyLetters(event)" placeholder="Occupation" required />
+                            </div>
+                        </div>
+
+                        <div class="col-md-5">
+                            <label class="required fw-semibold">Annual Income</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-currency-rupee text-primary"></i>
+                                </span>
+                                <input asp-for="AnnualIncome" type="number" min="0" oninput="if(this.value > 10000000) this.value = 10000000;"
+                                       max="10000000" class="form-control" placeholder="Annual Income" required />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between mt-3">
+                        <button type="button" class="btn btn-secondary" onclick="prevTab('family')"><i class="bi bi-arrow-left me-1"></i>Previous</button>
+                        <button type="button" class="btn btn-primary" onclick="nextTab('family')">Next <i class="bi bi-arrow-right ms-1"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= Class & Course Fee Tab ================= -->
+            <div class="tab-pane fade" id="class" role="tabpanel">
+                <!-- Class Assignment Card -->
+                <div class="card mb-2 shadow-sm rounded-4 border-0 hover-shadow">
+                    <div class="card-header text-white rounded-top-4 mb-2" style="background: linear-gradient(135deg, #ff4b1f 0%, #1fddff 100%);">
+                        <i class="bi bi-mortarboard me-2"></i>Academic Information
+                    </div>
+                    <div class="card-body row g-3">
+                        <div class="col-md-3">
+                            <label class="fw-semibold">Roll Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-hash text-primary"></i></span>
+                                <input type="text" class="form-control" name="RollNumber" id="RollNumber"
+                                       placeholder="Auto-generated" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="fw-semibold">Academic Year</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-calendar text-primary"></i></span>
+                                <select asp-for="AcademicYearID" asp-items="Model.AcademicYears" class="form-control">
+                                    <option value="">-- Select Year --</option>
+                                </select>
+                            </div>
+                            <span asp-validation-for="AcademicYearID" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="fw-semibold">Admission Year</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-calendar text-primary"></i></span>
+                                <input type="number" name="AdmissionYear" id="AdmissionYear" value="@Model.AdmissionYear" readonly
+                                       class="form-control" placeholder="YYYY">
+                            </div>
+                        </div>
+                       <div class="col-md-4">
+                            <label class="required fw-semibold">Select Class</label>
+                           <div class="input-group">
+                               <span class="input-group-text">
+                                    <i class="bi bi-journal-text text-success text-primary"></i>
+                                </span>
+                                <!-- Class to be joined -->
+                                <select id="ClassID" name="ClassID" required class="form-control">
+                                    <option value="">-- Select Class --</option>
+                                    @foreach (var item in classList)
+                                    {
+                                        <option value="@item.ClassId"
+                                                data-order="@item.ClassOrder">
+                                            @item.ClassName
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="required fw-semibold">Section</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-diagram-3 text-primary"></i></span>
+                                <select id="SectionDropdown" asp-for="SectionID" required class="form-control">
+                                    <option value="0">-- Select Section --</option>
+                                </select>
+                                <input type="hidden" asp-for="ClassSectionID" />
+                            </div>
+                            <span asp-validation-for="SectionID" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <!-- Course Fees Card -->
+                        <div class="card mb-2 shadow-sm rounded-4 border-0 hover-shadow">
+                            <div class="card-header text-white rounded-top-4 mb-2" style="background: linear-gradient(135deg, #ff4b1f 0%, #1fddff 100%);">
+                                <i class="bi bi-cash-stack me-2 fs-5"></i>Course Fees Detail
+                            </div>
+                            <div class="card-body">
+                                <div class="shadow-sm border-0 p-3">
+                                    <input type="hidden" id="transportFeeValue" value="@(Model.TransportFee ?? 0)" />
+                                    <input type="hidden" name="CourseFeeId" id="CourseFeeId" />
+
+                                    <!-- ================= Fee Breakdown ================= -->
+                                    <ul class="list-group list-group-flush mb-2">
+
+                                        <li class="list-group-item d-flex justify-content-between py-1">
+                                            <span><i class="bi bi-bank2 me-2 text-primary"></i>Tuition</span>
+                                            <span id="tuitionFee" class="badge bg-primary">
+                                                @(Model.TuitionFee.ToString("C"))
+                                            </span>
+                                        </li>
+
+                                        <li class="list-group-item d-flex justify-content-between py-1">
+                                            <span><i class="bi bi-gear me-2 text-info"></i>Admission Fee</span>
+                                            <span id="admissionFee" class="badge bg-info text-dark">
+                                                @((Model.AdmissionFee ?? 0).ToString("C"))
+                                            </span>
+                                        </li>
+
+                                        <li class="list-group-item py-2">
+
+                                            <div class="d-flex justify-content-between align-items-center">
+
+                                                <!-- Left: Checkbox + Label -->
+                                                <div class="form-check d-flex align-items-center">
+                                                    <input class="form-check-input me-2"
+                                                           type="checkbox"
+                                                           id="includeTransport" name="IncludeTransport"
+                                                           checked value="true"
+                                                           onchange="toggleTransportFee()">
+
+                                                    <label class="form-check-label fw-semibold">
+                                                        <i class="bi bi-bus-front-fill me-2 text-success"></i>
+                                                        Transport
+                                                    </label>
+                                                </div>
+
+                                                <!-- Right: Amount -->
+                                                <span id="transportFee"
+                                                      class="badge bg-success">
+                                                    @((Model.TransportFee ?? 0).ToString("C"))
+                                                </span>
+                                            </div>
+                                        </li>
+
+                                        <li class="list-group-item d-flex justify-content-between py-1">
+                                            <span><i class="bi bi-journal-bookmark me-2 text-warning"></i>Library</span>
+                                            <span id="libraryFee" class="badge bg-warning text-dark">
+                                                @((Model.LibraryFee ?? 0).ToString("C"))
+                                            </span>
+                                        </li>
+
+                                        <li class="list-group-item d-flex justify-content-between py-1">
+                                            <span><i class="bi bi-wallet2 me-2 text-secondary"></i>Other</span>
+                                            <span id="otherFee" class="badge bg-secondary">
+                                                @((Model.OtherFee ?? 0).ToString("C"))
+                                            </span>
+                                        </li>
+
+                                        <li class="list-group-item d-flex justify-content-between fw-bold bg-light">
+                                            <span><i class="bi bi-piggy-bank me-2 text-success"></i>Total</span>
+                                            <span id="totalFee" class="badge bg-success fs-6">
+                                                @(Model.TotalFee.ToString("C"))
+                                            </span>
+                                        </li>
+                                    </ul>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <!-- Fees Payment -->
+                        <div class="card mb-2 shadow-sm rounded-4 border-0 hover-shadow">
+                            <div class="card-header text-white rounded-top-4 mb-2"
+                                 style="background: linear-gradient(135deg, #4776E6 0%, #8E54E9 100%);">
+                                <i class="bi bi-cash-stack me-2 fs-5"></i> Payment Detail
+                            </div>
+                            @* <div class="card-header text-white rounded-top-4 mb-2"
+                                 style="background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);">
+                                <i class="bi bi-cash-stack me-2 fs-5"></i> Payment Detail
+                            </div> *@
+                            <div class="card-body">
+                                <div class="card shadow-sm border-0">
+
+                                    <div class="card-body">
+
+                                        <!-- ================= Payment Option ================= -->
+                                        <div class="mb-4">
+                                            <label class="fw-bold d-block mb-2">Payment Option</label>
+
+                                            <div class="d-flex align-items-center gap-3 flex-wrap">
+
+                                                <!-- Radio Buttons -->
+                                                <div class="d-flex gap-4">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input"
+                                                               type="radio"
+                                                               id="PaymentFull"
+                                                               asp-for="PaymentOption"
+                                                               value="Full"
+                                                               checked
+                                                               onchange="togglePaymentOption()">
+
+                                                        <label class="form-check-label fw-semibold text-success">
+                                                            Full Payment
+                                                        </label>
+                                                    </div>
+
+                                                    <div class="form-check">
+                                                        <input class="form-check-input"
+                                                               type="radio"
+                                                               id="PaymentPartial"
+                                                               asp-for="PaymentOption"
+                                                               value="Monthly"
+                                                               onchange="togglePaymentOption()">
+
+                                                        <label class="form-check-label fw-semibold text-primary">
+                                                            Monthly
+                                                        </label>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Inline Alert -->
+                                                <div class="alert alert-success py-1 px-2 mb-0 small">
+                                                    💡 Full payment includes extra 10% discount
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                        <!-- ================= Discount Section ================= -->
+                                        <div id="fullpaidsection" class="row g-3 mb-3">
+
+                                            <!-- Discount -->
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold">Discount</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-light">
+                                                        <i class="bi bi-percent text-warning"></i>
+                                                    </span>
+                                                    <input type="number"
+                                                           asp-for="Discount"
+                                                           class="form-control"
+                                                           value="0"
+                                                           min="0" readonly
+                                                           oninput="calculateFinalAmount()" />
+                                                </div>
+                                            </div>
+
+                                            <!-- Final Amount -->
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold">Final Amount</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-light">
+                                                        <i class="bi bi-currency-rupee text-success"></i>
+                                                    </span>
+                                                    <input type="text"
+                                                           id="FinalAmount" name="FinalAmount"
+                                                           class="form-control fw-bold text-success bg-light"
+                                                           readonly />
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <!-- ================= Monthly Section ================= -->
+                                        <div id="monthlySection" class="rounded bg-light" style="display:none;">
+
+                                            <div class="row g-3">
+
+                                                <!-- Months -->
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Months</label>
+                                                    <input type="number"
+                                                           name="Months"
+                                                           id="Months"
+                                                           class="form-control"
+                                                           value="12"
+                                                           min="1"
+                                                           max="12"
+                                                           oninput="validateMonths(); calculateInstallment()" />
+                                                </div>
+
+                                                <!-- Paid Months -->
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Paid Months</label>
+                                                    <input type="number"
+                                                           id="paidMonths"
+                                                           name="PaidMonths"
+                                                           class="form-control"
+                                                           value="0"
+                                                           min="0"
+                                                           max="12"
+                                                           oninput="validatePaidMonths(); allowOnlyNumbers(this); calculateInstallment()" />
+                                                </div>
+
+                                                <!-- Monthly Fee -->
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Monthly Fee</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text bg-light">
+                                                            <i class="bi bi-currency-rupee"></i>
+                                                        </span>
+                                                        <input type="text"
+                                                               asp-for="MonthlyAmount" oninput="allowOnlyNumbers(this);"
+                                                               class="form-control fw-bold text-primary bg-white"
+                                                               readonly />
+                                                    </div>
+                                                </div>
+
+                                                <!-- Remaining -->
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Remaining</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text bg-light">
+                                                            <i class="bi bi-currency-rupee"></i>
+                                                        </span>
+                                                        <input type="text" asp-for="RemainingAmount"
+                                                               class="form-control fw-bold text-danger bg-white"
+                                                               readonly />
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-3">
+                    <button type="button" class="btn btn-secondary" onclick="prevTab('class')"> <i class="bi bi-arrow-left me-1"></i> Previous</button>
+                    <button type="submit" class="btn btn-success" style="display:none;" id="btnSaveStudent"><i class="bi bi-person-plus-fill me-1"></i>Save Student</button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+</div>
+
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+
+        $(function () {
+
+            validateMobileNoField(
+                "EmergencyContact",
+                "mobileError1",
+                "mobileSuccess1"
+            );
+
+            validateAadhaarField(
+                "Aadhaar",
+                "AadhaarError",
+                "AadhaarSuccess"
+            );
+
+            validateAadhaarField(
+                "FatherAadhaar",
+                "AadhaarError1",
+                "AadhaarSuccess1"
+            );
+
+            validateAadhaarField(
+                "MotherAadhaar",
+                "AadhaarError2",
+                "AadhaarSuccess2"
+            );
+
+            /* =========================
+               TAB NAVIGATION
+            ==========================*/
+            window.nextTab = function (currentTabId) {
+                let currentTab = $("#" + currentTabId);
+                let inputs = currentTab.find("input[required], select[required], textarea[required]");
+                let isValid = true;
+
+                inputs.each(function () {
+                    if (!$(this).val()) {
+                        $(this).addClass("is-invalid").focus();
+                        isValid = false;
+                        return false;
+                    } else {
+                        $(this).removeClass("is-invalid");
+                    }
+                });
+
+                if (!isValid) return;
+
+                if (currentTabId === 'student') {
+                    $("#family-tab").removeAttr("disabled").click();
+                }
+                else if (currentTabId === 'family') {
+                    $("#class-tab").removeAttr("disabled").click();
+                }
+            };
+
+            window.prevTab = function (currentTabId) {
+                if (currentTabId === 'family') $("#student-tab").click();
+                if (currentTabId === 'class') $("#family-tab").click();
+            };
+
+            /* =========================
+               FEES HELPERS
+            ==========================*/
+            window.getTotalFee = function () {
+                return parseFloat(
+                    ($("#totalFee").text() || "").replace(/[^0-9.-]+/g, "")
+                ) || 0;
+            };
+
+
+            $("#Aadhaar, #FatherAadhaar, #MotherAadhaar").on("blur", function () {
+
+                let studentAadhaar = $("#Aadhaar").val().trim();
+                let fatherAadhaar = $("#FatherAadhaar").val().trim();
+                let motherAadhaar = $("#MotherAadhaar").val().trim();
+
+                // Student vs Father
+                if (studentAadhaar && fatherAadhaar && studentAadhaar === fatherAadhaar) 
+                {
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Duplicate Aadhaar",
+                        text: "Student Aadhaar and Father Aadhaar cannot be the same."
+                    });
+
+                    $("#FatherAadhaar").val("").focus();
+                    return;
+                }
+
+                // Student vs Mother
+                if (studentAadhaar && motherAadhaar && studentAadhaar === motherAadhaar) 
+                {
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Duplicate Aadhaar",
+                        text: "Student Aadhaar and Mother Aadhaar cannot be the same."
+                    });
+
+                    $("#MotherAadhaar").val("").focus();
+                    return;
+                }
+
+                // Father vs Mother
+                if (fatherAadhaar && motherAadhaar && fatherAadhaar === motherAadhaar) {
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Duplicate Aadhaar",
+                        text: "Father Aadhaar and Mother Aadhaar cannot be the same."
+                    });
+
+                    $("#MotherAadhaar").val("").focus();
+                    return;
+                }
+            });
+
+
+            /* =========================
+               FORM SUBMIT VALIDATION
+            ==========================*/
+
+            $("#studentForm").on("submit", function (e) {
+
+                e.preventDefault();
+
+                let classId = ($("#ClassID").val() || "0").trim();
+                let section = ($("#SectionDropdown").val() || "0").trim();
+
+                if (classId === "0" || section === "0") {
+                    alert("Please fill all required fields.");
+                    return false;
+                }
+
+                this.submit();
+            });
+
+            /* =========================
+            CLASS FILTER LOGIC
+            ==========================*/
+            const originalClassOptions = $("#ClassID").html();
+
+            $("#LastClassStudied").on("change", function (){
+
+                const selectedOrder = parseInt(
+                    $("#LastClassStudied option:selected").data("order")
+                );
+
+                $("#ClassID").html(originalClassOptions);
+                if (isNaN(selectedOrder)) return;
+
+                $("#ClassID option").each(function () {
+                    const optionOrder = parseInt($(this).data("order"));
+
+                    if (!isNaN(optionOrder) && optionOrder <= selectedOrder) {
+                        $(this).remove();
+                    }
+                });
+
+                $("#ClassID").val("");
+            });
+
+            function parseAmount(id) {
+                return parseFloat(
+                    ($(id).text() || "").replace(/[^\d.-]/g, '')
+                ) || 0;
+            }
+
+            /* =========================
+               TRANSPORT FEE
+            ==========================*/
+            window.toggleTransportFee = function () {
+
+                const $fee = $("#transportFee");
+                const actual = parseFloat($("#transportFeeValue").val()) || 0;
+
+                let value = $("#includeTransport").is(":checked") ? actual : 0;
+
+                $fee.text(formatCurrency(value));
+
+                $fee
+                    .toggleClass("bg-success", value > 0)
+                    .toggleClass("bg-secondary", value === 0)
+                    .closest("li")
+                    .toggleClass("opacity-50", value === 0);
+
+                calculateTotal();
+            };
+
+            /* =========================
+               PAYMENT OPTION
+            ==========================*/
+
+            window.togglePaymentOption = function () {
+
+                let isMonthly = $("input[name='PaymentOption']:checked").val() === "Monthly";
+
+                $("#Discount").prop("readonly", true);
+
+                $("#monthlySection").toggle(isMonthly);
+                $("#fullpaidsection").toggle(!isMonthly);
+
+                if (isMonthly) $("#Discount").val(0);
+
+                calculateFinalAmount();
+            };
+
+            window.validatePaidMonths = function () {
+
+                let months = parseInt($("#Months").val()) || 0;
+                let $paid = $("#paidMonths");
+                let paid = parseInt($paid.val()) || 0;
+
+                if (paid < 0) paid = 0;
+                if (paid > months) paid = months;
+
+                $paid.val(paid);
+            };
+
+            /* =========================
+               TOTAL CALCULATION
+            ==========================*/
+
+            window.calculateTotal = function () {
+
+                let tuition = parseAmount("#tuitionFee");
+                let admission = parseAmount("#admissionFee");
+                let transport = parseAmount("#transportFee");
+                let library = parseAmount("#libraryFee");
+                let other = parseAmount("#otherFee");
+
+                if ($("#includeTransport").is(":checked")) {
+                    transport = parseFloat($("#transportFeeValue").val()) || 0;
+                }
+
+                let total = tuition + admission + transport + library + other;
+
+                $("#totalFee").text(formatCurrency(total));
+
+                calculateFinalAmount();
+            };
+
+            /* =========================
+               FINAL AMOUNT
+            ==========================*/
+
+            window.calculateFinalAmount = function () {
+
+                let total = getTotalFee();
+                let discount = parseFloat($("#Discount").val()) || 0;
+
+                let isFull = $("#PaymentFull").is(":checked");
+
+                let extra = isFull ? total * 0.10 : 0;
+                let totalDiscount = isFull ? discount + extra : 0;
+
+                $("#Discount").val(totalDiscount.toFixed(2));
+
+                let finalAmount = total - totalDiscount;
+
+                $("#FinalAmount").val(finalAmount.toFixed(2));
+
+                calculateInstallment();
+            };
+
+            /* =========================
+               INSTALLMENT
+            ==========================*/
+
+            window.calculateInstallment = function () {
+
+                if ($("input[name='PaymentOption']:checked").val() !== "Monthly") return;
+
+                let finalAmount = parseFloat($("#FinalAmount").val()) || 0;
+                let months = parseInt($("#Months").val()) || 1;
+                let paidMonths = parseInt($("#paidMonths").val()) || 0;
+
+                // Step 1: exact monthly
+                let monthly = parseFloat((finalAmount / months).toFixed(2)); // finalAmount / months;
+
+                // Step 2: round monthly immediately
+                monthly = Math.round(monthly * 100) / 100;
+
+                // Step 3: calculate paid using rounded monthly
+                let paid = parseFloat((monthly * paidMonths).toFixed(2)); // monthly * paidMonths;
+                paid = Math.round(paid * 100) / 100;
+
+                // Step 4: remaining
+                let remaining =  parseFloat((finalAmount - paid).toFixed(2)); // finalAmount - paid;
+                remaining = Math.round(remaining * 100) / 100;
+
+                // Step 5: UI
+                $("#MonthlyAmount").val(monthly);
+                $("#RemainingAmount").val(remaining);
+            };
+
+            /* =========================
+               COUNTER (FIXED & INCLUDED)
+            ==========================*/
+
+            window.updateCounter = function (inputId, counterId, max) {
+                const $input = $("#" + inputId);
+                const $counter = $("#" + counterId);
+
+                if (!$input.length || !$counter.length) return;
+                let remaining = max - ($input.val() || "").length;
+                $counter.text(remaining + " characters remaining");
+            };
+
+            /* =========================
+               INIT COUNTERS
+            ==========================*/
+
+            const fields = [
+                { id: 'StudentName', max: 100 },
+                { id: 'PermanentAddress', max: 250 },
+                { id: 'PhoneNo', max: 10 },
+                { id: 'EmailID', max: 100 },
+                { id: 'Aadhaar', max: 12 },
+                { id: 'FatherName', max: 100 },
+                { id: 'FatherAadhaar', max: 12 },
+                { id: 'MotherName', max: 100 },
+                { id: 'MotherAadhaar', max: 12 },
+                { id: 'EmergencyContact', max: 10 },
+                { id: 'PreviousSchoolName', max: 150 }
+            ];
+
+            fields.forEach(f => updateCounter(f.id, f.id + 'Counter', f.max));
+
+            calculateFinalAmount();
+
+            /* =========================
+               CLASS SECTION AJAX
+            ==========================*/
+
+            $("#ClassID").on("change", function () {
+
+                let classId = $(this).val();
+                let academicYearId = $("#AcademicYearID").val();
+
+                if (!classId || !academicYearId) return;
+
+                $.getJSON('/Students/GetClassDetails',
+                    { classId, academicYearId },
+                    function (data) {
+
+                        let $section = $("#SectionDropdown");
+
+                        $section.empty();
+
+                        if (data.sections?.length) {
+
+                            $section.append('<option value="0">-- Select Section --</option>');
+
+                            $.each(data.sections, function (i, s) {
+                                $section.append(
+                                    `<option value="${s.sectionId}" data-classsectionid="${s.id}">
+                                        ${s.sectionName}
+                                     </option>`
+                                );
+                            });
+                        } else {
+                            $section.append('<option value="">-- No Sections --</option>');
+                        }
+
+                        $("#ClassSectionID").val("");
+
+                        updateFees(data.fees || {
+                            courseFeeId: 0,
+                            tuitionFee: 0,
+                            admissionFee: 0,
+                            transportFee: 0,
+                            libraryFee: 0,
+                            otherFee: 0,
+                            totalFee: 0
+                        });
+                    });
+            });
+
+            $("#SectionDropdown").on("change", function () {
+                let id = $(this).find(":selected").data("classsectionid");
+                $("#ClassSectionID").val(id || "");
+                $("#btnSaveStudent").toggle($(this).val() != 0);
+                $("#btnSaveStudent").toggle(parseInt($(this).val()) !== 0);
+
+            });
+
+            function updateFees(fees) {
+
+                $("#CourseFeeId").val(fees.courseFeeId || 0);
+
+                $("#tuitionFee").text(formatCurrency(fees.tuitionFee || 0));
+                $("#admissionFee").text(formatCurrency(fees.admissionFee || 0));
+                $("#transportFee").text(formatCurrency(fees.transportFee || 0));
+                $("#libraryFee").text(formatCurrency(fees.libraryFee || 0));
+                $("#otherFee").text(formatCurrency(fees.otherFee || 0));
+                $("#totalFee").text(formatCurrency(fees.totalFee || 0));
+
+                // keep your existing discount logic intact
+                let total = getTotalFee();
+                let userDiscount = parseFloat($("#Discount").val()) || 0;
+
+                let option = $("input[name='PaymentOption']:checked").val();
+
+                let extraDiscount = (option === "Full") ? total * 0.10 : 0;
+                let totalDiscount = (option === "Full") ? userDiscount + extraDiscount : 0;
+
+                $("#Discount").val(totalDiscount.toFixed(2));
+
+                let finalAmount = total - totalDiscount;
+                $("#FinalAmount").val(finalAmount.toFixed(2));
+
+                calculateInstallment();
+            }
+
+        });
+
+    </script>
+
+}
+
+
+
+
+
+
+
+

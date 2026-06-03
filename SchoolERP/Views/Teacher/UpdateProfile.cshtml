@@ -1,0 +1,466 @@
+﻿@using SchoolERP.Models.DTOS
+@model TeacherProfileUpdateDTO
+@{
+    ViewData["Title"] = "Profile Detail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    string progressClass =
+        Model.ProfileCompletion < 40 ? "bg-danger" :
+        Model.ProfileCompletion < 70 ? "bg-warning" :
+        "bg-success";
+
+    string employmentBadge =
+        Model.EmploymentType == "Permanent" ? "bg-success" :
+        Model.EmploymentType == "Contract" ? "bg-warning text-dark" :
+        Model.EmploymentType == "PartTime" ? "bg-info" :
+        "bg-secondary";
+}
+
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(45deg, #4e73df, #224abe);
+    }
+
+    .card {
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-3px);
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 5px rgba(78, 115, 223, 0.5);
+    }
+
+    .validation-icon::before {
+        content: "⚠ ";
+        font-weight: bold;
+    }
+
+    .field-validation-error {
+        color: #dc3545;
+        font-size: 0.9rem;
+        display: block;
+        margin-top: 5px;
+    }
+
+    input.input-validation-error,
+    select.input-validation-error,
+    textarea.input-validation-error {
+        border-color: #dc3545;
+        box-shadow: 0 0 5px rgba(220, 53, 69, 0.4);
+    }
+       
+
+    /* .profile-img {
+        width: 130px;
+        height: 130px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #fff;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    } */
+
+    /* 🔘 Perfect circular button */
+    .upload-btn {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        width: 38px;
+        height: 38px;
+        background: #4e73df;
+        color: #fff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+        transition: all 0.2s ease;
+    }
+
+    /* Hover effect */
+    .upload-btn:hover {
+        background: #224abe;
+        transform: scale(1.1);
+    }
+
+    /* Icon size */
+    .upload-btn i {
+        font-size: 16px;
+    }
+
+</style>
+
+<div class="container mt-4">
+    <div class="card shadow-lg border-0 rounded-4">
+
+        <form asp-action="UpdateProfile" method="post" enctype="multipart/form-data">
+
+            <div class="row">
+                <!-- LEFT SIDE: FORM -->
+                <div class="col-lg-8">
+                    <div class="card shadow-lg border-0 rounded-4">
+
+                        <!-- 🔷 Header -->
+                        <div class="card-header bg-gradient-primary text-white rounded-top-4 py-3">
+                            <h5 class="mb-0">
+                                <i class="bi bi-person-gear me-2"></i> Edit Profile
+                            </h5>
+                            <small class="opacity-75">Edit your personal data and contact details</small>
+                        </div>
+                        <!-- 🧾 Body -->
+                        <div class="card-body p-4">
+
+                            <input type="hidden" asp-for="Designation" />
+                            <input type="hidden" asp-for="Id" />
+                            <input type="hidden" asp-for="EmploymentType" />
+
+                            <!-- 👤 Personal Info -->
+                            <h6 class="text-primary mb-3">
+                                <i class="bi bi-person-lines-fill"></i> Personal Information
+                            </h6>
+
+                            <div class="row g-3">
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Full Name</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                        <input asp-for="FullName" class="form-control" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="form-label">Gender</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-gender-ambiguous"></i></span>
+                                        <select asp-for="GenderID" class="form-select">
+                                            <option value="">-- Select --</option>
+                                            <option value="1">Male</option>
+                                            <option value="2">Female</option>
+                                            <option value="3">Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Blood Group</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-droplet"></i></span>
+                                        <select class="form-select" required asp-for="BloodGroup">
+                                            <option value="">Select</option>
+                                            <option>A+</option>
+                                            <option>A-</option>
+                                            <option>B+</option>
+                                            <option>B-</option>
+                                            <option>O+</option>
+                                            <option>O-</option>
+                                            <option>AB+</option>
+                                            <option>AB-</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!-- 📞 Contact Info -->
+                            <h6 class="text-primary mt-4 mb-3">
+                                <i class="bi bi-telephone-forward"></i> Contact Details
+                            </h6>
+
+                            <div class="row g-3">
+
+                                <div class="col-md-3">
+                                    <label class="form-label">Phone</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                        <input asp-for="PhoneNumber" class="form-control" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="form-label">Emergency</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-shield-plus"></i></span>
+                                        <input asp-for="EmergencyContact" class="form-control" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="form-label">Email</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                        <input asp-for="Email" class="form-control" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label asp-for="Aadhaar" class="form-label"> Aadhaar</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-card-heading"></i></span>
+                                        @if (!string.IsNullOrEmpty(Model.Aadhaar))
+                                        {
+                                            <!-- Show as text if Aadhaar is already provided -->
+                                            <span class="form-control">@Model.Aadhaar</span>
+                                        }
+                                        else
+                                        {
+                                            <!-- Show input if not provided -->
+                                            <input asp-for="Aadhaar" class="form-control" />
+                                        }
+                                        <span asp-validation-for="Aadhaar" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 d-flex align-items-end">
+                                    <div class="form-check mt-2">
+                                        <input asp-for="IsMarried" class="form-check-input" id="isMarried" />
+                                        <label class="form-check-label">Married</label>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!-- 💑 Spouse -->
+                            <div id="spouseSection" class="row g-3 mt-2">
+                                <div class="col-md-6">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-heart"></i></span>
+                                        <input asp-for="SpouseName" class="form-control" placeholder="Spouse Name" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-telephone-plus"></i></span>
+                                        <input asp-for="SpouseContact" class="form-control" placeholder="Spouse Contact" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 🏠 Address -->
+                            <h6 class="text-primary mt-4 mb-3">
+                                <i class="bi bi-geo-alt-fill"></i> Address
+                            </h6>
+
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-house"></i></span>
+                                        <textarea asp-for="PermanentAddress" class="form-control" placeholder="Full Address"></textarea>
+                                    </div>
+                                </div>
+
+                                <!-- City -->
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="bi bi-geo-alt"></i>
+                                        </span>
+                                        <input asp-for="City"
+                                                class="form-control"
+                                                placeholder="City" />
+                                    </div>
+                                </div>
+                                <!-- State -->
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="bi bi-map"></i>
+                                        </span>
+                                        <input asp-for="State"
+                                                class="form-control"
+                                                placeholder="State" />
+                                    </div>
+                                </div>
+
+                                <!-- Postal Code -->
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="bi bi-hash"></i>
+                                        </span>
+                                        <input asp-for="PostalCode"
+                                                class="form-control"
+                                                placeholder="Postal Code" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="mt-4 text-end">
+                                <button type="submit" class="btn btn-success px-4 shadow-sm">
+                                    <i class="bi bi-check-circle me-1"></i> Save Changes
+                                </button>
+
+                                <a asp-action="Profile" class="btn btn-light border px-4 shadow-sm">
+                                    <i class="bi bi-arrow-left me-1"></i> Cancel
+                                </a>
+
+                            </div>
+                       
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT SIDE: PROFILE CARD -->
+                <div class="col-lg-4">
+                    <div class="card shadow-lg border-0 rounded-4 text-center">
+
+                        <!-- Header -->
+                        <div class="bg-gradient-primary text-white rounded-top-4 py-4">
+                            <h6 class="mb-0">Profile Preview</h6>
+                            <small class="opacity-75">Your public details</small>
+                        </div>
+
+                        <!-- Body -->
+                        <div class="card-body">
+
+                            <!-- Profile Image -->
+                            <div class="position-relative d-inline-block mb-3">
+                            
+                                <img id="profilePreview"
+                                     src="@(string.IsNullOrEmpty(Model.ProfileImageUrl) ? "/images/default-user.png" : Model.ProfileImageUrl)"
+                                     class="rounded-circle border border-4 border-white shadow"
+                                     width="130" height="130" />
+
+                                <!-- Upload Button (Overlay) -->
+                                <label class="upload-btn">
+                                    <i class="bi bi-camera-fill"></i>
+                                    <input asp-for="ProfileImageInput" type="file" id="profileImageInput" hidden />
+                                </label>
+                            </div>
+
+                            <!-- Name + Email -->
+                            <h5 id="profileName" class="mb-1">@Model.FullName</h5>
+                            <small id="profileEmail" class="text-muted">@Model.Email</small>
+
+                            <hr />
+
+                            <!-- Info -->
+                            <div class="text-start small px-2">
+                                <p class="mb-2">
+                                    <i class="bi bi-telephone me-2 text-primary"></i>
+                                    @Model.PhoneNumber
+                                </p>
+
+                                <p class="mb-2">
+                                    <i class="bi bi-geo-alt me-2 text-danger"></i>
+                                    @Model.City, @Model.State
+                                </p>
+
+                                <p class="mb-0">
+                                    <i class="bi bi-shield-check me-2 text-success"></i>
+                                    Emergency: @Model.EmergencyContact
+                                </p>
+                            </div>
+
+                            <!-- 🧾 READ ONLY INFO -->
+                            <div class="text-start small">
+                           
+
+                                <p class="mb-2">
+                                    <i class="bi bi-hash text-primary me-2"></i>
+                                    <strong>Employee ID:</strong> @Model.Id
+                                </p>
+
+                                <p class="mb-2">
+                                    <i class="bi bi-building text-success me-2"></i>
+                                    <strong>Designation:</strong> @Model.Designation
+                                </p>
+                                <p class="mb-2">
+                                    <i class="bi bi-briefcase-fill me-2"></i>
+                                    <strong>Employment Type:</strong>
+                                    <span class="badge @employmentBadge">@Model.EmploymentType</span>
+                                </p>
+                                <p class="mb-2">
+                                    <i class="bi bi-calendar-check text-warning me-2"></i>
+                                    <strong>Joining Date:</strong> @Model.JoiningDate.ToString("dd-MMM-yyyy")
+                                </p>
+
+                            </div>
+
+                            <hr />
+
+                            <!-- 📊 PROFILE COMPLETION -->
+                            <div class="text-start mb-2">
+                                <small class="fw-semibold">
+                                    <i class="bi bi-bar-chart-fill text-info me-1"></i>
+                                    Profile Completion
+                                </small>
+
+                                <div class="progress mt-2" style="height: 8px;">
+                                    <div class="progress-bar @progressClass"
+                                         style="width:@Model.ProfileCompletion%">
+                                    </div>
+                                </div>
+
+                                <small class="text-muted">@Model.ProfileCompletion % complete</small>
+                            </div>
+
+                            <hr />
+
+                            <!-- 🔐 CHANGE PASSWORD -->
+                            <a href="@Url.Action("ChangePassword", "Account")"
+                               class="btn btn-outline-warning w-100">
+                                <i class="bi bi-key me-1"></i> Change Password
+                            </a>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+
+        const isMarriedCheckbox = document.getElementById("isMarried");
+        const spouseSection = document.getElementById("spouseSection");
+
+        const input = document.getElementById("profileImageInput");
+        const preview = document.getElementById("profilePreview");
+
+        input.addEventListener("change", function () {
+            const file = this.files[0];
+
+            if (!file) return;
+
+            // Validate file type
+            if (!file.type.startsWith("image/")) {
+                alert("Please select a valid image file.");
+                this.value = "";
+                return;
+            }
+
+            // Validate size (max 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                alert("Image size must be less than 2MB.");
+                this.value = "";
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                preview.src = e.target.result;
+            };
+
+            reader.readAsDataURL(file);
+        });
+
+        function toggleSpouse() {
+            spouseSection.style.display = isMarriedCheckbox.checked ? "flex" : "none";
+        }
+
+        isMarriedCheckbox.addEventListener("change", toggleSpouse);
+        window.onload = toggleSpouse;
+
+    </script>
+}

@@ -1,0 +1,547 @@
+﻿
+@{
+    ViewBag.Title = "Student Attendance";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .present {
+        background-color: #e6f4ea;
+    }
+
+    .absent {
+        background-color: #fdecea;
+    }
+
+    .status-btn {
+        min-width: 110px;
+    }
+
+    .student-row:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+
+    /* Mobile optimization */
+    @@media (max-width: 576px) {
+        .status-btn {
+            font-size: 12px;
+            padding: 5px;
+        }
+    }
+</style>
+
+<div class="container mt-3">
+
+    @Html.AntiForgeryToken()
+
+    <!-- Header -->
+    <div class="d-flex align-items-center mb-3">
+        <i class="bi bi-clipboard-check text-primary fs-2 me-2"></i>
+        <div>
+            <h4 class="mb-0 fw-bold">Attendance</h4>
+            <small class="text-muted">Manage student attendance</small>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row g-2 mb-3">
+
+        <div class="col-6 col-md-3">
+            <select id="classId" class="form-select">
+                <option value="">Class</option>
+                @foreach (var c in ViewBag.Classes)
+                {
+                    <option value="@c.Value">@c.Text</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <select id="sectionId" class="form-select">
+                <option value="">Section</option>
+            </select>
+            <input type="hidden" id="ClassSectionID" />
+
+        </div>
+
+        <div class="col-6 col-md-3">
+            <select id="subjectId" class="form-select">
+                <option value="">Subject</option>
+                @foreach (var s in ViewBag.Subjects)
+                {
+                    <option value="@s.Value">@s.Text</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <input type="date" id="attendanceDate" class="form-control"
+                   value="@DateTime.Now.ToString("yyyy-MM-dd")" 
+                   max="@DateTime.Today.ToString("yyyy-MM-dd")"/>
+        </div>
+
+    </div>
+
+    <!-- Actions -->
+    <div class="mb-2 d-flex gap-2 flex-wrap">
+        <button type="button" class="btn btn-success btn-sm" onclick="markAll('Present')">
+            <i class="bi bi-check"></i> All Present
+        </button>
+
+        <button type="button" class="btn btn-danger btn-sm" onclick="markAll('Absent')">
+            <i class="bi bi-x"></i> All Absent
+        </button>
+
+        <button type="button" class="btn btn-secondary btn-sm" onclick="resetAll()">
+            <i class="bi bi-arrow-counterclockwise"></i> Reset
+        </button>
+    </div>
+
+    <!-- Search -->
+    <input type="text" id="searchBox" class="form-control mb-2" placeholder="Search student..." />
+
+    <!-- Student Table -->
+    <div class="card shadow-sm">
+
+        <!-- Card Header -->
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <span>📋 Student Attendance</span>
+            <span id="studentCount" class="small"></span>
+        </div>
+
+        <div class="table-responsive" style="max-height:400px;">
+            <table class="table table-sm table-hover mb-0">
+                <thead class="table-light sticky-top">
+                    <tr>
+                        <th width="60">#</th>
+                        <th width="80">Roll No</th>
+                        <th>Student Name</th>
+                        <th class="text-end">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="studentTable">
+                                    
+                </tbody>
+            </table>
+        </div>
+
+        <div class="p-2">
+            <button type="button" id="btnSaveAttendance" class="btn btn-primary w-100" disabled onclick="saveAttendance()">
+                <i class="bi bi-save"></i> <span id="btnText">Save Attendance</span>
+                <span id="btnSpinner" class="spinner-border spinner-border-sm ms-2 d-none"></span>
+            </button>
+            <!-- 🔽 Place it HERE -->
+            <small class="text-muted d-block text-center mt-1">
+                Save button will activate after loading students
+            </small>
+        </div>
+    </div>
+
+</div>
+
+
+@section Scripts {
+
+    <script>
+
+        let attendanceData = {};
+
+        // Toggle
+        function toggleStatus(btn) {
+
+            let row = btn.closest("tr");
+            let id = row.dataset.id;
+
+            let isPresent = btn.classList.contains("btn-success");
+
+            if (isPresent) {
+                btn.classList.remove("btn-success");
+                btn.classList.add("btn-danger");
+                btn.innerText = "Absent";
+                attendanceData[id] = "Absent";
+            } else {
+                btn.classList.remove("btn-danger");
+                btn.classList.add("btn-success");
+                btn.innerText = "Present";
+                attendanceData[id] = "Present";
+            }
+        }
+
+        function setStatus(id, status, btn) {
+
+            attendanceData[id] = status;
+
+            toggleSaveButton(); // 🔥 update state
+        }
+
+        // Mark all
+        function markAll(status) {
+
+            document.querySelectorAll(".student-row").forEach(row => {
+                let btn = row.querySelector(".status-btn");
+                let id = row.dataset.id;
+
+                attendanceData[id] = status;
+
+                btn.classList.remove("btn-success", "btn-danger");
+
+                if (status === "Present") {
+                    btn.classList.add("btn-success");
+                    btn.innerText = "Present";
+                } else {
+                    btn.classList.add("btn-danger");
+                    btn.innerText = "Absent";
+                }
+            });
+
+            toggleSaveButton();
+        }
+
+        // Reset
+        function resetAll() {
+            attendanceData = {};
+            toggleSaveButton();
+            document.querySelectorAll(".status-btn").forEach(btn => {
+                btn.classList.remove("btn-danger");
+                btn.classList.add("btn-success");
+                btn.innerText = "Present";
+            });
+        }
+
+        // Search
+        document.getElementById("searchBox").addEventListener("keyup", function () {
+            let val = this.value.toLowerCase();
+
+            document.querySelectorAll(".student-row").forEach(row => {
+                let name = row.dataset.name;
+                let id = row.dataset.id;
+
+                row.style.display = (name.includes(val) || id.includes(val)) ? "" : "none";
+            });
+        });
+
+        $('#classId').change(function(){
+            var classId = $(this).val();
+
+            if(classId) {
+
+                $.getJSON('/Attendance/GetClassDetails', { classId: classId }, function(data){
+
+                    // Make sure sections exist
+                    if(data.sections && data.sections.length > 0) {
+                        var sectionDropdown = $('#sectionId');
+                        sectionDropdown.empty();
+                        sectionDropdown.append('<option value="">-- Select Section --</option>');
+
+                        $.each(data.sections, function(i, section){
+                            sectionDropdown.append('<option value="'+section.sectionId+'" data-classsectionid="'+section.id+'">'+section.sectionName+'</option>');
+                        });
+
+                        // Reset hidden ClassSectionID
+                        $('#ClassSectionID').val('');
+                    } else {
+                        $('#sectionId').empty().append('<option value="">-- No Sections --</option>');
+                    }
+
+                });
+            }
+        });
+
+        $('#sectionId').change(async function () {
+
+            try {
+
+                toggleSaveButton();
+
+                // -----------------------------
+                // 1. Get ClassSectionId safely
+                // -----------------------------
+                const selectedOption = $(this).find('option:selected');
+                const classSectionId = selectedOption.data('classsectionid');
+
+                $('#ClassSectionID').val(classSectionId || '');
+
+                if (!classSectionId) {
+                    resetSubjects();
+                    resetStudents();
+                    return;
+                }
+
+                // -----------------------------
+                // 2. Load both in parallel
+                // -----------------------------
+                await Promise.all([
+                    loadSubjects(classSectionId),
+                    loadStudents(classSectionId)
+                ]);
+
+            }
+            catch (error) {
+                console.error("Section change error:", error);
+
+                resetSubjects();
+                resetStudents();
+
+                alert("Something went wrong while loading data");
+            }
+        });
+
+        // // When Section changes, set ClassSectionID
+        // $('#sectionId').change(function(){
+
+        //     toggleSaveButton();
+
+        //     // Get the selected <option>
+        //     var selectedOption = $(this).find('option:selected');
+
+        //     // Get the data attribute
+        //     var classSectionId = selectedOption.data('classsectionid');
+
+        //     // Set the value in your hidden/input field
+        //     $('#ClassSectionID').val(classSectionId);
+
+        //     let classSectionId = $(this).val();
+
+        //     fetch(`/Attendance/GetSubjects?classSectionId=${classSectionId}`)
+        //     .then(r => r.json())
+        //     .then(data => {
+
+        //         let ddl = $("#subjectId");
+        //         ddl.empty().append("<option>Select Subject</option>");
+
+        //         data.forEach(s => {
+        //             ddl.append(`<option value="${s.subjectId}">${s.subjectName}</option>`);
+        //         });
+        //     });
+
+        //     loadStudents(classSectionId);
+
+        // });
+
+        async function loadSubjects(classSectionId) {
+
+            try {
+
+                const res = await fetch(`/Attendance/GetSubjects?classSectionId=${classSectionId}`);
+
+                if (!res.ok) throw new Error("Failed to load subjects");
+
+                const data = await res.json();
+
+                const ddl = $("#subjectId");
+                ddl.empty().append("<option value=''>Select Subject</option>");
+
+                data.forEach(s => {
+                    ddl.append(`<option value="${s.subjectId}">${s.subjectName}</option>`);
+                });
+
+            }
+            catch (err) {
+                console.error("Subject load error:", err);
+                resetSubjects();
+            }
+        }
+
+        function resetSubjects() {
+            $("#subjectId").empty().append("<option value=''>Select Subject</option>");
+        }
+
+        function resetStudents() {
+            $("#studentTable").empty();
+            $("#studentCount").text("");
+        }
+
+        function toggleSaveButton() {
+
+            let hasStudents = $(".student-row").length > 0;
+            let hasData = Object.keys(attendanceData).length > 0;
+            let classSectionSelected = $("#classId").val() && $("#sectionId").val();
+
+            if (hasStudents && hasData && classSectionSelected) {
+                $("#btnSaveAttendance").prop("disabled", false);
+            } else {
+                $("#btnSaveAttendance").prop("disabled", true);
+            }
+        }
+
+
+        async function loadStudents(classSectionId) {
+
+           try{
+               var classid = $("#classId").val();
+               var sectionid = $("#sectionId").val();
+                $.ajax({
+                 url: '/Attendance/GetStudents',
+                 type: 'GET',
+                 data: { classid: classid, sectionid:sectionid, classSectionId: classSectionId },
+                 success: function (data) {
+
+                     let tbody = $("#studentTable");
+                     tbody.empty(); // clear old rows
+
+                     if (data.length === 0) {
+                         tbody.append(`
+                             <tr>
+                                 <td colspan="4" class="text-center text-muted">
+                                     No students found
+                                 </td>
+                             </tr>
+                         `);
+                         return;
+                     }
+
+                     $("#studentCount").text("Total Students: " + data.length);
+
+                     attendanceData = {}; // 🔥 reset old data
+
+                     $.each(data, function (i, student) {
+
+                         // 🔥 default attendance = Present
+                         attendanceData[student.id] = "Present";
+
+                         let row = `
+                         <tr class="student-row"
+                             data-id="${student.id}"
+                             data-name="${student.name.toLowerCase()}">
+                             <td width="60">${i + 1}</td>  <!-- SERIAL NUMBER -->
+                             <td width="60">${student.rollno}</td>
+                             <td>${student.name}</td>
+                             <td class="text-end">
+                                 <button type="button"
+                                         class="btn btn-sm btn-success status-btn"
+                                         onclick="toggleStatus(this)">
+                                     Present
+                                 </button>
+                             </td>
+
+                         </tr>`;
+
+                         tbody.append(row);
+                     });
+
+                     toggleSaveButton(); // 🔥 IMPORTANT
+                 },
+
+                 error: function () {
+                     alert("Error loading students");
+                 }
+             });
+           }
+            catch (err) {
+                console.error("Student load error:", err);
+                resetStudents();
+            }
+        }
+
+        // // Save
+        // function saveAttendance() 
+        // {
+        //     const subjectId = document.getElementById("subjectId").value;
+        //     const date = document.getElementById("attendanceDate").value;
+
+        //     if (!subjectId || !date) {
+        //         alert("Please select subject and date");
+        //         return;
+        //     }
+
+        //     const payload = {
+        //         subjectId: parseInt(subjectId),
+        //         attendanceDate: date,
+        //         records: attendanceData
+        //     };
+
+        //     fetch('/Attendance/Save', {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //             'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+        //         },
+        //         body: JSON.stringify(payload)
+        //     })
+        //     .then(res => res.json())
+        //     .then(res => {
+        //         Swal.fire({
+        //             icon: 'success',
+        //             title: res.message
+        //         });
+        //     })
+        //     .catch(() => {
+        //         Swal.fire({
+        //             icon: 'error',
+        //             title: 'Error saving attendance'
+        //         });
+        //     });
+        // }
+
+        //clean jQuery version of your saveAttendance():
+        function saveAttendance() 
+        {
+            const subjectId = $("#subjectId").val();
+            const date = $("#attendanceDate").val();
+
+            if (!subjectId || !date) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Please select subject and date'
+                });
+                return;
+            }
+
+            // 👉 Show loader + disable button
+            $("#btnSave").prop("disabled", true);
+            $("#btnSpinner").removeClass("d-none");
+            $("#btnText").text("Saving...");
+
+            const payload = {
+                subjectId: parseInt(subjectId),
+                attendanceDate: date,
+                records: attendanceData
+            };
+
+            $.ajax({
+                url: '/Attendance/Save',
+                type: 'POST',
+                contentType: 'application/json',
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                data: JSON.stringify(payload),
+
+                success: function (res) {
+
+                    if (res.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: res.message || 'Attendance saved successfully'
+                            }).then(() => {
+                                location.reload(); // optional
+                        });
+
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: res.message || 'Failed to save attendance'
+                        });
+                    }
+                },
+                error: function (xhr) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: xhr.responseJSON?.message || 'Something went wrong'
+                    });
+                },
+                complete: function () {
+                    // 👉 Hide loader + enable button
+                    $("#btnSave").prop("disabled", false);
+                    $("#btnSpinner").addClass("d-none");
+                    $("#btnText").text("Save Attendance");
+                }
+            });
+        }
+
+
+
+    </script>
+
+
+}

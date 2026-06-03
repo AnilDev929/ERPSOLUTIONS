@@ -1,0 +1,71 @@
+﻿@using SchoolERP.Models.ViewModels
+@model FeeConfigurationVM
+
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-primary text-white">
+            <h4>
+                <i class="bi bi-cash-coin"></i> Fee Configuration Setup
+            </h4>
+            <small>Define how fees are scheduled and late fines applied</small>
+        </div>
+
+        <div class="card-body">
+            <form asp-action="Create">
+
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+                        <label>Fee Type</label>
+                        <select asp-for="FeeType" asp-items="Model.FeeTypes" class="form-control"></select>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Due Day</label>
+                        <input asp-for="DueDay" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Grace Days</label>
+                        <input asp-for="GraceDays" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Late Fine Type</label>
+                        <select asp-for="LateFineType" asp-items="Model.LateFineTypes" class="form-control"></select>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Late Fine Amount</label>
+                        <input asp-for="LateFineAmount" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Max Months Per Payment</label>
+                        <input asp-for="MaxMonthsPerPayment" class="form-control" />
+                    </div>
+
+                    <div class="col-md-12 form-check mb-3">
+                        <input asp-for="IsActive" class="form-check-input" />
+                        <label class="form-check-label">Active</label>
+                    </div>
+
+                </div>
+
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-check-circle"></i> Save Configuration
+                </button>
+
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back
+                </a>
+
+            </form>
+        </div>
+    </div>
+</div>

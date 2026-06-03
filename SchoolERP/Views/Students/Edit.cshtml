@@ -1,0 +1,840 @@
+﻿@using SchoolERP.Models.ViewModels
+@model StudentFormViewModel
+@{
+    ViewData["Title"] = "Student Detail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link href="~/css/editstudent.css" rel="stylesheet" />
+
+<form id="studentForm" asp-action="Edit" method="post" enctype="multipart/form-data">
+
+    <div class="student-header p-3 mb-3 d-flex justify-content-between align-items-center flex-wrap">
+
+        <div class="d-flex align-items-center gap-3">
+
+            <div class="position-relative">
+                <img id="photoPreview" src="~/images/default-user.png" class="student-photo">
+
+                <label class="photo-upload">
+                    <i class="bi bi-camera"></i>
+                    <input type="file" id="photoInput" hidden>
+                </label>
+            </div>
+
+            <div>
+                <h5 class="mb-1 fw-bold">@Model.StudentName</h5>
+
+                <div class="small">
+                    <i class="bi bi-mortarboard"></i>
+                    @Model.ClassName - @Model.SectionName
+                </div>
+
+                <div class="small mt-1 d-flex gap-3 flex-wrap">
+                    <span><i class="bi bi-hash"></i> Regd No : @Model.AdmissionNumber</span>
+                    <span><i class="bi bi-person"></i> Roll No: @Model.RollNumber</span>
+                    <span><i class="bi bi-calendar"></i> Year : @Model.AdmissionYear</span>
+                </div>
+            </div>
+        </div>
+
+        <span class="badge rounded-pill px-3 py-2 @(Model.IsActive ? "bg-success" : "bg-danger")">
+            @(Model.IsActive ? "Active" : "Inactive")
+        </span>
+    </div>
+
+    <input type="hidden" asp-for="PaymentOption" />
+    <input type="hidden" asp-for="ClassID" />
+    <input type="hidden" asp-for="SectionID" />
+    <input type="hidden" asp-for="StudentId" />
+    <input type="hidden" asp-for="AdmissionNumber" />
+    <input type="hidden" asp-for="RollNumber" />
+    <input type="hidden" asp-for="AdmissionYear" />
+    <input type="hidden" asp-for="AcademicYearID" />
+
+    <!-- ================= NAV (TABS DESKTOP) ================= -->
+    <ul class="nav custom-tabs mb-3">
+        <li class="nav-item">
+            <button type="button" class="nav-link basic active" data-bs-toggle="tab" data-bs-target="#basic">
+                <i class="bi bi-person"></i> Basic
+            </button>
+        </li>
+
+        <li class="nav-item">
+            <button type="button" class="nav-link academic" data-bs-toggle="tab" data-bs-target="#academic">
+                <i class="bi bi-book"></i> Academic
+            </button>
+        </li>
+
+        <li class="nav-item">
+            <button type="button" class="nav-link parents" data-bs-toggle="tab" data-bs-target="#parents">
+                <i class="bi bi-people"></i> Parents
+            </button>
+        </li>
+
+        <li class="nav-item">
+            <button type="button" class="nav-link address" data-bs-toggle="tab" data-bs-target="#address">
+                <i class="bi bi-geo-alt"></i> Address
+            </button>
+        </li>
+        <li class="nav-item">
+            <button type="button" class="nav-link medical" data-bs-toggle="tab" data-bs-target="#medical">
+                <i class="bi bi-heart-pulse"></i> Medical
+            </button>
+        </li>
+        <li class="nav-item">
+            <button type="button" class="nav-link fees" data-bs-toggle="tab" data-bs-target="#fees">
+                <i class="bi bi-cash"></i> Fees
+            </button>
+        </li>
+    </ul>
+    
+    <!-- CONTENT -->
+    <div class="tab-content">
+
+        <!-- BASIC -->
+        <div class="tab-pane fade show active" id="basic">
+
+            <!-- PERSONAL INFO -->
+            <div class="card p-3 mb-3">
+                <div class="section-title basic-section">
+                    <i class="bi bi-person-circle"></i> Personal Info
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="required fw-semibold">Student Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            <input type="text" asp-for="StudentName" required onkeypress="allowOnlyLetters(event)"
+                                   class="form-control" placeholder="Enter Student Name" maxlength="100">
+                        </div>
+                        <span asp-validation-for="StudentName" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="required fw-semibold">Gender</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-gender-ambiguous"></i></span>
+                            <select asp-for="GenderID" required asp-items="Model.Genders" class="form-select"></select>
+                        </div>
+                        <span asp-validation-for="GenderID" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="required fw-semibold">Date Of Birth</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-calendar-date"></i></span>
+                            <input asp-for="DateOfBirth" required
+                                max="@DateTime.Today.AddYears(-5).ToString("yyyy-MM-dd")" 
+                                min="@DateTime.Today.AddYears(-100).ToString("yyyy-MM-dd")" type="date" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="required fw-semibold">Blood Group</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-droplet"></i></span>
+                            <select asp-for="BloodGroup" required class="form-select">
+                                <option value="">Select</option>
+                                <option>A+</option>
+                                <option>A-</option>
+                                <option>B+</option>
+                                <option>B-</option>
+                                <option>O+</option>
+                                <option>O-</option>
+                                <option>AB+</option>
+                                <option>AB-</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="BloodGroup" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTACT -->
+            <div class="card p-3 mb-3">
+                <div class="section-title basic-section">
+                    <i class="bi bi-telephone"></i> Contact Info
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="required fw-semibold">Mobile Number</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                            <input type="text" asp-for="PhoneNo" id="PhoneNo"
+                                   class="form-control"
+                                   maxlength="10" required
+                                   oninput="allowOnlyNumbers(this);"
+                                   placeholder="Mobile Number">
+                            @* <div class="form-control bg-light d-flex justify-content-between">
+                                <span>@Model.PhoneNo</span>
+                                <i class="bi bi-lock text-muted"></i>
+                            </div> *@
+                        </div>
+                        <span id="mobileError" class="text-danger"></span>
+                        <span id="mobileSuccess" class="text-success"></span>
+                        <span asp-validation-for="PhoneNo" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="required fw-semibold">Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-envelope-at"></i></span>
+                            <input type="email" asp-for="EmailID"
+                                   class="form-control"
+                                   maxlength="100" required
+                                   oninput="updateCounter('EmailID','emailCounter',100)"
+                                   placeholder="Email Address">
+                            <span class="input-group-text d-none" id="emailLoader">
+                                <span class="spinner-border spinner-border-sm text-primary"></span>
+                            </span>
+
+                            @* <div class="form-control bg-light d-flex justify-content-between">
+                                <span>@Model.EmailID</span>
+                                <i class="bi bi-lock text-muted"></i>
+                            </div> *@
+                        </div>
+                        <small id="emailError" class="text-danger"></small>
+                        <small id="emailSuccess" class="text-success"></small>
+                        <span asp-validation-for="EmailID" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="required fw-semibold">Emergency Contact</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                            <input type="text" asp-for="EmergencyContact" maxlength="10"
+                                   required class="form-control" placeholder="Emergency Contact"
+                                   maxlength="10" oninput="allowOnlyNumbers(this);">
+                            
+                            @* <div class="form-control bg-light d-flex justify-content-between">
+                                <span>@Model.EmergencyContact</span>
+                                <i class="bi bi-lock text-muted"></i>
+                            </div> *@
+                        </div>
+                        <span asp-validation-for="EmergencyContact" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="required fw-semibold">Parent Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-envelope-at"></i></span>
+                            <input asp-for="ParentEmail" required type="email" class="form-control" placeholder="Parent Email" />
+                            <span class="input-group-text d-none" id="fatherEmailLoader">
+                                <span class="spinner-border spinner-border-sm text-primary"></span>
+                            </span>
+                            @* <div class="form-control bg-light d-flex justify-content-between">
+                                <span>@Model.ParentEmail</span>
+                                <i class="bi bi-lock text-muted"></i>
+                            </div> *@
+                        </div>
+                        <small id="fatherEmailError" class="text-danger"></small>
+                        <small id="fatherEmailSuccess" class="text-success"></small>
+                        <span asp-validation-for="ParentEmail" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- IDENTITY (SECURED) -->
+            <div class="card p-3 mb-3">
+                <div class="section-title basic-section">
+                    <i class="bi bi-shield-lock"></i> Identity Info
+                </div>
+
+                <div class="row g-3">
+
+                    <!-- Aadhaar (SAFE) -->
+                    <div class="col-md-3">
+                        <label class="required fw-semibold">Aadhaar Number</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-credit-card-2-front"></i></span>
+                            <input type="text" asp-for="Aadhaar"
+                                   class="form-control"
+                                   maxlength="12" required
+                                   oninput="allowOnlyNumbers(this);"
+                                   placeholder="Aadhaar Number">
+                            @* <div class="form-control bg-light d-flex justify-content-between">
+                                <span>@Model.Aadhaar</span>
+                                <i class="bi bi-lock text-muted"></i>
+                            </div> *@
+                        </div>
+                        <small id="AadhaarError" class="text-danger"></small>
+                        <small id="AadhaarSuccess" class="text-success"></small>
+                        <span asp-validation-for="Aadhaar" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="fw-semibold">APAAR ID</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-credit-card-2-front"></i></span>
+                            <input type="text" asp-for="ApaarID"
+                                   class="form-control"
+                                   maxlength="12" 
+                                   oninput="allowOnlyNumbers(this);"
+                                   placeholder="APAAR ID">
+
+                            @* <div class="form-control bg-light d-flex justify-content-between">
+                                <span>@Model.ApaarID</span>
+                                <i class="bi bi-lock text-muted"></i>
+                            </div> *@
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="required fw-semibold">Category</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-tags"></i></span>
+                            <select asp-for="Category" required class="form-select">
+                                    <option>General</option>
+                                    <option>OBC</option>
+                                    <option>SC</option>
+                                    <option>ST</option>
+                                </select>
+                        </div>
+                        <span asp-validation-for="Category" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="required fw-semibold">Religion</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                            <input asp-for="Religion" class="form-control" placeholder="Religion" onkeypress="allowOnlyLetters(event)" required />
+
+                            @* <div class="form-control bg-light d-flex justify-content-between">
+                                <span>@Model.Religion</span>
+                                <i class="bi bi-lock text-muted"></i>
+                            </div> *@
+                        </div>
+                        <span asp-validation-for="Religion" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EDUCATION BACKGROUND -->
+            <div class="card p-3 mb-3">
+                <div class="section-title basic-section">
+                    <i class="bi bi-mortarboard"></i> Previous Academic Background
+                </div>
+                <input type="hidden" asp-for="PreviousSchoolName" />
+                <input type="hidden" asp-for="LastClassStudied" />
+                <input type="hidden" asp-for="LastClassResult" />
+                <input type="hidden" asp-for="MediumOfEducation" />
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label>Previous School</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-building"></i></span>
+                            <div class="form-control bg-light d-flex justify-content-between">
+                                <span>@Model.PreviousSchoolName</span>
+                                <i class="bi bi-lock text-muted"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label>Last Class</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-journal"></i></span>
+                            <div class="form-control bg-light d-flex justify-content-between">
+                                <select asp-for="LastClassStudied" asp-items="Model.Classes" disabled class="form-select">
+                                    <option value="0">-- Select Class --</option>
+                                </select>
+                                <i class="bi bi-lock text-muted"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label>Result (%)</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-bar-chart"></i></span>
+                            <div class="form-control bg-light d-flex justify-content-between">
+                                <span>@Model.LastClassResult</span>
+                                <i class="bi bi-lock text-muted"></i>
+                            </div>
+                        </div> 
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <label>Medium</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-translate"></i></span>
+                            <div class="form-control bg-light d-flex justify-content-between">
+                                <span>@Model.MediumOfEducation</span>
+                                <i class="bi bi-lock text-muted"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                    
+            </div>
+        </div>
+
+        <!-- ACADEMIC -->
+        <div class="tab-pane fade" id="academic">
+            <div class="card p-3 mb-3">
+                <div class="section-title academic-section">
+                    <i class="bi bi-book"></i> Academic Details
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="required fw-semibold">Class</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-book"></i></span>
+                            <div class="form-control d-flex justify-content-between">
+                                <select asp-for="ClassID" asp-items="Model.Classes" class="form-select" disabled></select>
+                                <i class="bi bi-lock text-muted"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="required fw-semibold">Section</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-diagram-3"></i>
+                            </span>
+                            <select asp-for="SectionID" class="form-select" id="StudentSectionID">
+                            </select>
+                            <span class="input-group-text">
+                                <i class="bi bi-lock text-muted"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="required fw-semibold">Academic Year</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
+                            <div class="form-control d-flex justify-content-between">
+                                <select asp-for="AcademicYearID" asp-items="Model.AcademicYears" class="form-select" disabled></select>
+                                <i class="bi bi-lock text-muted"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PARENTS -->
+        <div class="tab-pane fade" id="parents">
+            <div class="card p-3 mb-3">
+                <div class="section-title parents-section">
+                    <i class="bi bi-people"></i> Parent Details
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="required fw-semibold">Father Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                            <input type="text" asp-for="FatherName" required onkeypress="allowOnlyLetters(event)"
+                                   class="form-control" placeholder="Father Name" maxlength="100">
+                            @* <div class="form-control bg-light d-flex justify-content-between">
+                                <span>@Model.FatherName</span>
+                                <i class="bi bi-lock text-muted"></i>
+                            </div> *@
+                        </div>
+                        <span asp-validation-for="FatherName" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="required fw-semibold">Father Aadhaar</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-credit-card"></i></span>
+                            <input type="text" asp-for="FatherAadhaar"
+                                   required class="form-control" placeholder="Enter Aadhaar" maxlength="12"
+                                   oninput="allowOnlyNumbers(this);">
+                            @* <div class="form-control bg-light d-flex justify-content-between">
+                                <span>@Model.FatherAadhaar</span>
+                                <i class="bi bi-lock text-muted"></i>
+                            </div> *@
+                        </div>
+                        <small id="AadhaarError1" class="text-danger"></small>
+                        <small id="AadhaarSuccess1" class="text-success"></small>
+                        <span asp-validation-for="FatherAadhaar" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="required fw-semibold">Mother Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person-heart"></i></span>
+                            <input type="text" asp-for="MotherName" required onkeypress="allowOnlyLetters(event)"
+                                   class="form-control" placeholder="Mother Name"
+                                   maxlength="100">
+                            @* <div class="form-control bg-light d-flex justify-content-between">
+                                <span>@Model.MotherName</span>
+                                <i class="bi bi-lock text-muted"></i>
+                            </div> *@
+                        </div>
+                        <small id="AadhaarError2" class="text-danger"></small>
+                        <small id="AadhaarSuccess2" class="text-success"></small>
+                        <span asp-validation-for="MotherName" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="required fw-semibold">Mother Aadhaar</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-credit-card"></i></span>
+                            <input type="text" asp-for="MotherAadhaar" required
+                                   class="form-control" placeholder="Enter Aadhaar" maxlength="12"
+                                   oninput="allowOnlyNumbers(this);">
+                           @*  <div class="form-control bg-light d-flex justify-content-between">
+                                <span>@Model.MotherAadhaar</span>
+                                <i class="bi bi-lock text-muted"></i>
+                            </div> *@
+                        </div>
+                        <span asp-validation-for="MotherAadhaar" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="required fw-semibold">Parent Occupation</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-briefcase"></i>
+                            </span>
+                            <input asp-for="ParentOccupation" class="form-control"
+                                   onkeypress="allowOnlyLetters(event)" placeholder="Occupation" required />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="required fw-semibold">Annual Income</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-currency-rupee"></i>
+                            </span>
+                            <input asp-for="AnnualIncome" type="number" class="form-control" placeholder="Annual Income" required />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADDRESS -->
+        <div class="tab-pane fade" id="address">
+            <div class="card p-3 mb-3">
+
+                <div class="section-title address-section">
+                    <i class="bi bi-geo-alt"></i> Address
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label>Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-house"></i></span>
+                            <textarea asp-for="PermanentAddress" required class="form-control"></textarea>
+                        </div>
+                        <span asp-validation-for="PermanentAddress" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>City</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-buildings"></i></span>
+                            <input asp-for="City" oninput="cleanLetters(this)" onkeypress="allowOnlyLetters(event)" required class="form-control" />
+                        </div>
+                        <span asp-validation-for="City" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>State</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-map"></i></span>
+                            <input asp-for="State" oninput="cleanLetters(this)" onkeypress="allowOnlyLetters(event)" required class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>Pincode</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-mailbox"></i></span>
+                            <input asp-for="Pincode" maxlength="6" oninput="allowOnlyNumbers(this)" required class="form-control" />
+                        </div>
+                        <span asp-validation-for="Pincode" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MEDICAL -->
+        <div class="tab-pane fade" id="medical">
+            <div class="card p-3 mb-3">
+                <label>Medical Condition</label>
+                <textarea asp-for="MedicalCondition" class="form-control track-change"></textarea>
+            </div>
+            <span asp-validation-for="MedicalCondition" class="text-danger"></span>
+        </div>
+
+        <!-- fees -->
+        <div class="tab-pane fade" id="fees">
+            <div class="card p-3 mb-3 shadow-sm">
+
+                <!-- ================= COURSE FEES ================= -->
+                <div class="section-title fees-section">
+                    <i class="bi bi-journal-text me-1"></i> Course Fees Breakdown
+                </div>
+
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+                        <div class="border rounded p-2 bg-light">
+                            <i class="bi bi-book text-primary me-1"></i>
+                            Tuition Fee:
+                            <span class="fw-semibold float-end">@Model.TuitionFee</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="border rounded p-2 bg-light">
+                            <i class="bi bi-person-badge text-success me-1"></i>
+                            Admission Fee:
+                            <span class="fw-semibold float-end">@Model.AdmissionFee</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="border rounded p-2 bg-light">
+                            <i class="bi bi-bus-front text-warning me-1"></i>
+                            Transport Fee:
+                            <span class="fw-semibold float-end">@Model.TransportFee</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="border rounded p-2 bg-light">
+                            <i class="bi bi-journal-bookmark text-info me-1"></i>
+                            Library Fee:
+                            <span class="fw-semibold float-end">@Model.LibraryFee</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="border rounded p-2 bg-light">
+                            <i class="bi bi-plus-circle text-secondary me-1"></i>
+                            Other Fee:
+                            <span class="fw-semibold float-end">@Model.OtherFee</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="border rounded p-2 bg-light">
+                            <i class="bi bi-cash-stack text-dark me-1"></i>
+                            Total Fee:
+                            <span class="fw-bold float-end">@Model.TotalFee</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <hr />
+
+                <!-- ================= STUDENT FEES ================= -->
+                <h6 class="mb-3 text-success">
+                    <i class="bi bi-wallet2 me-1"></i> Student Payment Details
+                </h6>
+
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+                        <div class="border rounded p-2">
+                            <i class="bi bi-percent text-info me-1"></i>
+                            Discount:
+                            <span class="fw-semibold float-end">@Model.Discount</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="border rounded p-2">
+                            <i class="bi bi-receipt text-primary me-1"></i>
+                            Final Amount:
+                            <span class="fw-bold float-end">@Model.FinalAmount</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="border rounded p-2">
+                            <i class="bi bi-hourglass-split text-danger me-1"></i>
+                            Remaining:
+                            <span class="fw-semibold float-end">@Model.RemainingAmount</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="border rounded p-2">
+                            <i class="bi bi-credit-card text-success me-1"></i>
+                            Payment Mode:
+                            <span class="fw-semibold float-end">@Model.PaymentOption</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="border rounded p-2">
+                            <i class="bi bi-calendar-check text-warning me-1"></i>
+                            Paid Months:
+                            <span class="fw-semibold float-end">@Model.PaidMonths</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ================= SAVE BAR ================= -->
+    <div class="sticky-save">
+        <button type="button" onclick="window.location.href='@Url.Action("Index", "Students")'" class="btn btn-light">
+            <i class="bi bi-arrow-left"></i> Cancel</button>
+
+        <button type="submit" id="btnSave" class="btn btn-primary">
+            <i class="bi bi-check-circle"></i> <span id="btnText">Save Changes</span>
+            <span id="btnLoader"
+                  class="spinner-border spinner-border-sm d-none"
+                  role="status">
+            </span>
+
+        </button>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // 🔹 On Page Load (IMPORTANT)
+
+        $(document).ready(function () 
+        {
+             validateMobileNoField(
+                "PhoneNo",
+                "mobileError",
+                "mobileSuccess"
+            );
+
+            validateAadhaarField(
+                "Aadhaar",
+                "AadhaarError",
+                "AadhaarSuccess"
+            );
+
+            validateAadhaarField(
+                "FatherAadhaar",
+                "AadhaarError1",
+                "AadhaarSuccess1"
+            );
+
+            validateAadhaarField(
+                "MotherAadhaar",
+                "AadhaarError2",
+                "AadhaarSuccess2"
+            );
+
+
+            // 🔹 Load Sections on Page Load
+            let classId = $("#ClassID").val();
+            // If editing existing student
+            let selectedSectionId = '@Model.SectionID';
+            if (classId) {
+                loadSections(classId, selectedSectionId);
+            }
+            $("#StudentSectionID").prop("disabled", true);
+
+            // 🔹 Detect Changed Fields
+            $("input, select, textarea").on("input change", function () {
+                $(this).addClass("changed");
+            });
+
+            // 🔹 Image Preview
+            $("#photoInput").on("change", function (e) {
+                let file = e.target.files[0];
+                if (!file) return;
+                let reader = new FileReader();
+                reader.onload = function (evt) {
+                    $("#photoPreview").attr("src", evt.target.result);
+                };
+                reader.readAsDataURL(file);
+            });
+
+            $('button[data-bs-toggle="tab"]').on('show.bs.tab', function (e) {
+
+                let currentTab = $('.tab-pane.active');
+                let isValid = true;
+
+                currentTab.find("input[required], select[required], textarea[required]").each(function () {
+
+                    if ($(this).val().trim() === "") {
+
+                        $(this).addClass("input-validation-error");
+                        isValid = false;
+                    }
+                    else {
+                        $(this).removeClass("input-validation-error");
+                    }
+                });
+
+                if (!isValid) {
+                    e.preventDefault();
+                    let firstError = currentTab.find(".input-validation-error").first();
+                    firstError.focus();
+                }
+            });
+
+            // Remove validation while typing
+            $(document).on("input change", "input, select, textarea", function () {
+                if ($(this).val().trim() !== "") {
+                    $(this).removeClass("input-validation-error");
+                }
+            });
+
+            $("#studentForm").on("submit", function () 
+            {
+                // Disable button
+                $("#btnSave").prop("disabled", true);
+                // Show loader
+                $("#btnLoader").removeClass("d-none");
+                // Change button text
+                $("#btnText").text("Saving...");
+
+            });
+
+        });
+
+        // 🔹 Load Sections Function
+        function loadSections(classId, selectedSectionId = null) {
+
+            $.ajax({
+                url: '/Students/GetSectionsByClass',
+                type: 'GET',
+                data: { classId: classId },
+
+                success: function (data) {
+
+                    let options = '<option value="">-- Select Section --</option>';
+
+                    $.each(data, function (i, item) {
+
+                        let selected = (selectedSectionId == item.id)
+                            ? 'selected'
+                            : '';
+
+                        options += `<option value="${item.id}" ${selected}>${item.name}</option>`;
+                    });
+
+                    // update dropdown UI
+                    $("#StudentSectionID").html(options);
+
+                    // update hidden field (IMPORTANT)
+                    $("#StudentSectionID").val(selectedSectionId);
+                },
+
+                error: function () {
+                    console.log("Failed to load sections");
+                }
+            });
+        }
+
+    </script>
+
+}

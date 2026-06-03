@@ -1,0 +1,157 @@
+﻿@using SchoolERP.Models.Entities
+@model List<Notification>
+@{
+    ViewData["Title"] = "Notifications";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <div>
+            <h3 class="mb-0">
+                <i class="fas fa-bell text-primary"></i>
+                Notification Management
+            </h3>
+            <small class="text-muted">Manage system-wide notifications</small>
+        </div>
+
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Create Notification
+        </a>
+
+    </div>
+
+    <!-- TABLE CARD -->
+    <div class="card shadow-sm border-0">
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th>Title</th>
+                            <th>Priority</th>
+                            <th>Duration</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th class="text-end" style="width: 120px;">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var item in Model)
+                        {
+                            var isExpired = item.EndDate < DateTime.Now;
+                            var statusClass = item.IsActive && !isExpired ? "success" : "secondary";
+                            var statusText = item.IsActive && !isExpired ? "Active" : "Expired";
+
+                            <tr>
+
+                                <!-- TITLE -->
+                                <td>
+                                    <strong>@item.Title</strong>
+                                    <div class="text-muted small">
+                                        @item.Message?.Substring(0, Math.Min(50, item.Message.Length))...
+                                    </div>
+                                </td>
+
+                                <!-- PRIORITY -->
+                                <td>
+                                    @if (item.Priority == "High")
+                                    {
+                                        <span class="badge bg-danger">High</span>
+                                    }
+                                    else if (item.Priority == "Medium")
+                                    {
+                                        <span class="badge bg-warning text-dark">Medium</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-info">Low</span>
+                                    }
+                                </td>
+
+                                <!-- DURATION -->
+                                <td>
+                                    <small>
+                                        @item.StartDate.ToString("dd MMM yyyy") <br />
+                                        to <br />
+                                        @item.EndDate.ToString("dd MMM yyyy")
+                                    </small>
+                                </td>
+
+                                <!-- STATUS -->
+                                <td>
+                                    <span class="badge bg-@statusClass">
+                                        @statusText
+                                    </span>
+                                </td>
+
+                                <!-- CREATED -->
+                                <td>
+                                    <small>@item.CreatedAt.ToString("dd MMM yyyy")</small>
+                                </td>
+
+                                <!-- ACTIONS -->
+                                <td class="text-end">
+
+                                    <a asp-action="Create"
+                                       asp-route-id="@item.NotificationId"
+                                       class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+
+                                    <button class="btn btn-sm btn-danger"
+                                            onclick="deleteNotification(@item.NotificationId)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+@section Scripts {
+
+    <script>
+
+        function deleteNotification(id) {
+
+            if (!confirm("Are you sure you want to delete this notification?"))
+                return;
+
+            $.post("/Notification/Delete", { id: id }, function (res) {
+
+                if (res.success) {
+                    location.reload();
+                } else {
+                    alert("Failed to delete");
+                }
+
+            });
+        }
+    </script>
+
+}
+
+
+                                   

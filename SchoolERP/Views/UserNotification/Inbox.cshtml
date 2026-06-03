@@ -1,0 +1,111 @@
+﻿@using SchoolERP.Models.DTOS
+@model List<NotificationDTO>
+@{
+    ViewData["Title"] = "Inbox";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="container mt-4">
+
+    <!-- Header -->
+    @* <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">
+            <i class="bi bi-bell me-2 text-primary"></i>
+            Notifications
+        </h4>
+    </div> *@
+    <div class="d-flex justify-content-between mb-4 p-3 rounded-3 shadow-sm"
+         style="background: linear-gradient(135deg, #eef2ff, #f8fafc);
+        border: 1px solid rgba(0,0,0,0.08);
+        backdrop-filter: blur(6px)">
+
+        <!-- Left Section -->
+        <div class="d-flex align-items-center">
+            <div class="me-3 d-flex justify-content-center align-items-center rounded-circle" style="width:50px; height:50px; background:#4e73df; color:white;">
+                <i class="bi bi-bell-fill fs-5"></i>
+            </div>
+
+            <div>
+                <h5 class="mb-1 fw-bold text-dark">Notifications</h5>
+                <small class="text-muted">
+                    Stay updated with important alerts, announcements, and activity updates.
+                </small>
+            </div>
+        </div>
+
+        <!-- Right Section (optional actions) -->
+        <div>
+            <button class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-check2-all me-1"></i> Mark all as read
+            </button>
+        </div>
+
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center text-muted mt-5">
+            <i class="bi bi-bell-slash fs-1"></i>
+            <p>No notifications available</p>
+        </div>
+    }
+    else
+    {
+        @foreach (var n in Model)
+        {
+            <div class="card mb-3 shadow-sm border-0 border-start border-4
+                        @(n.Priority == "High" ? "border-danger" :
+                                   n.Priority == "Medium" ? "border-warning" : "border-primary")">
+
+                <div class="card-body">
+
+                    <!-- Top Row -->
+                    <div class="d-flex justify-content-between align-items-start">
+
+                        <!-- Left Content -->
+                        <div class="d-flex align-items-center gap-2">
+                            <h5 class="mb-1">@n.Title</h5>
+
+                            <span class="badge
+                                @(n.Priority == "High" ? "bg-danger" :
+                                n.Priority == "Medium" ? "bg-warning text-dark" : "bg-secondary")">
+                                @n.Priority
+                            </span>
+
+                            <!-- Meta Info -->
+                            <small class="text-muted">
+                                📅 From @n.StartDate.ToString("dd MMM yyyy")
+                                 To @n.EndDate.ToString("dd MMM yyyy")
+                            </small>
+                            <br />
+
+                            
+                        </div>
+
+                        <!-- Right Button -->
+                        <div>
+                            @if (!n.IsRead)
+                            {
+                                <a href="@Url.Action("Read", "UserNotification", new { id = n.NotificationId })"
+                                   class="btn btn-sm btn-outline-primary">
+                                    Mark as Read
+                                </a>
+                            }
+                            else
+                            {
+                                <a class="btn btn-sm btn-outline-secondary disabled">
+                                    Read
+                                </a>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Message -->
+                    <p class="mt-2 mb-0 text-secondary">
+                        @n.Message
+                    </p>
+
+                </div>
+            </div>
+        }
+    }
+</div>
